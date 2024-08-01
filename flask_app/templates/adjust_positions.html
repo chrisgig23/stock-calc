@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Adjust Positions{% endblock %}
+
+{% block content %}
+<h2>{{ account_name }} - Adjust Positions</h2>
+<form method="post" action="{{ url_for('adjust_positions', account_name=account_name) }}">
+    <table class="allocation-table">
+        <thead>
+            <tr>
+                <th>Stock Symbol</th>
+                <th>Current Price</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for position in positions %}
+            <tr>
+                <td>{{ position.name }}</td>
+                <td>${{ "%.2f" | format(prices[position.name]) }}</td>
+                <td><input type="number" name="quantity_{{ position.name }}" value="{{ position.quantity }}" required></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" value="Save Changes">
+</form>
+<a href="{{ url_for('view_account', account_name=account_name) }}" class="button">Back</a>
+{% endblock %}

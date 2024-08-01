@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Stock Calculator{% endblock %}
+
+{% block content %}
+<form action="{{ url_for('calculate') }}" method="post">
+    <label for="cash_value">Cash Value</label>
+    <input type="number" id="cash_value" name="cash_value" required>
+
+    <label for="stock_ticker">Stock Ticker</label>
+    <input type="text" id="stock_ticker" name="stock_ticker" required>
+
+    <input type="submit" value="Calculate">
+</form>
+{% endblock %}

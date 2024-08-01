@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Flask App{% endblock %}</title>
+    <!-- Link to Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <h1>Stock Calculator</h1>
+        {% if current_user.is_authenticated %}
+        <div style="float: right;">
+            Logged in as: {{ current_user.username }} | <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+        {% endif %}
+    </header>
+    <nav style="background-color: {% if market_state == 'REGULAR' %}#6BA368{% else %}#31708E{% endif %};">
+        <a href="{{ url_for('menu') }}">Menu</a> |
+        {% if market_state == 'REGULAR' %}
+            <span>Markets are open</span>
+        {% else %}
+            <span>Markets are closed</span>
+        {% endif %}
+    </nav>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}View Allocations{% endblock %}
+
+{% block content %}
+<h2>{{ account.account_name }} - Current Allocations</h2>
+<table class="allocation-table">
+    <thead>
+        <tr>
+            <th>Stock Symbol</th>
+            <th>Current Allocation (%)</th>
+            <th>Target Allocation (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for allocation in allocations %}
+        <tr>
+            <td>{{ allocation.ticker }}</td>
+            <td>{{ allocation.current_allocation }}%</td>
+            <td>{{ allocation.target_allocation }}%</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('view_account', account_id=account.id) }}" class="button back-button">Back</a>
+{% endblock %}

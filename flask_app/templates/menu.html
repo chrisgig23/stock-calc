@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Account Menu{% endblock %}
+
+{% block content %}
+<h2>Accounts</h2>
+<form method="post" action="{{ url_for('menu') }}">
+    <label for="account">Choose an account:</label>
+    <select name="account" id="account">
+        {% for account in accounts %}
+        <option value="{{ account.account_id }}">{{ account.account_name }}</option>
+        {% endfor %}
+        <option disabled>--------------------------------------------</option>
+        <option value="add">Add a new account</option>
+        <option value="remove">Remove an existing account</option>
+    </select>
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

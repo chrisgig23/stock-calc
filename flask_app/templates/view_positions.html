@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Current Positions for {{ account.account_name }}</h2>
+
+    {% if stock_data_list %}
+    <table>
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Quantity</th>
+                <th>Current Price</th>
+                <th>Market Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stock_data_list %}
+            <tr>
+                <td>{{ stock.ticker }}</td>
+                <td>{{ stock.quantity }}</td>
+                <td>${{ "%.2f" | format(stock.current_price) }}</td>
+                <td>${{ "{:,.2f}".format(stock.market_value) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p><strong>Total Market Value: ${{ "{:,.2f}".format(total_market_value) }}</strong></p>
+    {% else %}
+    <p>No positions found.</p>
+    {% endif %}
+    <a href="{{ url_for('view_account', account_id=account.id) }}" class="button">Back</a>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Adjust Allocations{% endblock %}
+
+{% block content %}
+<h2>{{ account.account_name }} - Adjust Allocations</h2>
+<form method="post" action="{{ url_for('adjust_allocation', account_id=account.id) }}" onsubmit="return validateAllocations()">
+    <table class="allocation-table">
+        <thead>
+            <tr>
+                <th>Stock Symbol</th>
+                <th>Desired Allocation (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in allocations %}
+            <tr>
+                <td>{{ stock.name }}</td>
+                <td><input type="number" name="allocation_target" value="{{ stock.target }}" required></td>
+                <input type="hidden" name="allocation_name" value="{{ stock.name }}">
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <input type="submit" value="Submit">
+</form>
+<a href="{{ url_for('view_account', account_id=account.id) }}" class="button back-button">Back</a>
+
+<script>
+function validateAllocations() {
+    let total = 0;
+    const inputs = document.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        total += parseFloat(input.value);
+    });
+    if (total !== 100) {
+        alert('Allocations must add up to 100%. Current total: ' + total + '%');
+        return false;
+    }
+    return true;
+}
+</script>
+{% endblock %}

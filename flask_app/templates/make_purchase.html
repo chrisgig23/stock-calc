@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Make a Purchase{% endblock %}
+
+{% block content %}
+<h2>{{ account.account_name }} - Make a Purchase</h2>
+
+{% if cash_value is not defined %}
+<form method="post" action="{{ url_for('make_purchase', account_id=account.id) }}">
+    <label for="cash_value">Enter Current Cash Value:</label>
+    <input type="number" id="cash_value" name="cash_value" step="0.01" required>
+    <input type="submit" value="Next">
+</form>
+{% else %}
+<form method="post" action="{{ url_for('make_purchase', account_id=account.id) }}">
+    <a href="#" onclick="document.getElementById('refresh_form').submit(); return false;">Refresh Pricing</a>
+    <table class="allocation-table">
+        <thead>
+            <tr>
+                <th>Stock Symbol</th>
+                <th>Current Price</th>
+                <th>Current Position</th>
+                <th>Suggested Quantity</th>
+                <th>Estimated Total Cost</th>
+                <th>Purchase Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for purchase in suggested_purchases %}
+            <tr>
+                <td>{{ purchase.name }}</td>
+                <td>${{ "%.2f" | format(purchase.current_price) }}</td>
+                <td>{{ purchase.current_position }}</td>
+                <td>{{ purchase.suggested_quantity }}</td>
+                <td id="estimated_total_{{ purchase.name }}">${{ "%.2f" | format(purchase.estimated_total_cost) }}</td>
+                <td>
+                    <input type="number" name="quantity_{{ purchase.name }}" value="{{ purchase.suggested_quantity }}" required
+                        data-price="{{ purchase.current_price }}"
+                        oninput="updateTotal('{{ purchase.name }}')">
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div id="total_cost">
+        <strong>Total Cost: $<span id="total_cost_value">0.00</span></strong>
+    </div>
+    <input type="hidden" name="cash_value" value="{{ cash_value }}">
+    <input type="submit" name="submit_purchase" id="confirm_purchases" class="button highlight" value="Confirm Purchases">
+</form>
+<!-- <form id="refresh_form" method="post" action="{{ url_for('make_purchase', account_id=account.id) }}">
+    <input type="hidden" name="cash_value" value="{{ cash_value }}">
+    <input type="hidden" name="refresh_pricing" value="1">
+</form> -->
+{% endif %}
+<a href="{{ url_for('view_account', account_id=account.id) }}" class="button" style="float: left;">Back</a>
+
+<script>
+function updateTotal(name) {
+    const quantityInput = document.querySelector(`input[name="quantity_${name}"]`);
+    const totalCell = document.getElementById(`estimated_total_${name}`);
+    const price = parseFloat(quantityInput.getAttribute('data-price'));
+    let quantity = parseFloat(quantityInput.value);
+
+    if (isNaN(quantity) || quantity < 0) {
+        quantity = 0;
+    }
+
+    const total = quantity * price;
+    totalCell.textContent = `$${total.toFixed(2)}`;
+    updateTotalCost();
+}
+
+function updateTotalCost() {
+    let totalCost = 0;
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        const quantity = parseFloat(input.value);
+        const price = parseFloat(input.getAttribute('data-price'));
+        if (!isNaN(quantity) && quantity >= 0) {
+            totalCost += quantity * price;
+        }
+    });
+    document.getElementById("total_cost_value").textContent = totalCost.toFixed(2);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    updateTotalCost();
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener('input', function() {
+            const name = this.name.split('_')[1];
+            updateTotal(name);
+        });
+    });
+});
+</script>
+{% endblock %}

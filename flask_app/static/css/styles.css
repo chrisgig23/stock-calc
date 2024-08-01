@@ -1,0 +1,238 @@
+/* Base Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #F7F9FB;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header {
+    width: 100%;
+    background-color: #687864;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-weight: 700;
+}
+
+nav {
+    width: 100%;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: 400;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* Button Styles */
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.button {
+    display: block;
+    width: 200px;
+    padding: 10px 20px;
+    margin: 10px 0;
+    background-color: #31708E;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.button:hover {
+    background-color: #5085A5;
+}
+
+.button.highlight {
+    background-color: #14A76C;
+    font-weight: bold;
+}
+
+.button.highlight:hover {
+    background-color: #5085A5;
+}
+
+/* Form Styles */
+form {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+input[type="submit"] {
+    background-color: #31708E;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    align-self: center;
+}
+
+input[type="submit"]:hover {
+    background-color: #5085A5;
+}
+
+label {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-top: 5px;
+    width: calc(100% - 22px); /* Ensure it fits within the container */
+    box-sizing: border-box;
+}
+
+option[disabled] {
+    font-style: italic;
+    color: #888;
+}
+
+/* Table Styles */
+.allocation-table, table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.allocation-table th, .allocation-table td, th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.allocation-table th {
+    background-color: #31708E;
+    color: white;
+}
+
+.allocation-table tr:nth-child(even), tr:nth-child(even) {
+    background-color: #F7F9FB;
+}
+
+.allocation-table tr:hover, tr:hover {
+    background-color: #ddd;
+}
+
+input[type="number"] {
+    max-width: 100%; /* Ensure responsiveness */
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+/* Login Form Styles */
+.login-container {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-container form {
+    width: 100%;
+}
+
+.login-container h2 {
+    color: #687864;
+    margin-bottom: 20px;
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.login-container input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.flashes {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.flashes li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.flashes li.error {
+    background-color: #f2dede;
+    color: #a94442;
+}
+
+.flashes li.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+.back-button-container {
+    margin-bottom: 10px;
+    text-align: left;
+    display: flex;
+    justify-content: flex-start; /* Ensure the button is aligned to the left */
+}
+
+.back-button {
+    font-size: 12px;
+    padding: 5px 10px;
+    background-color: #F7F9FB;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #333;
+}
+
+.back-button:hover {
+    background-color: #e0e0e0;
+}
