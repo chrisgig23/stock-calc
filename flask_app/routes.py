@@ -6,12 +6,30 @@ from flask_app.utils.price_fetcher import fetch_current_prices
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify, request
 import yfinance as yf
+import pytz
+import pandas_market_calendars as mcal
+from datetime import datetime
 
 @app.context_processor
 def inject_market_state():
-    ticker = yf.Ticker("AAPL")
-    market_state = ticker.info.get("marketState", "CLOSED")
-    # market_state = "REGULAR"
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    # Get the NYSE schedule for today
+    schedule = mcal.get_calendar("NYSE").schedule(start_date=today, end_date=today)
+    
+    if not schedule.empty:
+        # Extract market open and close times and convert them to local timezone
+        market_open = schedule.iloc[0]["market_open"].tz_convert('America/New_York')
+        market_close = schedule.iloc[0]["market_close"].tz_convert('America/New_York')
+        
+        # Get the current time in the same timezone
+        current_time = datetime.now(pytz.timezone('America/New_York'))
+        
+        # Check if the current time is within market hours
+        market_state = market_open <= current_time <= market_close
+        return dict(market_state=market_state)
+    
+    market_state = False
     return dict(market_state=market_state)
 
 @app.route('/')

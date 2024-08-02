@@ -19,9 +19,9 @@
         </div>
         {% endif %}
     </header>
-    <nav style="background-color: {% if market_state == 'REGULAR' %}#6BA368{% else %}#31708E{% endif %};">
+    <nav style="background-color: {% if market_state %}#6BA368{% else %}#31708E{% endif %};">
         <a href="{{ url_for('menu') }}">Menu</a> |
-        {% if market_state == 'REGULAR' %}
+        {% if market_state %}
             <span>Markets are open</span>
         {% else %}
             <span>Markets are closed</span>
