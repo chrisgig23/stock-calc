@@ -5,13 +5,16 @@ from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
 
-app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with your actual secret key
-
-# Database configuration
 load_dotenv()
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+class Config:
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECRET_KEY = os.getenv('SECRET_KEY')
+
+# Initialize the app and apply the configuration
+app = Flask(__name__)
+app.config.from_object(Config)
 
 # Initialize the database
 db = SQLAlchemy(app)

@@ -1,0 +1,9 @@
+2024-08-01 20:31:19.738 EDT [65672] LOG:  starting PostgreSQL 14.12 (Homebrew) on aarch64-apple-darwin23.4.0, compiled by Apple clang version 15.0.0 (clang-1500.3.9.4), 64-bit
+2024-08-01 20:31:19.739 EDT [65672] LOG:  listening on IPv6 address "::1", port 5432
+2024-08-01 20:31:19.739 EDT [65672] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-08-01 20:31:19.739 EDT [65672] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-08-01 20:31:19.742 EDT [65673] LOG:  database system was shut down at 2024-08-01 20:30:42 EDT
+2024-08-01 20:31:19.746 EDT [65672] LOG:  database system is ready to accept connections
+2024-08-01 20:31:28.452 EDT [65682] FATAL:  role "postgres" does not exist
+2024-08-01 20:31:55.480 EDT [65692] FATAL:  database "chrisgiglio" does not exist
+2024-08-01 20:32:32.725 EDT [65698] FATAL:  database "chrisgiglio" does not exist
