@@ -7,3 +7,7 @@
 2024-08-01 20:31:28.452 EDT [65682] FATAL:  role "postgres" does not exist
 2024-08-01 20:31:55.480 EDT [65692] FATAL:  database "chrisgiglio" does not exist
 2024-08-01 20:32:32.725 EDT [65698] FATAL:  database "chrisgiglio" does not exist
+2024-08-03 10:22:37.348 EDT [65672] LOG:  received smart shutdown request
+2024-08-03 10:22:37.352 EDT [65672] LOG:  background worker "logical replication launcher" (PID 65679) exited with exit code 1
+2024-08-03 10:22:37.353 EDT [65674] LOG:  shutting down
+2024-08-03 10:22:37.370 EDT [65672] LOG:  database system is shut down

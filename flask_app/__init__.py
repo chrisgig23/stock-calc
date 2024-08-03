@@ -10,7 +10,8 @@ load_dotenv()
 class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.getenv('SECRET_KEY')
+    SECRET_KEY = os.getenv('SECRET_KEY').encode('utf-8', 'replace')
+    # SECRET_KEY='30a0302980dc772f268d1ec81cec21d033398cb60c0520756b2ef3acfaa36961'
 
 # Initialize the app and apply the configuration
 app = Flask(__name__)
