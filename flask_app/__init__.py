@@ -27,7 +27,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Import the User model for the user loader
-from flask_app.models import User, Account, Stock
+from flask_app.models import User, Account, Stock, Purchase
 
 # User loader for Flask-Login
 @login_manager.user_loader

@@ -2,6 +2,7 @@ from flask_app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import yfinance as yf
+from datetime import datetime
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -98,3 +99,20 @@ class Allocation(db.Model):
 
     def __repr__(self):
         return f'<Allocation {self.name} with target {self.target}% in Account {self.account_id}>'
+
+class Purchase(db.Model):
+    __tablename__ = 'purchases'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    stock_id = db.Column(db.Integer, db.ForeignKey('stocks.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    price_paid = db.Column(db.Float, nullable=False)
+    purchase_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    transaction_id = db.Column(db.String(36), nullable=False)  # Add this line
+    
+    user = db.relationship('User', backref=db.backref('purchases', lazy=True))
+    stock = db.relationship('Stock', backref=db.backref('purchases', lazy=True))
+
+    def __repr__(self):
+        return f'<Purchase {self.id} - User: {self.user_id}, Stock: {self.stock_id}, Quantity: {self.quantity}, Price Paid: {self.price_paid}, Date: {self.purchase_date}, Transaction ID: {self.transaction_id}>'

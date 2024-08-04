@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, request, flash, session
 from flask_login import login_user, login_required, logout_user, current_user
 from flask_app import app, db
-from flask_app.models import User, Account, Position, Allocation, Stock
+from flask_app.models import User, Account, Position, Allocation, Stock, Purchase
 from flask_app.utils.price_fetcher import fetch_current_prices
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify, request
@@ -9,6 +9,7 @@ import yfinance as yf
 import pytz
 import pandas_market_calendars as mcal
 from datetime import datetime
+from uuid import uuid4
 
 @app.context_processor
 def inject_market_state():
@@ -177,6 +178,9 @@ def make_purchase(account_id):
 
     if request.method == 'POST':
         if 'submit_purchase' in request.form:
+            # Generate a unique transaction ID
+            transaction_id = uuid4()
+
             # Second step: user confirms the purchase
             for key, value in request.form.items():
                 if key.startswith('quantity_'):
@@ -189,6 +193,17 @@ def make_purchase(account_id):
                     else:
                         new_stock = Stock(ticker=ticker, quantity=quantity, account_id=account.id)
                         db.session.add(new_stock)
+                    
+                    # Create a purchase entry
+                    new_purchase = Purchase(
+                        user_id=current_user.id,
+                        stock_id=stock.id,
+                        quantity=quantity,
+                        price_paid=stock.current_price,  
+                        purchase_date=datetime.utcnow(),
+                        transaction_id=transaction_id  
+                    )
+                    db.session.add(new_purchase)
         elif 'cash_value' in request.form:
             # First step: user entered cash value, show suggested purchases
             cash_value = float(request.form['cash_value'])
@@ -199,9 +214,9 @@ def make_purchase(account_id):
         db.session.commit()
         flash("Purchase made successfully!")
         return redirect(url_for('view_positions', account_id=account.id))
-
-    # Initial GET request or no cash value provided
     return render_template('make_purchase.html', account=account)
+
+
 
 
 def get_suggested_purchases(account, cash_value):
