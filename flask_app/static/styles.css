@@ -1,9 +1,10 @@
 /* Base Styles */
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #F7F9FB;
+    font-family: 'Inter', sans-serif;
+    background-color: #F8F9FA;
     margin: 0;
     padding: 0;
+    color: #343A40;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,19 +12,22 @@ body {
 
 header {
     width: 100%;
-    background-color: #687864;
+    background-color: #007BFF;
     color: white;
-    padding: 10px 0;
+    padding: 15px 0;
     text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
     margin: 0;
     font-weight: 700;
+    font-size: 1.8em;
 }
 
 nav {
     width: 100%;
+    background-color: #343A40;
     color: white;
     text-align: center;
     padding: 10px 0;
@@ -33,45 +37,43 @@ nav a {
     color: white;
     text-decoration: none;
     margin: 0 15px;
-    font-weight: 400;
+    font-weight: 500;
+    font-size: 1em;
+    transition: color 0.3s ease;
 }
 
 nav a:hover {
-    text-decoration: underline;
+    color: #FFC107;
 }
 
 /* Button Styles */
-.button-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 20px;
-}
-
 .button {
     display: block;
     width: 200px;
     padding: 10px 20px;
     margin: 10px 0;
-    background-color: #31708E;
+    background-color: #007BFF;
     color: white;
     text-align: center;
     text-decoration: none;
     border-radius: 5px;
     font-size: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 .button:hover {
-    background-color: #5085A5;
+    background-color: #0056b3;
+    transform: translateY(-2px);
 }
 
 .button.highlight {
-    background-color: #14A76C;
+    background-color: #28A745;
     font-weight: bold;
 }
 
 .button.highlight:hover {
-    background-color: #5085A5;
+    background-color: #218838;
 }
 
 /* Form Styles */
@@ -79,8 +81,8 @@ form {
     background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin-top: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
     width: 100%;
     max-width: 600px;
     display: flex;
@@ -88,42 +90,47 @@ form {
 }
 
 input[type="submit"] {
-    background-color: #31708E;
+    background-color: #007BFF;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 12px 20px;
     text-align: center;
-    display: inline-block;
     font-size: 16px;
-    margin-top: 10px;
+    margin-top: 20px;
     cursor: pointer;
     border-radius: 5px;
     align-self: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
 }
 
 input[type="submit"]:hover {
-    background-color: #5085A5;
+    background-color: #0056b3;
 }
 
 label {
     margin-top: 10px;
-    font-weight: bold;
+    font-weight: 600;
+    font-size: 0.9em;
+    color: #495057;
 }
 
 input[type="text"],
 input[type="number"],
 input[type="password"] {
-    padding: 10px;
-    border: 1px solid #ccc;
+    padding: 12px;
+    border: 1px solid #CED4DA;
     border-radius: 4px;
     margin-top: 5px;
-    width: calc(100% - 22px); /* Ensure it fits within the container */
+    width: calc(100% - 24px);
     box-sizing: border-box;
+    transition: border-color 0.3s ease;
 }
 
-option[disabled] {
-    font-style: italic;
-    color: #888;
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="password"]:focus {
+    border-color: #007BFF;
 }
 
 /* Table Styles */
@@ -131,37 +138,35 @@ option[disabled] {
     width: 100%;
     margin-top: 20px;
     border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.allocation-table th, .allocation-table td, th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+.allocation-table th, .allocation-table td {
+    border: 1px solid #E9ECEF;
+    padding: 10px;
     text-align: center;
     vertical-align: middle;
+    font-size: 0.9em;
 }
 
 .allocation-table th {
-    background-color: #31708E;
+    background-color: #007BFF;
     color: white;
+    font-weight: 600;
 }
 
-.allocation-table tr:nth-child(even), tr:nth-child(even) {
-    background-color: #F7F9FB;
+.allocation-table tr:nth-child(even) {
+    background-color: #F1F3F5;
 }
 
-.allocation-table tr:hover, tr:hover {
-    background-color: #ddd;
-}
-
-input[type="number"] {
-    max-width: 100%; /* Ensure responsiveness */
-    padding: 5px;
-    box-sizing: border-box;
+.allocation-table tr:hover {
+    background-color: #DEE2E6;
 }
 
 /* Login Form Styles */
 .login-container {
-    margin-top: 100px;
+    margin-top: 120px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -175,64 +180,18 @@ input[type="number"] {
 }
 
 .login-container h2 {
-    color: #687864;
+    color: #495057;
     margin-bottom: 20px;
-}
-
-.login-container input[type="text"],
-.login-container input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.login-container input[type="submit"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-}
-
-.flashes {
-    list-style-type: none;
-    padding: 0;
-    margin: 10px 0;
-}
-
-.flashes li {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
+    font-size: 1.5em;
+    font-weight: 700;
 }
 
 .flashes li.error {
-    background-color: #f2dede;
-    color: #a94442;
+    background-color: #F8D7DA;
+    color: #721C24;
 }
 
 .flashes li.success {
-    background-color: #dff0d8;
-    color: #3c763d;
-}
-
-.back-button-container {
-    margin-bottom: 10px;
-    text-align: left;
-    display: flex;
-    justify-content: flex-start; /* Ensure the button is aligned to the left */
-}
-
-.back-button {
-    font-size: 12px;
-    padding: 5px 10px;
-    background-color: #F7F9FB;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    text-decoration: none;
-    color: #333;
-}
-
-.back-button:hover {
-    background-color: #e0e0e0;
+    background-color: #D4EDDA;
+    color: #155724;
 }
