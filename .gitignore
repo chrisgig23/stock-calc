@@ -2,6 +2,7 @@
 stock-calc git token.rtf
 
 # Byte-compiled / optimized / DLL files
+flask_app/__pycache__/
 __pycache__/
 *.py[cod]
 *$py.class
