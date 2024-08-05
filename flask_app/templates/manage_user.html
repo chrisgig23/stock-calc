@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Account{% endblock %}
+
+{% block content %}
+<h2>Manage User Account</h2>
+    <a href="{{ url_for('reset_password', user_id=user.id) }}" class="button">Reset Password</a>
+    <a href="{{ url_for('change_username', user_id=user.id) }}" class="button">Change Username</a>
+    
+    
+    <a href="{{ url_for('menu') }}" class="button back-button">Exit</a>
+
+{% endblock %}

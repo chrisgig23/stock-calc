@@ -437,3 +437,39 @@ def view_reports(account_id):
     account = Account.query.get_or_404(account_id)
 
     return render_template('reports.html', account=account)
+
+
+@app.route('/manage_user/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def manage_user(user_id):
+    user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        # Handle form submission, like updating user details
+        pass
+    
+    return render_template('manage_user.html', user=user)
+
+
+@app.route('/change_username', methods=['GET', 'POST'])
+@login_required
+def change_username():
+    if request.method == 'POST':
+        new_username = request.form['new_username'].strip()
+
+        # Validation checks
+        if len(new_username) < 5:
+            flash('Username must be at least 5 characters long.', 'error')
+        elif len(new_username) > 15:
+            flash('Username must not exceed 15 characters.', 'error')
+        elif ' ' in new_username:
+            flash('Username must not contain spaces.', 'error')
+        elif User.query.filter_by(username=new_username).first():
+            flash('Username already exists. Please choose another one.', 'error')
+        else:
+            # Update username
+            current_user.username = new_username
+            db.session.commit()
+            flash('Username successfully updated.', 'success')
+            return redirect(url_for('menu'))
+
+    return render_template('change_username.html')
