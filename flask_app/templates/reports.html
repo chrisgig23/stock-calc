@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Reports Page{% endblock %}
+
+{% block content %}
+<h2>{{ account.account_name }} - Reports</h2>
+
+<p>Coming soon!</p>
+
+<a href="{{ url_for('view_account', account_id=account.id) }}" class="button back-button">Back to Account</a>
+{% endblock %}

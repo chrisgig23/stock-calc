@@ -429,3 +429,11 @@ def validate_tickers():
         return jsonify(valid=False, invalid_tickers=invalid_tickers)
     else:
         return jsonify(valid=True, matches=valid_tickers)
+    
+
+@app.route('/view_reports/<account_id>', methods=['GET', 'POST'])
+@login_required
+def view_reports(account_id):
+    account = Account.query.get_or_404(account_id)
+
+    return render_template('reports.html', account=account)
