@@ -135,33 +135,30 @@ input[type="password"]:focus {
 
 /* Table Styles */
 .allocation-table, table {
-    width: 100%;
+    width: 80%;
     margin-top: 20px;
     border-collapse: collapse;
-    border-radius: 8px;
-    overflow: hidden;
+    max-width: 1000px;
 }
 
-.allocation-table th, .allocation-table td {
-    border: 1px solid #E9ECEF;
-    padding: 10px;
+.allocation-table th, .allocation-table td, th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
     text-align: center;
     vertical-align: middle;
-    font-size: 0.9em;
 }
 
 .allocation-table th {
-    background-color: #007BFF;
+    background-color: #31708E;
     color: white;
-    font-weight: 600;
 }
 
-.allocation-table tr:nth-child(even) {
-    background-color: #F1F3F5;
+.allocation-table tr:nth-child(even), tr:nth-child(even) {
+    background-color: #F7F9FB;
 }
 
-.allocation-table tr:hover {
-    background-color: #DEE2E6;
+.allocation-table tr:hover, tr:hover {
+    background-color: #ddd;
 }
 
 /* Login Form Styles */
@@ -194,4 +191,25 @@ input[type="password"]:focus {
 .flashes li.success {
     background-color: #D4EDDA;
     color: #155724;
+}
+
+.back-button-container {
+    margin-bottom: 10px;
+    text-align: left;
+    display: flex;
+    justify-content: flex-start; /* Ensure the button is aligned to the left */
+}
+
+.back-button {
+    font-size: 12px;
+    padding: 5px 10px;
+    background-color: #F7F9FB;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #333;
+}
+
+.back-button:hover {
+    background-color: #e0e0e0;
 }

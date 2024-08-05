@@ -3,13 +3,13 @@
     <h2>Edit Portfolio for {{ account.account_name }}</h2>
 
     <div class="back-button-container">
-        <a href="{{ url_for('view_account', account_id=account.id) }}" class="back-button">← Back</a>
+        <a href="{{ url_for('view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
     </div>
     <form method="post" action="{{ url_for('edit_portfolio', account_id=account.id) }}" id="portfolio-form">
         <table>
             <thead>
                 <tr>
-                    <th>Ticker</th>
+                    <th>Stock Symbol</th>
                     <th>Quantity</th>
                     <th>Current Price</th>
                     <th>Market Value</th>
