@@ -5,6 +5,12 @@
 {% block content %}
 <h2>{{ account.account_name }} - Make a Purchase</h2>
 
+{% if last_purchase_date %}
+<p><strong>Date of Last Purchase:</strong> {{ last_purchase_date.strftime('%B %-d, %Y') }}</p>
+{% else %}
+<p><strong>Date of Last Purchase:</strong> No purchases made yet.</p>
+{% endif %}
+
 {% if cash_value is not defined %}
 <form method="post" action="{{ url_for('make_purchase', account_id=account.id) }}">
     <label for="cash_value">Enter Current Cash Value:</label>
@@ -14,7 +20,7 @@
 {% else %}
 <form method="post" action="{{ url_for('make_purchase', account_id=account.id) }}">
     <a href="#" onclick="document.getElementById('refresh_form').submit(); return false;">Refresh Pricing</a>
-    <table class="allocation-table">
+    <table class="edit-portfolio-table">
         <thead>
             <tr>
                 <th>Stock Symbol</th>
@@ -48,10 +54,6 @@
     <input type="hidden" name="cash_value" value="{{ cash_value }}">
     <input type="submit" name="submit_purchase" id="confirm_purchases" class="button highlight" value="Confirm Purchases">
 </form>
-<!-- <form id="refresh_form" method="post" action="{{ url_for('make_purchase', account_id=account.id) }}">
-    <input type="hidden" name="cash_value" value="{{ cash_value }}">
-    <input type="hidden" name="refresh_pricing" value="1">
-</form> -->
 {% endif %}
 <a href="{{ url_for('view_account', account_id=account.id) }}" class="back-button" style="float: left;">←  Back to Account</a>
 

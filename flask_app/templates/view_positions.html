@@ -3,6 +3,11 @@
 {% block content %}
     <h2>Current Positions for {{ account.account_name }}</h2>
 
+    {% if last_purchase_date %}
+    <p><strong>Date of Last Purchase:</strong> {{ last_purchase_date.strftime('%B %-d, %Y') }}</p>
+    {% else %}
+    <p><strong>Date of Last Purchase:</strong> No purchases made yet.</p>
+    {% endif %}
     {% if stock_data_list %}
     <table class="allocation-table view-table">
         <thead>

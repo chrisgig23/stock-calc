@@ -176,6 +176,9 @@ def make_purchase(account_id):
         flash("Please set desired allocation before making a purchase.")
         return redirect(url_for('adjust_allocation', account_id=account_id))
 
+    last_purchase = Purchase.query.filter_by(user_id=current_user.id).order_by(Purchase.purchase_date.desc()).first()
+    last_purchase_date = last_purchase.purchase_date if last_purchase else None
+
     if request.method == 'POST':
         if 'submit_purchase' in request.form:
             # Generate a unique transaction ID
@@ -208,13 +211,13 @@ def make_purchase(account_id):
             # First step: user entered cash value, show suggested purchases
             cash_value = float(request.form['cash_value'])
             suggested_purchases = get_suggested_purchases(account, cash_value)
-            return render_template('make_purchase.html', account=account, suggested_purchases=suggested_purchases, cash_value=cash_value)
+            return render_template('make_purchase.html', account=account, suggested_purchases=suggested_purchases, cash_value=cash_value, last_purchase_date=last_purchase_date)
 
 
         db.session.commit()
         flash("Purchase made successfully!")
         return redirect(url_for('view_positions', account_id=account.id))
-    return render_template('make_purchase.html', account=account)
+    return render_template('make_purchase.html', account=account, last_purchase_date=last_purchase_date)
 
 
 
@@ -335,6 +338,9 @@ def view_positions(account_id):
     account = Account.query.get_or_404(account_id)
     stocks = Stock.query.filter_by(account_id=account_id).all()
     
+    last_purchase = Purchase.query.filter_by(user_id=current_user.id).order_by(Purchase.purchase_date.desc()).first()
+    last_purchase_date = last_purchase.purchase_date if last_purchase else None
+
     if not stocks:
         flash('No stocks found in this account.')
         return redirect(url_for('menu'))  # Redirect to menu if no stocks are found
@@ -355,7 +361,7 @@ def view_positions(account_id):
             'market_value': market_value
         })
     
-    return render_template('view_positions.html', account=account, stock_data_list=stock_data_list,total_market_value=total_market_value)
+    return render_template('view_positions.html', account=account, stock_data_list=stock_data_list,total_market_value=total_market_value, last_purchase_date=last_purchase_date)
 # Replaced with Edit Portfolio
 # @app.route('/adjust_positions/<account_name>', methods=['GET', 'POST'])
 # @login_required
