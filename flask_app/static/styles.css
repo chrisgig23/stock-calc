@@ -8,6 +8,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
 header {
@@ -17,6 +19,7 @@ header {
     padding: 15px 0;
     text-align: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
 header h1 {
@@ -29,8 +32,11 @@ nav {
     width: 100%;
     background-color: #343A40;
     color: white;
-    text-align: center;
     padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
 }
 
 nav a {
@@ -42,13 +48,24 @@ nav a {
     transition: color 0.3s ease;
 }
 
+nav .left-section {
+    display: flex;
+    gap: 15px;
+}
+
+nav .right-section {
+    margin-right: 20px;
+}
+
 nav a:hover {
     color: #FFC107;
 }
 
 /* Button Styles */
 .button {
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 200px;
     padding: 10px 20px;
     margin: 10px 0;
@@ -60,6 +77,7 @@ nav a:hover {
     font-size: 16px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
 }
 
 .button:hover {
@@ -122,7 +140,7 @@ input[type="password"] {
     border: 1px solid #CED4DA;
     border-radius: 4px;
     margin-top: 5px;
-    width: calc(100% - 24px);
+    width: 100%;
     box-sizing: border-box;
     transition: border-color 0.3s ease;
 }
@@ -134,15 +152,11 @@ input[type="password"]:focus {
 }
 
 /* Table Styles */
-.allocation-table, table {
+.allocation-table {
     width: 100%;
+    max-width: 80%;
     margin-top: 20px;
     border-collapse: collapse;
-}
-
-.allocation-table.view-table {
-    width: 80%;
-    max-width: 1000px;
 }
 
 .allocation-table th, .allocation-table td, th, td {
@@ -157,12 +171,108 @@ input[type="password"]:focus {
     color: white;
 }
 
-.allocation-table tr:nth-child(even), tr:nth-child(even) {
+.allocation-table tr:nth-child(even) {
     background-color: #F7F9FB;
 }
 
-.allocation-table tr:hover, tr:hover {
+.allocation-table tr:hover {
     background-color: #ddd;
+}
+
+/* Specific Table Styles for Edit Portfolio */
+.edit-portfolio-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    display: table; /* Ensure table layout */
+}
+
+.edit-portfolio-table th, .edit-portfolio-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.edit-portfolio-table th {
+    background-color: #31708E;
+    color: white;
+}
+
+.edit-portfolio-table tr {
+    display: table-row; /* Override flexbox to ensure table row behavior */
+}
+
+.edit-portfolio-table input[type="text"],
+.edit-portfolio-table input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.edit-portfolio-table .delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.edit-portfolio-table tr:nth-child(even) {
+    background-color: #F7F9FB;
+}
+
+.edit-portfolio-table tr:hover {
+    background-color: #ddd;
+}
+
+/* Specific Button Styles for the Edit Portfolio */
+#add-row-button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+#add-row-button:hover {
+    background-color: #0056b3;
+}
+
+#save-button {
+    display: block;
+    width: 200px;
+    padding: 10px 20px;
+    margin: 20px auto;
+    background-color: #28A745;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+#save-button:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+/* Login Info Header */
+.login-info {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    align-items: flex-end; /* Align items to the right */
+    margin-right: 10px; /* Add 10px margin from the right side */
+}
+
+.user-controls {
+    margin-top: 5px; /* Add some space between the username and controls */
 }
 
 /* Login Form Styles */
@@ -178,6 +288,8 @@ input[type="password"]:focus {
 
 .login-container form {
     width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .login-container h2 {
@@ -199,7 +311,6 @@ input[type="password"]:focus {
 
 .back-button-container {
     margin-bottom: 10px;
-    text-align: left;
     display: flex;
     justify-content: flex-start; /* Ensure the button is aligned to the left */
 }
@@ -212,8 +323,41 @@ input[type="password"]:focus {
     border-radius: 3px;
     text-decoration: none;
     color: #333;
+    margin-top: 10px;
 }
 
 .back-button:hover {
     background-color: #e0e0e0;
+}
+
+.box-highlight {
+    display: flex;
+    font-size: 2em; /* Makes the text large */
+    font-weight: bold; /* Makes the text bold */
+    color: #343A40; /* Initial text color */
+    position: relative;
+    text-decoration: none;
+    overflow: hidden; /* Ensures the slide effect stays within bounds */
+    justify-content: center;
+    align-items: center;
+}
+
+.button::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 0;
+    background-color: #00FBFF; /* Color of the background box on hover */
+    z-index: -1; /* Places the box behind the text */
+    transition: height 0.3s ease; /* Smooth transition effect */
+}
+
+.button:hover::before {
+    height: 100%; /* When hovered, the background slides up */
+}
+
+.button:hover {
+    color: rgb(15, 8, 8); /* Changes text color to contrast with the background */
 }
