@@ -26,9 +26,11 @@
         </div>
     </header>
     <nav style="background-color: {% if market_state %}#6BA368{% else %}#31708E{% endif %};">
-        <div class="left-section">
-            <a href="{{ url_for('menu') }}">← Account Overview</a>
-        </div>
+        {% if current_user.is_authenticated %}
+            <div class="left-section">
+                <a href="{{ url_for('menu') }}">← Account Overview</a>
+            </div>
+        {% endif %}
         <div class="right-section">
             {% if market_state %}
                 <span><strong></strong>Markets are open</strong></span>
