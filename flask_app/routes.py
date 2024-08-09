@@ -7,9 +7,37 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify, request
 import yfinance as yf
 import pytz
+from pytz import utc
 import pandas_market_calendars as mcal
 from datetime import datetime
 from uuid import uuid4
+
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+
+@app.before_request
+def session_management():
+    now = datetime.now(utc)  # Make 'now' timezone-aware
+    last_activity = session.get('last_activity', now)
+
+    # Convert last_activity from string to datetime if necessary
+    if isinstance(last_activity, str):
+        last_activity = datetime.fromisoformat(last_activity)
+
+    session['last_activity'] = now
+
+    if (now - last_activity).total_seconds() > app.config['PERMANENT_SESSION_LIFETIME'].total_seconds():
+        session.clear()
+        flash('Your session has expired. Please log in again.', 'warning')
+        return redirect(url_for('login'))
+
+@app.route('/extend-session', methods=['POST'])
+@login_required
+def extend_session():
+    session['last_activity'] = datetime.now(utc).isoformat()
+    return jsonify(success=True)
 
 @app.context_processor
 def inject_market_state():

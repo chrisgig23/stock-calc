@@ -9,6 +9,100 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <script>
+        let countdownTime = 60; // 60 seconds until session timeout
+        let countdownInterval;
+
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown-timer');
+            
+            countdownInterval = setInterval(() => {
+                countdownTime--;
+
+                countdownElement.textContent = countdownTime;
+
+                if (countdownTime <= 0) {
+                    clearInterval(countdownInterval);
+                    // Redirect to the login page or any other action you want to take when time runs out
+                    window.location.href = '/login';
+                }
+            }, 1000); // Update every second
+        }
+
+        // Show the session warning modal and start the countdown
+        function showSessionModal() {
+            document.getElementById('sessionModal').style.display = 'block';
+            startCountdown();
+        }
+
+        // Extend session when user clicks the button
+        function extendSession() {
+            fetch('/extend-session', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        clearInterval(countdownInterval); // Stop the countdown
+                        countdownTime = 60; // Reset the countdown timer
+                        document.getElementById('sessionModal').style.display = 'none'; // Hide the modal
+                    } else {
+                        alert('Failed to extend session.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const sessionLifetime = {{ config['PERMANENT_SESSION_LIFETIME'].total_seconds() }};
+            const warningTime = 60; // 1 minute before expiration
+            const warningTimeout = (sessionLifetime - warningTime) * 1000;
+
+            setTimeout(function() {
+                showSessionModal(); // Show modal and start countdown
+            }, warningTimeout);
+        });
+    </script>
+    <style>
+        /* Modal styles */
+        #sessionModal {
+            display: none; 
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+        }
+        #sessionModal .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            border-radius: 8px;
+        }
+        #sessionModal button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #sessionModal button:hover {
+            background-color: #0056b3;
+        }
+        #sessionModal .logout-button {
+            background-color: #DC3545;
+        }
+        #sessionModal .logout-button:hover {
+            background-color: #C82333;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -49,5 +143,21 @@
         {% endif %}
     {% endwith %}
     {% block content %}{% endblock %}
+
+    {% if current_user.is_authenticated %}
+        <!-- The Modal -->
+        <div id="sessionModal" class="modal">
+            <div class="modal-content">
+                <h2>Session Expiring Soon</h2>
+                <p>Your session will expire in <span id="countdown-timer">60</span> seconds.</p>
+                <div>
+                    <button onclick="extendSession()">Keep Working</button>
+                    <a href="{{ url_for('logout') }}">
+                        <button class="logout-button">Log Out Now</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </body>
 </html>
