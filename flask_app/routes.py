@@ -377,9 +377,9 @@ def view_positions(account_id):
 
     if request.method == 'POST' and 'refresh_pricing' in request.form:
         flash("Market pricing refreshed.", 'success')
-        last_refresh = datetime.now()
+        last_refresh = datetime.now(pytz.timezone('America/New_York'))
     else:
-        last_refresh = datetime.now()  # You might want to store and retrieve this from the database in a real scenario.
+        last_refresh = datetime.now(pytz.timezone('America/New_York'))  # You might want to store and retrieve this from the database in a real scenario.
 
     stock_data_list = []
     total_market_value = 0
