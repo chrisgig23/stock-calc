@@ -122,6 +122,30 @@ def reset_password(user_id):
     
     return render_template('reset_password.html', user=user)
 
+
+@app.route('/add_user', methods=['POST'])
+@login_required
+def add_user():
+    if current_user.username != 'cgiglio':
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('menu'))
+
+    new_username = request.form.get('new_username')
+    if new_username:
+        existing_user = User.query.filter_by(username=new_username).first()
+        if existing_user:
+            flash('Username already exists.', 'warning')
+        else:
+            # Create the new user with the default password
+            new_user = User(username=new_username, password_hash=generate_password_hash('password1'))
+            db.session.add(new_user)
+            db.session.commit()
+            flash(f'User {new_username} added successfully with a temporary password "password1".', 'success')
+    else:
+        flash('Please enter a username.', 'warning')
+
+    return redirect(url_for('menu'))
+
 @app.route('/menu', methods=['GET', 'POST'])
 @login_required
 def menu():
