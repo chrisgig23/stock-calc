@@ -8,13 +8,21 @@
     {% else %}
     <p><strong>Date of Last Purchase:</strong> No purchases made yet.</p>
     {% endif %}
+
+    {% if last_refresh %}
+    <p><strong>Market data updated as of:</strong> {{ last_refresh.strftime('%B %-d, %Y %-I:%M:%S %p') }}</p>
+    {% endif %}
+
     {% if stock_data_list %}
+    <div class="refresh-button-container">
+        <a href="{{ url_for('refresh_market_data', account_id=account.id) }}" class="refresh-button">Refresh Market Pricing</a>
+    </div>
     <table class="allocation-table view-table">
         <thead>
             <tr>
                 <th>Stock Symbol</th>
                 <th>Quantity</th>
-                <th>Current Price</th>
+                <th>Current Market Price</th>
                 <th>Market Value</th>
             </tr>
         </thead>
@@ -33,5 +41,6 @@
     {% else %}
     <p>No positions found.</p>
     {% endif %}
+
     <a href="{{ url_for('view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
 {% endblock %}

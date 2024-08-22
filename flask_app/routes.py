@@ -360,18 +360,26 @@ def adjust_allocation(account_id):
 
     return render_template('adjust_allocation.html', account=account, allocations=allocations)
 
-@app.route('/view_positions/<account_id>')
+from datetime import datetime
+
+@app.route('/view_positions/<int:account_id>', methods=['GET', 'POST'])
 @login_required
 def view_positions(account_id):
     account = Account.query.get_or_404(account_id)
     stocks = Stock.query.filter_by(account_id=account_id).all()
-    
+
     last_purchase = Purchase.query.filter_by(user_id=current_user.id).order_by(Purchase.purchase_date.desc()).first()
     last_purchase_date = last_purchase.purchase_date if last_purchase else None
 
     if not stocks:
         flash('No stocks found in this account.')
         return redirect(url_for('menu'))  # Redirect to menu if no stocks are found
+
+    if request.method == 'POST' and 'refresh_pricing' in request.form:
+        flash("Market pricing refreshed.", 'success')
+        last_refresh = datetime.now()
+    else:
+        last_refresh = datetime.now()  # You might want to store and retrieve this from the database in a real scenario.
 
     stock_data_list = []
     total_market_value = 0
@@ -388,8 +396,10 @@ def view_positions(account_id):
             'current_price': current_price,
             'market_value': market_value
         })
-    
-    return render_template('view_positions.html', account=account, stock_data_list=stock_data_list,total_market_value=total_market_value, last_purchase_date=last_purchase_date)
+
+    return render_template('view_positions.html', account=account, stock_data_list=stock_data_list,
+                           total_market_value=total_market_value, last_purchase_date=last_purchase_date,
+                           last_refresh=last_refresh)
 # Replaced with Edit Portfolio
 # @app.route('/adjust_positions/<account_name>', methods=['GET', 'POST'])
 # @login_required
@@ -404,6 +414,20 @@ def view_positions(account_id):
 #         db.session.commit()
 #         return redirect(url_for('view_positions', account_name=account_name))
 #     return render_template('adjust_positions.html', account_name=account_name, positions=positions, prices=prices)
+@app.route('/refresh_market_data/<int:account_id>', methods=['GET'])
+@login_required
+def refresh_market_data(account_id):
+    account = Account.query.get_or_404(account_id)
+    stocks = Stock.query.filter_by(account_id=account_id).all()
+
+    for stock in stocks:
+        # Fetch and update the latest price from yfinance
+        stock.current_price  # This will automatically update the price using the property defined in your model
+
+    db.session.commit()  # Save the updated prices to the database
+
+    flash('Market pricing updated successfully.', 'success')
+    return redirect(url_for('view_positions', account_id=account_id))
 
 @app.route('/edit_portfolio/<account_id>', methods=['GET', 'POST'])
 @login_required

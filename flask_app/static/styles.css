@@ -362,3 +362,27 @@ input[type="password"]:focus {
 .button:hover {
     color: rgb(15, 8, 8); /* Changes text color to contrast with the background */
 }
+
+.refresh-button-container {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-start; /* Align to the left like the back button */
+}
+
+.refresh-button {
+    font-size: 12px;
+    padding: 5px 10px;
+    background-color: #F7F9FB;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    text-decoration: none;
+    color: #333;
+    margin-top: 10px;
+    display: inline-block;
+    width: auto; /* Ensure the width is auto to avoid stretching */
+    box-sizing: border-box; /* Ensure padding is calculated correctly */
+}
+
+.refresh-button:hover {
+    background-color: #e0e0e0;
+}
