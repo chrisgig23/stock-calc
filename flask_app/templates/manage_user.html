@@ -9,5 +9,13 @@
     
     
     <a href="{{ url_for('menu') }}" class="button back-button">Exit</a>
-
+    
+    
+    {% if current_user.username == 'cgiglio' %}
+        <form action="{{ url_for('add_user') }}" method="post" style="margin-top: 20px;">
+            <label for="new_username">New Username:</label>
+            <input type="text" id="new_username" name="new_username" required>
+            <button type="submit" class="button highlight">Add New User</button>
+        </form>
+    {% endif %}
 {% endblock %}
