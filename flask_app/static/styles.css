@@ -14,12 +14,16 @@ body {
 
 header {
     width: 100%;
+    height: 74px;
     background-color: #007BFF;
     color: white;
     padding: 15px 0;
     text-align: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
+    position: fixed; /* Fixed position */
+    top: 0; /* Stays at the top */
+    left: 0;
+    z-index: 1001; /* Ensures it stays above other content */
 }
 
 header h1 {
@@ -36,7 +40,10 @@ nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-shrink: 0;
+    position: fixed; /* Fixed position */
+    top: 104px; /* Positioned just below the header */
+    left: 0;
+    z-index: 1000; /* Ensure nav is below the header but above the content */
 }
 
 nav a {
@@ -102,7 +109,8 @@ form {
     border-radius: 8px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     margin-top: 30px;
-    width: 100%;
+    margin-bottom: 30px;
+    /* width: 100%; */
     max-width: 600px;
     display: flex;
     flex-direction: column;
@@ -157,6 +165,7 @@ input[type="password"]:focus {
     width: 100%;
     max-width: 80%;
     margin-top: 20px;
+    margin-bottom: 20px;
     border-collapse: collapse;
 }
 
@@ -385,4 +394,125 @@ input[type="password"]:focus {
 
 .refresh-button:hover {
     background-color: #e0e0e0;
+}
+/* Sidebar and Main Content */
+.container {
+    display: flex;
+    width: 100%;
+    min-height: calc(100vh - 120px); /* Adjust height based on header + nav height */
+    margin-top: 120px; /* Space for fixed header + nav */
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #343A40;
+    color: white;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 142px; /* Start below the header and nav */
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 1000; /* Ensure sidebar is above main content but below header */
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    color: #FFF;
+    display: block;
+    text-decoration: none;
+    font-size: 1em;
+    font-weight: 100;
+    transition: color 0.3s ease;
+}
+
+.sidebar ul li a:hover {
+    color: #FFC107;
+}
+
+.sidebar-buttons {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+}
+
+.account_ident {
+    display: block; /* Make the entire li a block element */
+    width: 108%;    /* Ensure it takes up the full width of the parent element */
+    padding: 10px;  /* Add padding if needed to increase the clickable area */
+    box-sizing: border-box; /* Make sure padding doesn’t overflow the width */
+}
+
+.account_ident:hover {
+    background-color: #007BFF; /* Change background on hover */
+    cursor: pointer; /* Show a pointer cursor to indicate it’s clickable */
+}
+
+.main-content {
+    margin-left: 300px; /* Adjust to match the sidebar width */
+    padding: 20px;
+    flex-grow: 1;
+    transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        width: 100%;
+        height: auto;
+        left: -100%;
+        transition: left 0.3s ease;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 50px;
+        padding-top: 80px; /* Adjust depending on sidebar height */
+    }
+
+    /* nav{
+        width: calc(100% - 20px); 
+        left: 30px;
+    } */
+}
+
+/* Hamburger Menu Button */
+.hamburger {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001; /* Ensure the hamburger is above the sidebar */
+}
+
+.hamburger div {
+    width: 35px;
+    height: 5px;
+    background-color: white;
+    margin: 6px 0;
+    transition: 0.4s;
+}
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+    }
 }
