@@ -8,9 +8,8 @@
     <a href="{{ url_for('change_username', user_id=user.id) }}" class="button">Change Username</a>
     
     
-    <a href="{{ url_for('menu') }}" class="button back-button">Exit</a>
-    
-    
+    <a href="{{ url_for('view_account') }}" class="button back-button">Exit</a>
+
     {% if current_user.username == 'cgiglio' %}
         <form action="{{ url_for('add_user') }}" method="post" style="margin-top: 20px;">
             <label for="new_username">New Username:</label>

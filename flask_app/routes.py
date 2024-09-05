@@ -61,6 +61,19 @@ def inject_market_state():
     market_state = False
     return dict(market_state=market_state)
 
+
+def get_user_accounts():
+    account_objects = current_user.get_accounts()
+    accounts = [{"account_name": account.account_name, "account_id": account.id} for account in account_objects]
+    return accounts
+
+@app.context_processor
+def inject_accounts():
+    if current_user.is_authenticated:
+        accounts = get_user_accounts()
+        return {"accounts": accounts}
+    return {}
+
 @app.route('/')
 def root():
     if current_user.is_authenticated:
@@ -82,7 +95,7 @@ def login():
             else:
                 # Log in the user if the password is not the default
                 login_user(user)
-                return redirect(url_for('menu'))
+                return redirect(url_for('view_account'))
         else:
             flash('Invalid username or password')
     return render_template('login.html')
@@ -146,30 +159,30 @@ def add_user():
 
     return redirect(url_for('menu'))
 
-@app.route('/menu', methods=['GET', 'POST'])
-@login_required
-def menu():
-    # Fetch accounts with both name and ID
-    account_objects = current_user.get_accounts()
+# @app.route('/menu', methods=['GET', 'POST'])
+# @login_required
+# def menu():
+#     # Fetch accounts with both name and ID
+#     account_objects = current_user.get_accounts()
 
-    if request.method == 'POST':
-        selected_account_id = request.form['account']
-        if selected_account_id == 'add':
-            return redirect(url_for('add_account'))
-        elif selected_account_id == 'remove':
-            if len(account_objects)>0:
-                return redirect(url_for('remove_account'))
-            else:
-                flash('No accounts to remove.', 'error')
-        else:
-            return redirect(url_for('view_account', account_id=selected_account_id))
+#     if request.method == 'POST':
+#         selected_account_id = request.form['account']
+#         if selected_account_id == 'add':
+#             return redirect(url_for('add_account'))
+#         elif selected_account_id == 'remove':
+#             if len(account_objects)>0:
+#                 return redirect(url_for('remove_account'))
+#             else:
+#                 flash('No accounts to remove.', 'error')
+#         else:
+#             return redirect(url_for('view_account', account_id=selected_account_id))
     
     
     
-    # Create a list of dictionaries with account name and ID
-    accounts = [{"account_name": account.account_name, "account_id": account.id} for account in account_objects]
+#     # Create a list of dictionaries with account name and ID
+#     accounts = [{"account_name": account.account_name, "account_id": account.id} for account in account_objects]
     
-    return render_template('menu.html', accounts=accounts)
+#     return render_template('menu.html', accounts=accounts)
 
 @app.route('/add_account', methods=['GET', 'POST'])
 @login_required
@@ -189,7 +202,7 @@ def add_account():
         db.session.commit()
 
         flash('Account added successfully!', 'success')
-        return redirect(url_for('menu'))
+        return redirect(url_for('view_account', account_id=new_account.id))
     
     return render_template('add_account.html')
 
@@ -206,15 +219,26 @@ def remove_account():
         else:
             flash('Account not found or does not belong to you.', 'error')
 
-        return redirect(url_for('menu'))
+        return redirect(url_for('view_account'))
 
-    accounts = Account.query.filter_by(user_id=current_user.id).all()
-    return render_template('remove_account.html', accounts=accounts)
+    # accounts = Account.query.filter_by(user_id=current_user.id).all()
+    return render_template('remove_account.html')
 
+@app.route('/view_account', defaults={'account_id': None})
 @app.route('/view_account/<int:account_id>')
 @login_required
 def view_account(account_id):
-    account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
+    if account_id:
+        # Fetch the account if an ID is provided
+        account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
+    else:
+        # If no account is provided, attempt to load the first available account
+        account = Account.query.filter_by(user_id=current_user.id).first()
+
+    if not account:
+        flash('No accounts available. Please create a new account.', 'info')
+        return redirect(url_for('add_account'))
+    
     return render_template('account_menu.html', account=account)
 
 @app.route('/make_purchase/<int:account_id>', methods=['GET', 'POST'])
@@ -397,7 +421,7 @@ def view_positions(account_id):
 
     if not stocks:
         flash('No stocks found in this account.')
-        return redirect(url_for('menu'))  # Redirect to menu if no stocks are found
+        return redirect(url_for('view_account', account_id=account.id))  # Redirect to menu if no stocks are found
 
     if request.method == 'POST' and 'refresh_pricing' in request.form:
         flash("Market pricing refreshed.", 'success')
