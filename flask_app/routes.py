@@ -77,7 +77,7 @@ def inject_accounts():
 @app.route('/')
 def root():
     if current_user.is_authenticated:
-        return redirect(url_for('menu'))
+        return redirect(url_for('view_account'))
     else:
         return redirect(url_for('login'))
 
@@ -141,7 +141,7 @@ def reset_password(user_id):
 def add_user():
     if current_user.username != 'cgiglio':
         flash('Unauthorized access.', 'danger')
-        return redirect(url_for('menu'))
+        return redirect(url_for('view_account'))
 
     new_username = request.form.get('new_username')
     if new_username:
@@ -157,7 +157,7 @@ def add_user():
     else:
         flash('Please enter a username.', 'warning')
 
-    return redirect(url_for('menu'))
+    return redirect(url_for('view_account'))
 
 # @app.route('/menu', methods=['GET', 'POST'])
 # @login_required
@@ -576,6 +576,6 @@ def change_username():
             current_user.username = new_username
             db.session.commit()
             flash('Username successfully updated.', 'success')
-            return redirect(url_for('menu'))
+            return redirect(url_for('view_account'))
 
     return render_template('change_username.html')
