@@ -159,30 +159,30 @@ def add_user():
 
     return redirect(url_for('view_account'))
 
-# @app.route('/menu', methods=['GET', 'POST'])
-# @login_required
-# def menu():
-#     # Fetch accounts with both name and ID
-#     account_objects = current_user.get_accounts()
+@app.route('/account/<int:account_id>/move_up', methods=['POST'])
+@login_required
+def move_account_up(account_id):
+    account = Account.query.get_or_404(account_id)
+    if account.position > 0:
+        # Find the account just above the current one
+        account_above = Account.query.filter_by(user_id=current_user.id, position=account.position - 1).first()
+        if account_above:
+            # Swap positions
+            account_above.position, account.position = account.position, account_above.position
+            db.session.commit()
+    return redirect(url_for('view_account'))
 
-#     if request.method == 'POST':
-#         selected_account_id = request.form['account']
-#         if selected_account_id == 'add':
-#             return redirect(url_for('add_account'))
-#         elif selected_account_id == 'remove':
-#             if len(account_objects)>0:
-#                 return redirect(url_for('remove_account'))
-#             else:
-#                 flash('No accounts to remove.', 'error')
-#         else:
-#             return redirect(url_for('view_account', account_id=selected_account_id))
-    
-    
-    
-#     # Create a list of dictionaries with account name and ID
-#     accounts = [{"account_name": account.account_name, "account_id": account.id} for account in account_objects]
-    
-#     return render_template('menu.html', accounts=accounts)
+@app.route('/account/<int:account_id>/move_down', methods=['POST'])
+@login_required
+def move_account_down(account_id):
+    account = Account.query.get_or_404(account_id)
+    # Find the account just below the current one
+    account_below = Account.query.filter_by(user_id=current_user.id, position=account.position + 1).first()
+    if account_below:
+        # Swap positions
+        account_below.position, account.position = account.position, account_below.position
+        db.session.commit()
+    return redirect(url_for('view_account'))
 
 @app.route('/add_account', methods=['GET', 'POST'])
 @login_required

@@ -20,7 +20,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
     
     def get_accounts(self):
-        return self.accounts
+        return Account.query.filter_by(user_id=self.id).order_by(Account.position.asc()).all()
 
 class Account(db.Model):
     __tablename__ = 'accounts'
@@ -28,7 +28,8 @@ class Account(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     account_name = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-
+    position = db.Column(db.Integer, nullable=False, default=0)
+    
     # Relationships with Stock, Position, and Allocation
     stocks = db.relationship('Stock', backref='account', lazy=True)
     positions = db.relationship('Position', backref='account', lazy=True)

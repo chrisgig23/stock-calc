@@ -469,6 +469,51 @@ input[type="password"]:focus {
     transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
 }
 
+/* Style for the reorder buttons */
+.arrow-button {
+    background: none; /* Remove button background */
+    border: none; /* Remove button border */
+    padding: 0; /* Remove padding */
+    margin: 0 5px; /* Add some space between the arrows */
+    font-size: 12px; /* Small font for minimalistic look */
+    cursor: pointer;
+    color: #007BFF; /* Set color for the arrows */
+    transition: color 0.3s ease; /* Add smooth transition */
+}
+
+.button-form {
+    background-color: #343a40;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0.1);
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.arrow-button:hover {
+    color: #0056b3; /* Darker color on hover */
+}
+
+.account-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reorder-buttons {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between buttons */
+}
+
+ul {
+    list-style: none; /* Remove default list styling */
+    padding-left: 0;
+}
+
+li {
+    padding: 10px 0;
+}
+
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;

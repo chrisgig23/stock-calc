@@ -164,19 +164,30 @@
         <aside class="sidebar">
             <h2>Your Accounts</h2>
             <ul>
-                {% if accounts %}
-                    {% for account in accounts %}
-                        <li class="account_ident"><a href="{{ url_for('view_account', account_id=account.account_id) }}">{{ account.account_name }}</a></li>
-                    {% endfor %}
-                {% else %}
-                    <li>No accounts available</li>
-                {% endif %}
+                {% for account in accounts %}
+                <li>
+                    <div class="account-item">
+                        <a href="{{ url_for('view_account', account_id=account.account_id) }}">{{ account.account_name }}</a>
+                        <!-- Add buttons to move accounts up/down -->
+                        <div class="reorder-buttons">
+                            <img src="{{ url_for('static', filename='images/star.png') }}" alt="Default Star" class="star-img">
+                            <form class="button-form" method="POST" action="{{ url_for('move_account_up', account_id=account.account_id) }}" style="display: inline;">
+                                <button type="submit" class="arrow-button" title="Move Up">
+                                    <img src="{{ url_for('static', filename='images/arrow-up.png') }}" alt="Move Up" class="arrow-icon">
+                                </button>
+                            </form>
+                            <form class="button-form" method="POST" action="{{ url_for('move_account_down', account_id=account.account_id) }}" style="display: inline;">
+                                <button type="submit" class="arrow-button" title="Move Down">
+                                    <img src="{{ url_for('static', filename='images/arrow-down.png') }}" alt="Move Down" class="arrow-icon">
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
             </ul>
-            <div class="sidebar-buttons">
-                <a href="{{ url_for('add_account') }}" class="button">Add Account</a>
-                <a href="{{ url_for('remove_account') }}" class="button">Remove Account</a>
-            </div>
         </aside>
+
         {% endif %}
         <main class="main-content">
             {% with messages = get_flashed_messages() %}
