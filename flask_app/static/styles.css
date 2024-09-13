@@ -555,6 +555,16 @@ li {
     transition: 0.4s;
 }
 
+.star-img {
+    padding-right: 5px;
+}
+
+.spacer {
+    display: inline-block;
+    width: 35px; /* Set to the width of your arrow icon */
+    height: 12px; /* Set to the height of your arrow icon */
+}
+
 @media (max-width: 768px) {
     .hamburger {
         display: block;

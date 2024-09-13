@@ -64,7 +64,7 @@ def inject_market_state():
 
 def get_user_accounts():
     account_objects = current_user.get_accounts()
-    accounts = [{"account_name": account.account_name, "account_id": account.id} for account in account_objects]
+    accounts = [{"account_name": account.account_name, "account_id": account.id, "account_position":account.position} for account in account_objects]
     return accounts
 
 @app.context_processor
@@ -169,6 +169,7 @@ def move_account_up(account_id):
         if account_above:
             # Swap positions
             account_above.position, account.position = account.position, account_above.position
+            print(f"Moving {account.account_name} from position {account.position} to position {account_above.position}")
             db.session.commit()
     return redirect(url_for('view_account'))
 
@@ -181,6 +182,7 @@ def move_account_down(account_id):
     if account_below:
         # Swap positions
         account_below.position, account.position = account.position, account_below.position
+        print(f"Moving {account.account_name} from position {account.position} to position {account_below.position}")
         db.session.commit()
     return redirect(url_for('view_account'))
 
@@ -231,15 +233,17 @@ def view_account(account_id):
     if account_id:
         # Fetch the account if an ID is provided
         account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
+        max_position = db.session.query(db.func.max(Account.position)).filter_by(user_id=current_user.id).scalar()
     else:
         # If no account is provided, attempt to load the first available account
         account = Account.query.filter_by(user_id=current_user.id).first()
+        max_position = db.session.query(db.func.max(Account.position)).filter_by(user_id=current_user.id).scalar()
 
     if not account:
         flash('No accounts available. Please create a new account.', 'info')
         return redirect(url_for('add_account'))
     
-    return render_template('account_menu.html', account=account)
+    return render_template('account_menu.html', account=account, max_position=max_position)
 
 @app.route('/make_purchase/<int:account_id>', methods=['GET', 'POST'])
 @login_required
