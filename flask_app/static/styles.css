@@ -565,6 +565,30 @@ li {
     height: 12px; /* Set to the height of your arrow icon */
 }
 
+.accounts-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.edit-toggle-button {
+    background-color: #343a40; /* Darker color on hover */
+    background: none; /* Remove button background */
+    border: none; /* Remove button border */
+    padding: 0; /* Remove padding */
+    margin: 0 5px; /* Add some space between the arrows */
+    font-size: 12px; /* Small font for minimalistic look */
+    cursor: pointer;
+    transition: color 0.3s ease; /* Add smooth transition */
+    height: 100%;
+}
+
+/* Hide the arrows by default */
+.reorder-buttons {
+    display: none;
+}
+
+
+
 @media (max-width: 768px) {
     .hamburger {
         display: block;

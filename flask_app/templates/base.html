@@ -59,6 +59,31 @@
                 showSessionModal(); // Show modal and start countdown
             }, warningTimeout);
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const editButton = document.getElementById('edit-button');
+            const editIcon = document.getElementById('edit-icon');  // Reference to the image inside the button
+            const reorderButtons = document.querySelectorAll('.reorder-buttons');
+    
+            let editMode = false;
+    
+            editButton.addEventListener('click', function() {
+                editMode = !editMode;
+    
+                // Toggle visibility of the arrows
+                reorderButtons.forEach(button => {
+                    if (editMode) {
+                        button.style.display = 'inline-block';  // Show arrows
+                        editIcon.src = "{{ url_for('static', filename='images/done.png') }}";  // Change icon to 'done'
+                        editIcon.title = "Done";  // Update the tooltip
+                    } else {
+                        button.style.display = 'none';  // Hide arrows
+                        editIcon.src = "{{ url_for('static', filename='images/edit.png') }}";  // Change icon back to 'edit'
+                        editIcon.title = "Edit";  // Update the tooltip
+                    }
+                });
+            });
+        });
     </script>
     <style>
         /* Modal styles */
@@ -108,7 +133,7 @@
 </head>
 <body>
     <header>
-        <h1>Stock Calculator</h1>
+        <h1>WealthWise™</h1>
         <div class="login-info">
             {% if current_user.is_authenticated %}
             <div class="user-details">
@@ -162,14 +187,19 @@
     <div class="container">
         {% if current_user.is_authenticated %}
         <aside class="sidebar">
-            <h2>Your Accounts</h2>
+            <div class="accounts-header">
+                <h2>Your Accounts</h2>
+                <button id="edit-button" class="edit-toggle-button">
+                    <img src="{{ url_for('static', filename='images/edit.png') }}" title="Edit" class="edit-img" id="edit-icon">
+                </button>
+            </div>
             <ul>
                 {% for account in accounts %}
                 <li>
                     <div class="account-item">
                         <a href="{{ url_for('view_account', account_id=account.account_id) }}">{{ account.account_name }}</a>
-                        <!-- Add buttons to move accounts up/down -->
-                        <div class="reorder-buttons">
+                        
+                        <div class="reorder-buttons" style="display:none;">
                             {% if account.account_position == 0 %}
                                 <img src="{{ url_for('static', filename='images/star.png') }}" title="Default account" class="star-img">
                             {% else %}
