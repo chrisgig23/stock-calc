@@ -256,7 +256,10 @@ def make_purchase(account_id):
         flash("Please set desired allocation before making a purchase.")
         return redirect(url_for('adjust_allocation', account_id=account_id))
 
-    last_purchase = Purchase.query.filter_by(user_id=current_user.id).order_by(Purchase.purchase_date.desc()).first()
+    last_purchase = Purchase.query.join(Stock, Purchase.stock_id == Stock.id) \
+                                  .filter(Stock.account_id == account_id, Purchase.user_id == current_user.id) \
+                                  .order_by(Purchase.purchase_date.desc()) \
+                                  .first()
     last_purchase_date = last_purchase.purchase_date if last_purchase else None
 
     if request.method == 'POST':
@@ -420,7 +423,12 @@ def view_positions(account_id):
     account = Account.query.get_or_404(account_id)
     stocks = Stock.query.filter_by(account_id=account_id).all()
 
-    last_purchase = Purchase.query.filter_by(user_id=current_user.id).order_by(Purchase.purchase_date.desc()).first()
+    # Update the query to filter by both account_id and user_id
+    last_purchase = Purchase.query.join(Stock, Purchase.stock_id == Stock.id) \
+                                  .filter(Stock.account_id == account_id, Purchase.user_id == current_user.id) \
+                                  .order_by(Purchase.purchase_date.desc()) \
+                                  .first()
+    
     last_purchase_date = last_purchase.purchase_date if last_purchase else None
 
     if not stocks:
