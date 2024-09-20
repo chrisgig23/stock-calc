@@ -631,8 +631,3 @@ li {
     }
 }
 
-@media (max-height: 675px) {
-    .main-content {
-        margin-top: 100px;
-    }
-}
