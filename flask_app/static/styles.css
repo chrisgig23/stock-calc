@@ -12,6 +12,10 @@ body {
     box-sizing: border-box;
 }
 
+html, body {
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
 header {
     width: 100%;
     height: 74px;
@@ -517,7 +521,7 @@ li {
 @media (max-width: 768px) {
     .sidebar {
         position: fixed;
-        width: 100%;
+        width: 90%;
         height: auto;
         left: -100%;
         transition: left 0.3s ease;
@@ -592,6 +596,26 @@ li {
 @media (max-width: 768px) {
     .hamburger {
         display: block;
+    }
+
+    .sidebar-strip {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 50px;
+        height: 100%;
+        background-color: #343A40; /* Same color as the sidebar for consistency */
+        z-index: 999; /* Ensure it's visible above other elements */
+        display: none; /* Hidden by default */
+    }
+
+    .sidebar:not(.active) ~ .sidebar-strip {
+        display: block; /* Show the strip when the sidebar is hidden */
+    }
+
+    /* When the sidebar is active (visible), hide the strip */
+    .sidebar.active ~ .sidebar-strip {
+        display: none;
     }
 }
 
