@@ -249,9 +249,12 @@
         document.addEventListener("DOMContentLoaded", function() {
             const hamburger = document.querySelector(".hamburger");
             const sidebar = document.querySelector(".sidebar");
-
+            const body = document.querySelector("body");
+        
             hamburger.addEventListener("click", function() {
-                sidebar.classList.toggle("active");
+                sidebar.classList.toggle("active");  // Toggle sidebar visibility
+                body.classList.toggle("no-scroll");  // Prevent body scroll when sidebar is open
+                hamburger.classList.toggle("active");  // Toggle hamburger to X icon
             });
         });
     </script>

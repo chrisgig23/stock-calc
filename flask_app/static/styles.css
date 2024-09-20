@@ -548,7 +548,8 @@ li {
     position: fixed;
     top: 20px;
     left: 20px;
-    z-index: 1001; /* Ensure the hamburger is above the sidebar */
+    z-index: 1001;
+    cursor: pointer;
 }
 
 .hamburger div {
@@ -559,6 +560,17 @@ li {
     transition: 0.4s;
 }
 
+.hamburger.active div:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+}
+
+.hamburger.active div:nth-child(2) {
+    opacity: 0; /* Hide the middle line */
+}
+
+.hamburger.active div:nth-child(3) {
+    transform: rotate(-45deg) translate(8px, -8px);
+}
 .star-img {
     padding-right: 5px;
 }
