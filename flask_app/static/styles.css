@@ -600,6 +600,12 @@ li {
     display: none;
 }
 
+input[type="text"], 
+input[type="password"], 
+input[type="email"], 
+textarea {
+    font-size: 16px; /* Ensure font size is at least 16px to prevent zoom */
+}
 
 
 @media (max-width: 768px) {
