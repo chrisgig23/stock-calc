@@ -250,8 +250,11 @@ def view_account(account_id):
 def make_purchase(account_id):
     account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
 
-    total_target_allocation = db.session.query(db.func.sum(Allocation.target)).filter_by(account_id=account_id).scalar() or 0
-
+    total_target_allocation = db.session.query(db.func.sum(Allocation.target)) \
+        .join(Stock, Stock.ticker == Allocation.name) \
+        .filter(Stock.account_id == account_id, Stock.isincluded == True) \
+        .scalar() or 0
+    
     if total_target_allocation != 100:
         flash("Please set desired allocation before making a purchase.")
         return redirect(url_for('adjust_allocation', account_id=account_id))
@@ -306,14 +309,14 @@ def make_purchase(account_id):
 
 
 def get_suggested_purchases(account, cash_value):
-    # Fetch all stocks and their allocations
-    stocks = Stock.query.filter_by(account_id=account.id).all()
+    # Fetch only included stocks for the account
+    stocks = Stock.query.filter_by(account_id=account.id, isincluded=True).all()
     allocations = Allocation.query.filter_by(account_id=account.id).all()
 
     # Create a dictionary of allocations indexed by stock name
     allocation_dict = {allocation.name: allocation.target for allocation in allocations}
 
-    # Calculate the total market value of the account
+    # Calculate the total market value of only included stocks
     total_market_value = sum(stock.market_value for stock in stocks)
 
     suggested_purchases = []
@@ -357,19 +360,19 @@ def get_suggested_purchases(account, cash_value):
 def view_allocation(account_id):
     account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
     
-    # Fetch all stocks in the account
-    stocks = Stock.query.filter_by(account_id=account.id).all()
+    # Fetch only included stocks in the account
+    included_stocks = Stock.query.filter_by(account_id=account.id, isincluded=True).all()
 
     # Initialize variables
     total_market_value = 0
     allocations = []
 
     # Calculate the total market value and collect allocation data
-    for stock in stocks:
+    for stock in included_stocks:
         total_market_value += stock.market_value
 
     # Calculate the current allocation as a percentage of the total market value
-    for stock in stocks:
+    for stock in included_stocks:
         current_allocation = (stock.market_value / total_market_value) * 100 if total_market_value > 0 else 0
         target_allocation = Allocation.query.filter_by(account_id=account.id, name=stock.ticker).first()
         allocations.append({
@@ -404,61 +407,97 @@ def adjust_allocation(account_id):
     # Retrieve all stocks for the account
     stocks = Stock.query.filter_by(account_id=account.id).all()
 
-    # Ensure all stocks have an allocation
+    # Ensure all stocks have an allocation and determine if they are editable
     allocations = []
     for stock in stocks:
         allocation = Allocation.query.filter_by(account_id=account.id, name=stock.ticker).first()
-        if allocation:
-            allocations.append(allocation)
-        else:
-            allocations.append(Allocation(name=stock.ticker, target=0, account_id=account.id))
+        allocations.append({
+            'name': stock.ticker,
+            'target': allocation.target if allocation else 0,
+            'isincluded': stock.isincluded
+        })
 
     return render_template('adjust_allocation.html', account=account, allocations=allocations)
 
-from datetime import datetime
+def get_allocations(account_id):
+    # Fetch stocks for the account where isincluded is True
+    included_stocks = db.session.query(Stock).filter_by(account_id=account_id, isincluded=True).all()
+
+    # Calculate allocations based on included stocks
+    total_value = sum(stock.quantity * stock.price for stock in included_stocks)
+    
+    allocations = []
+    for stock in included_stocks:
+        allocation = {
+            "ticker": stock.ticker,
+            "quantity": stock.quantity,
+            "allocation_percent": (stock.quantity * stock.price) / total_value * 100
+        }
+        allocations.append(allocation)
+
+    return allocations
 
 @app.route('/view_positions/<int:account_id>', methods=['GET', 'POST'])
 @login_required
 def view_positions(account_id):
     account = Account.query.get_or_404(account_id)
+
+    # Fetch all stocks for the given account
     stocks = Stock.query.filter_by(account_id=account_id).all()
 
-    # Update the query to filter by both account_id and user_id
+    # Fetch last purchase details
     last_purchase = Purchase.query.join(Stock, Purchase.stock_id == Stock.id) \
                                   .filter(Stock.account_id == account_id, Purchase.user_id == current_user.id) \
                                   .order_by(Purchase.purchase_date.desc()) \
                                   .first()
-    
     last_purchase_date = last_purchase.purchase_date if last_purchase else None
-
-    if not stocks:
-        flash('No stocks found in this account.')
-        return redirect(url_for('view_account', account_id=account.id))  # Redirect to menu if no stocks are found
 
     if request.method == 'POST' and 'refresh_pricing' in request.form:
         flash("Market pricing refreshed.", 'success')
         last_refresh = datetime.now(pytz.timezone('America/New_York'))
     else:
-        last_refresh = datetime.now(pytz.timezone('America/New_York'))  # You might want to store and retrieve this from the database in a real scenario.
+        last_refresh = datetime.now(pytz.timezone('America/New_York'))  # Consider storing this in DB
 
+    # If no stocks exist, redirect to account view
+    if not stocks:
+        flash('No stocks found in this account.')
+        return redirect(url_for('view_account', account_id=account.id))
+
+    # Initialize data containers
     stock_data_list = []
+    included_market_value = 0
+    tracked_market_value = 0
     total_market_value = 0
 
     for stock in stocks:
-        # Using the properties directly from the Stock model
-        current_price = stock.current_price
-        market_value = stock.market_value
-        total_market_value += market_value
-
-        stock_data_list.append({
+        stock_data = {
             'ticker': stock.ticker,
             'quantity': stock.quantity,
-            'current_price': current_price,
-            'market_value': market_value
-        })
+            'current_price': stock.current_price,
+            'market_value': stock.market_value,
+            'isincluded': stock.isincluded
+        }
 
-    return render_template('view_positions.html', account=account, stock_data_list=stock_data_list,
-                           total_market_value=total_market_value, last_purchase_date=last_purchase_date,
+        stock_data_list.append(stock_data)
+
+        # Separate market values
+        if stock.isincluded:
+            included_market_value += stock.market_value
+        else:
+            tracked_market_value += stock.market_value
+
+        total_market_value += stock.market_value  # Calculate total portfolio value
+
+    # Debugging Output
+    print("Stock Data List:", stock_data_list)  # Check if stocks are retrieved correctly
+
+    return render_template('view_positions.html', 
+                           account=account,
+                           stock_data_list=stock_data_list,
+                           included_market_value=included_market_value,
+                           tracked_market_value=tracked_market_value,
+                           total_market_value=total_market_value,
+                           last_purchase_date=last_purchase_date,
                            last_refresh=last_refresh)
 # Replaced with Edit Portfolio
 # @app.route('/adjust_positions/<account_name>', methods=['GET', 'POST'])
@@ -489,11 +528,11 @@ def refresh_market_data(account_id):
     flash('Market pricing updated successfully.', 'success')
     return redirect(url_for('view_positions', account_id=account_id))
 
-@app.route('/edit_portfolio/<account_id>', methods=['GET', 'POST'])
+@app.route('/edit_portfolio/<int:account_id>', methods=['GET', 'POST'])
 @login_required
 def edit_portfolio(account_id):
     account = Account.query.get_or_404(account_id)
-    
+
     if request.method == 'POST':
         stocks = request.form.getlist('tickers[]')
         quantities = request.form.getlist('quantities[]')
@@ -502,19 +541,32 @@ def edit_portfolio(account_id):
 
         # Process existing stocks
         for i, stock in enumerate(stocks):
-            quantity = quantities[i]
+            quantity = int(quantities[i]) if quantities[i] else 0
+            # Check if "Include in Calculations" is checked
+            isincluded = request.form.get(f'isincluded_{stock}', 'off') == 'on'
+
             if request.form.get(f'delete_{stock}'):
+                # Delete stock if delete button is clicked
                 Stock.query.filter_by(account_id=account_id, ticker=stock).delete()
             else:
-                Stock.query.filter_by(account_id=account_id, ticker=stock).update({'quantity': quantity})
+                # Update stock details
+                Stock.query.filter_by(account_id=account_id, ticker=stock).update({
+                    'quantity': quantity,
+                    'isincluded': isincluded
+                })
 
         # Process new stocks
         for i, ticker in enumerate(new_tickers):
-            if ticker:
+            if ticker.strip():
                 stock_data = yf.Ticker(ticker).info
                 if 'shortName' in stock_data:
                     # Add new stock to account
-                    new_stock = Stock(account_id=account.id, ticker=ticker, quantity=int(new_quantities[i]) if new_quantities[i] else 0)
+                    new_stock = Stock(
+                        account_id=account.id,
+                        ticker=ticker.upper(),
+                        quantity=int(new_quantities[i]) if new_quantities[i] else 0,
+                        isincluded=True  # New stocks are included by default
+                    )
                     db.session.add(new_stock)
                 else:
                     flash(f"Ticker symbol {ticker} is not valid, please verify and try again.")
@@ -526,6 +578,7 @@ def edit_portfolio(account_id):
 
     # Initial GET request, load current stocks
     stocks = Stock.query.filter_by(account_id=account_id).all()
+    print([{stock.ticker: stock.isincluded} for stock in stocks])
     return render_template('edit_portfolio.html', account=account, stocks=stocks)
 
 @app.route('/validate_tickers', methods=['POST'])

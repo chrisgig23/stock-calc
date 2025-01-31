@@ -4,42 +4,74 @@
     <h2>Current Positions for {{ account.account_name }}</h2>
 
     {% if last_purchase_date %}
-    <p><strong>Date of Last Purchase:</strong> {{ last_purchase_date.strftime('%B %-d, %Y') }}</p>
+        <p><strong>Date of Last Purchase:</strong> {{ last_purchase_date.strftime('%B %-d, %Y') }}</p>
     {% else %}
-    <p><strong>Date of Last Purchase:</strong> No purchases made yet.</p>
+        <p><strong>Date of Last Purchase:</strong> No purchases made yet.</p>
     {% endif %}
 
     {% if last_refresh %}
-    <p><strong>Market data updated as of:</strong> {{ last_refresh.strftime('%B %-d, %Y %-I:%M:%S %p') }}</p>
+        <p><strong>Market data updated as of:</strong> {{ last_refresh.strftime('%B %-d, %Y %-I:%M:%S %p') }}</p>
     {% endif %}
 
     {% if stock_data_list %}
-    <div class="refresh-button-container">
-        <a href="{{ url_for('refresh_market_data', account_id=account.id) }}" class="refresh-button">Refresh Market Pricing</a>
-    </div>
-    <table class="allocation-table view-table">
-        <thead>
-            <tr>
-                <th>Stock Symbol</th>
-                <th>Quantity</th>
-                <th>Current Market Price</th>
-                <th>Market Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for stock in stock_data_list %}
-            <tr>
-                <td>{{ stock.ticker }}</td>
-                <td>{{ stock.quantity }}</td>
-                <td>${{ "%.2f" | format(stock.current_price) }}</td>
-                <td>${{ "{:,.2f}".format(stock.market_value) }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p><strong>Total Market Value: ${{ "{:,.2f}".format(total_market_value) }}</strong></p>
+        <p style="font-size: 1.2em; font-weight: bold;">
+            Total Account Value: ${{ "{:,.2f}".format(total_market_value) }}
+        </p>
+
+        <div class="refresh-button-container">
+            <a href="{{ url_for('refresh_market_data', account_id=account.id) }}" class="refresh-button">Refresh Market Pricing</a>
+        </div>
+
+        <!-- Included Stocks Table -->
+        <h3>Included Stocks</h3>
+        <table class="allocation-table view-table">
+            <thead>
+                <tr>
+                    <th>Stock Symbol</th>
+                    <th>Quantity</th>
+                    <th>Current Market Price</th>
+                    <th>Market Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stock_data_list if stock.isincluded %}
+                <tr>
+                    <td>{{ stock.ticker }}</td>
+                    <td>{{ stock.quantity }}</td>
+                    <td>${{ "%.2f" | format(stock.current_price) }}</td>
+                    <td>${{ "{:,.2f}".format(stock.market_value) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p><strong>Included Stocks Value: ${{ "{:,.2f}".format(included_market_value) }}</strong></p>
+
+        <!-- Tracked (Not Included) Stocks Table -->
+        <h3>Tracked Stocks (Not Included in Allocation)</h3>
+        <table class="allocation-table view-table">
+            <thead>
+                <tr>
+                    <th>Stock Symbol</th>
+                    <th>Quantity</th>
+                    <th>Current Market Price</th>
+                    <th>Market Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stock_data_list if not stock.isincluded %}
+                <tr>
+                    <td>{{ stock.ticker }}</td>
+                    <td>{{ stock.quantity }}</td>
+                    <td>${{ "%.2f" | format(stock.current_price) }}</td>
+                    <td>${{ "{:,.2f}".format(stock.market_value) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p><strong>Tracked Stocks Value: ${{ "{:,.2f}".format(tracked_market_value) }}</strong></p>
+
     {% else %}
-    <p>No positions found.</p>
+        <p>No positions found.</p>
     {% endif %}
 
     <a href="{{ url_for('view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>

@@ -13,6 +13,7 @@
                     <th>Quantity</th>
                     <th>Current Price</th>
                     <th>Market Value</th>
+                    <th>Include in Calculations</th>
                     <th>Remove</th>
                 </tr>
             </thead>
@@ -23,6 +24,10 @@
                     <td><input type="number" name="quantities[]" value="{{ stock.quantity }}"></td>
                     <td>{{ stock.current_price }}</td>
                     <td>{{ stock.market_value }}</td>
+                    <td>
+                        <input type="checkbox" name="isincluded_{{ stock.ticker }}" 
+                            {% if stock.isincluded %}checked{% endif %}>
+                    </td>
                     <td><button class="delete-button" onclick="removeRow(this)">🗑️</button></td>
                 </tr>
                 {% endfor %}
@@ -31,13 +36,16 @@
                     <td><input type="number" name="new_quantities[]" value="0"></td>
                     <td></td>
                     <td></td>
+                    <td>
+                        <input type="checkbox" name="isincluded_new[]" checked disabled>
+                    </td>
                     <td><button class="delete-button" onclick="removeRow(this)">🗑️</button></td>
                 </tr>
             </tbody>
         </table>
         <button type="button" id="add-row-button">Add Another Stock</button>
         <input type="submit" value="Save" id="save-button">
-</form>
+    </form>
 
     <script>
         document.getElementById('add-row-button').addEventListener('click', function() {
@@ -47,6 +55,7 @@
             // Clear the inputs in the cloned row
             newRow.querySelector('input[name="new_tickers[]"]').value = '';
             newRow.querySelector('input[name="new_quantities[]"]').value = '0';
+            newRow.querySelector('input[name="isincluded_new[]"]').checked = true;
 
             // Append the new row to the table body
             tableBody.appendChild(newRow);
@@ -102,4 +111,3 @@
         }
     </script>
 {% endblock %}
-

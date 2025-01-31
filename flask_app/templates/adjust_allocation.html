@@ -16,8 +16,15 @@
             {% for stock in allocations %}
             <tr>
                 <td>{{ stock.name }}</td>
-                <td><input type="number" name="allocation_target" value="{{ stock.target }}" required></td>
-                <input type="hidden" name="allocation_name" value="{{ stock.name }}">
+                <td>
+                    {% if stock.isincluded %}
+                        <input type="number" name="allocation_target" value="{{ stock.target }}" required>
+                    {% else %}
+                        <input type="number" name="allocation_target" value="0" disabled 
+                               title="Navigate to Edit Portfolio and select Include to adjust allocations">
+                    {% endif %}
+                    <input type="hidden" name="allocation_name" value="{{ stock.name }}">
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -29,7 +36,7 @@
 <script>
 function validateAllocations() {
     let total = 0;
-    const inputs = document.querySelectorAll('input[type="number"]');
+    const inputs = document.querySelectorAll('input[type="number"]:not([disabled])');
     inputs.forEach(input => {
         total += parseFloat(input.value);
     });

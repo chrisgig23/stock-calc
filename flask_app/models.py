@@ -54,11 +54,13 @@ class Stock(db.Model):
     ticker = db.Column(db.String(10), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=0)
     account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
+    isincluded = db.Column(db.Boolean, nullable=False, default=True)  # Added this line
 
-    def __init__(self, ticker, quantity, account_id):
+    def __init__(self, ticker, quantity, account_id, isincluded=True):
         self.ticker = ticker.upper()  # Ensure ticker symbols are uppercase
         self.quantity = quantity
         self.account_id = account_id
+        self.isincluded = isincluded  # Initialize isincluded with a default value
 
     @property
     def current_price(self):
