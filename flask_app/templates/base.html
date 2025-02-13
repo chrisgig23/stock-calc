@@ -144,8 +144,8 @@
                 Logged in as: {{ current_user.username }}
             </div>
             <div class="user-controls">
-                <a href="{{ url_for('logout') }}">Logout</a> | 
-                <a href={{ url_for('manage_user', user_id=current_user.id) }}>Manage my account</a>
+                <a href="{{ url_for('auth.logout') }}">Logout</a> | 
+                <a href={{ url_for('admin.manage_user', user_id=current_user.id) }}>Manage my account</a>
             </div>
             {% endif %}
         </div>
@@ -173,7 +173,7 @@
                 <p>Your session will expire in <span id="countdown-timer">60</span> seconds.</p>
                 <div>
                     <button onclick="extendSession()">Keep Working</button>
-                    <a href="{{ url_for('logout') }}">
+                    <a href="{{ url_for('auth.logout') }}">
                         <button class="logout-button">Log Out Now</button>
                     </a>
                 </div>
@@ -201,26 +201,27 @@
                 {% for account in accounts %}
                 <li>
                     <div class="account-item">
-                        <a href="{{ url_for('view_account', account_id=account.account_id) }}">{{ account.account_name }}</a>
-                        
+                        <a href="{{ url_for('accounts.view_account', account_id=account.id) }}">{{ account.account_name }}</a>
+        
                         <div class="reorder-buttons" style="display:none;">
-                            {% if account.account_position == 0 %}
+                            <!-- ✅ Show a star icon for the default account (position 0) -->
+                            {% if account.position == 0 %}
                                 <img src="{{ url_for('static', filename='images/star.png') }}" title="Default account" class="star-img">
                             {% else %}
-                                <form class="button-form" method="POST" action="{{ url_for('move_account_up', account_id=account.account_id) }}" style="display: inline;">
+                                <form class="button-form" method="POST" action="{{ url_for('accounts.move_account_up', account_id=account.id) }}" style="display: inline;">
                                     <button type="submit" class="arrow-button" title="Move Up">
                                         <img src="{{ url_for('static', filename='images/arrow-up.png') }}" alt="Move Up" class="arrow-icon">
                                     </button>
                                 </form>
                             {% endif %}
-                            {% if account.account_position < max_position %}
-                                <form class="button-form" method="POST" action="{{ url_for('move_account_down', account_id=account.account_id) }}" style="display: inline;">
+        
+                            <!-- ✅ Ensure the down arrow appears correctly for non-last accounts -->
+                            {% if account.position < max_position %}
+                                <form class="button-form" method="POST" action="{{ url_for('accounts.move_account_down', account_id=account.id) }}" style="display: inline;">
                                     <button type="submit" class="arrow-button" title="Move Down">
                                         <img src="{{ url_for('static', filename='images/arrow-down.png') }}" alt="Move Down" class="arrow-icon">
                                     </button>
                                 </form>
-                            {% else %}
-                                <span class="spacer"></span>
                             {% endif %}
                         </div>
                     </div>
@@ -228,8 +229,8 @@
                 {% endfor %}
             </ul>
             <div class="sidebar-buttons">
-                <a href="{{ url_for('add_account') }}" class="button">Add Account</a>
-                <a href="{{ url_for('remove_account') }}" class="button">Remove Account</a>
+                <a href="{{ url_for('accounts.add_account') }}" class="button">Add Account</a>
+                <a href="{{ url_for('accounts.remove_account', account_id=current_user.id) }}" class="button">Remove Account</a>
             </div>
         </aside>
         <div class="sidebar-strip"></div>

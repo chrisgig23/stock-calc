@@ -8,7 +8,7 @@
 <body>
     <header>
         <div style="float: right;">
-            Logged in as: {{ user.username }} | <a href="{{ url_for('logout') }}">Logout</a>
+            Logged in as: {{ user.username }} | <a href="{{ url_for('auth.logout') }}">Logout</a>
         </div>
     </header>
     <h2>Welcome, {{ user.username }}!</h2>

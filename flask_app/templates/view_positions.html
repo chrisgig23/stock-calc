@@ -19,7 +19,7 @@
         </p>
 
         <div class="refresh-button-container">
-            <a href="{{ url_for('refresh_market_data', account_id=account.id) }}" class="refresh-button">Refresh Market Pricing</a>
+            <a href="{{ url_for('market.refresh_market_data', account_id=account.id) }}" class="refresh-button">Refresh Market Pricing</a>
         </div>
 
         <!-- Included Stocks Table -->
@@ -74,5 +74,5 @@
         <p>No positions found.</p>
     {% endif %}
 
-    <a href="{{ url_for('view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+    <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
 {% endblock %}

@@ -6,13 +6,12 @@
 <h2>{{ account.account_name }}</h2>
 <div class="button-container">
     {% if accounts %}
-        <a href="{{ url_for('view_positions', account_id=account.id) }}" class="button">View Current Positions</a>
-        <a href="{{ url_for('edit_portfolio', account_id=account.id) }}" class="button">Edit Portfolio</a>
-        <a href="{{ url_for('view_allocation', account_id=account.id) }}" class="button">View Current Allocation</a>
-        <a href="{{ url_for('adjust_allocation', account_id=account.id) }}" class="button">Adjust Allocations</a>
-        <a href="{{ url_for('view_reports', account_id=account.id) }}" class="button">View Reports</a>
-        <a href="{{ url_for('make_purchase', account_id=account.id) }}" class="button highlight">Make a Purchase</a>
+        <a href="{{ url_for('portfolio.view_positions', account_id=account.id) }}" class="button">View Current Positions</a>
+        <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="button">Edit Portfolio</a>
+        <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="button">View Current Allocation</a>
+        <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="button">Adjust Allocations</a>
+        <a href="{{ url_for('reports.view_reports', account_id=account.id) }}" class="button">View Reports</a>
+        <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="button highlight">Make a Purchase</a>
     {% endif %}
-
-    </div>
+</div>
 {% endblock %}

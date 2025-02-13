@@ -4,7 +4,7 @@
 
 {% block content %}
 <h2>{{ account.account_name }} - Adjust Allocations</h2>
-<form method="post" action="{{ url_for('adjust_allocation', account_id=account.id) }}" onsubmit="return validateAllocations()">
+<form method="post" action="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" onsubmit="return validateAllocations()">
     <table class="edit-portfolio-table">
         <thead>
             <tr>
@@ -14,24 +14,24 @@
         </thead>
         <tbody>
             {% for stock in allocations %}
-            <tr>
-                <td>{{ stock.name }}</td>
-                <td>
-                    {% if stock.isincluded %}
-                        <input type="number" name="allocation_target" value="{{ stock.target }}" required>
-                    {% else %}
-                        <input type="number" name="allocation_target" value="0" disabled 
-                               title="Navigate to Edit Portfolio and select Include to adjust allocations">
-                    {% endif %}
-                    <input type="hidden" name="allocation_name" value="{{ stock.name }}">
-                </td>
-            </tr>
-            {% endfor %}
+                <tr>
+                    <td>{{ stock.name }}</td>
+                    <td>
+                        {% if stock.isincluded %}
+                            <input type="number" name="allocation_target" value="{{ stock.target }}" required>
+                            <input type="hidden" name="allocation_name" value="{{ stock.name }}"> <!-- ✅ Only included stocks have this -->
+                        {% else %}
+                            <input type="number" name="allocation_target" value="0" disabled 
+                                title="Navigate to Edit Portfolio and select Include to adjust allocations">
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
         </tbody>
     </table>
     <input type="submit" value="Submit">
 </form>
-<a href="{{ url_for('view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+<a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
 
 <script>
 function validateAllocations() {

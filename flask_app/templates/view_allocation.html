@@ -22,5 +22,5 @@
         {% endfor %}
     </tbody>
 </table>
-<a href="{{ url_for('view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+<a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
 {% endblock %}
