@@ -20,6 +20,7 @@ def make_purchase(account_id):
         .filter(Stock.account_id == account_id, Stock.isincluded == True) \
         .scalar() or 0
 
+    print(f"Total Target Allocation: {total_target_allocation}")  # Debugging
     if total_target_allocation != 100:
         flash("Please set desired allocation before making a purchase.", 'warning')
         return redirect(url_for('portfolio.adjust_allocation', account_id=account_id))
