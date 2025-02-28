@@ -18,16 +18,23 @@ def make_purchase(account_id):
     allocations = db.session.query(Allocation.name, Allocation.target) \
         .filter(Allocation.account_id == account_id).all()
 
-    print("Allocations from Flask query:")
+    print("\nAllocations from Flask query:")
     for allocation in allocations:
         print(f"Stock: {allocation.name}, Target: {allocation.target}")
 
-    total_target_allocation = db.session.query(db.func.sum(Allocation.target)) \
+    included_stocks = db.session.query(Stock.ticker, Stock.isincluded) \
+        .filter(Stock.account_id == account_id).all()
+
+    print("\nStocks and isIncluded status from Flask query:")
+    for stock in included_stocks:
+        print(f"Stock: {stock.ticker}, isIncluded: {stock.isincluded}")
+
+    total_target_allocation = db.session.query(db.func.sum(db.cast(Allocation.target, db.Float))) \
         .join(Stock, Stock.ticker == Allocation.name) \
         .filter(Stock.account_id == account_id, Stock.isincluded == True) \
         .scalar() or 0
 
-    print(f"Total Target Allocation: {total_target_allocation}")  # Debugging
+    print(f"\nComputed Total Target Allocation: {total_target_allocation}")
     if total_target_allocation != 100:
         flash("Please set desired allocation before making a purchase.", 'warning')
         return redirect(url_for('portfolio.adjust_allocation', account_id=account_id))
