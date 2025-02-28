@@ -30,7 +30,7 @@ def make_purchase(account_id):
         print(f"Stock: {stock.ticker}, isIncluded: {stock.isincluded}")
 
     total_target_allocation = db.session.query(db.func.sum(db.cast(Allocation.target, db.Float))) \
-        .join(Stock, Stock.ticker == Allocation.name) \
+        .join(Stock, (Stock.ticker == Allocation.name) & (Stock.account_id == Allocation.account_id)) \
         .filter(Stock.account_id == account_id, Stock.isincluded == True) \
         .scalar() or 0
 
