@@ -15,6 +15,13 @@ def make_purchase(account_id):
     """Handles purchasing stocks based on user allocation."""
     account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
 
+    allocations = db.session.query(Allocation.name, Allocation.target) \
+        .filter(Allocation.account_id == account_id).all()
+
+    print("Allocations from Flask query:")
+    for allocation in allocations:
+        print(f"Stock: {allocation.name}, Target: {allocation.target}")
+
     total_target_allocation = db.session.query(db.func.sum(Allocation.target)) \
         .join(Stock, Stock.ticker == Allocation.name) \
         .filter(Stock.account_id == account_id, Stock.isincluded == True) \
