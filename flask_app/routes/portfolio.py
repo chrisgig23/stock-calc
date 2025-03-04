@@ -228,10 +228,49 @@ def view_positions(account_id):
 def edit_portfolio(account_id):
     """Allows users to edit portfolio holdings (add, remove, update quantities)."""
     account = Account.query.get_or_404(account_id)
-    
-    if request.method == 'POST':
-        # Process stock changes
-        pass
 
+    if request.method == 'POST':
+        stocks = request.form.getlist('tickers[]')
+        quantities = request.form.getlist('quantities[]')
+        new_tickers = request.form.getlist('new_tickers[]')
+        new_quantities = request.form.getlist('new_quantities[]')
+
+        # Process existing stocks
+        for i, stock in enumerate(stocks):
+            quantity = int(quantities[i]) if quantities[i] else 0
+            isincluded = request.form.get(f'isincluded_{stock}', 'off') == 'on'  # Checkbox for "Include in Calculations"
+
+            if request.form.get(f'delete_{stock}'):
+                # Delete stock if delete button is clicked
+                Stock.query.filter_by(account_id=account_id, ticker=stock).delete()
+            else:
+                # Update stock details
+                Stock.query.filter_by(account_id=account_id, ticker=stock).update({
+                    'quantity': quantity,
+                    'isincluded': isincluded
+                })
+
+        # Process new stocks
+        for i, ticker in enumerate(new_tickers):
+            if ticker.strip():
+                stock_data = yf.Ticker(ticker).info
+                if 'shortName' in stock_data:
+                    # Add new stock to account
+                    new_stock = Stock(
+                        account_id=account.id,
+                        ticker=ticker.upper(),
+                        quantity=int(new_quantities[i]) if new_quantities[i] else 0,
+                        isincluded=True  # New stocks are included by default
+                    )
+                    db.session.add(new_stock)
+                else:
+                    flash(f"Ticker symbol {ticker} is not valid, please verify and try again.")
+                    return render_template('edit_portfolio.html', account=account, stocks=Stock.query.filter_by(account_id=account_id).all())
+
+        db.session.commit()
+        flash('Portfolio updated successfully!')
+        return redirect(url_for('accounts.view_account', account_id=account.id))
+    
+    # Initial GET request, load current stocks
     stocks = Stock.query.filter_by(account_id=account_id).all()
     return render_template('edit_portfolio.html', account=account, stocks=stocks)
