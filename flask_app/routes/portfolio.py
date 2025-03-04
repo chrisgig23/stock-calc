@@ -85,22 +85,43 @@ def make_purchase(account_id):
     return render_template('make_purchase.html', account=account, last_purchase_date=last_purchase_date)
 
 def get_suggested_purchases(account, cash_value):
-    """Calculates stock purchases based on target allocation and available cash."""
+    """Calculates stock purchases based on target allocation and available cash,
+       prioritizing stocks furthest from their target allocation."""
+    
     stocks = Stock.query.filter_by(account_id=account.id, isincluded=True).all()
     allocations = Allocation.query.filter_by(account_id=account.id).all()
+
+    # Create a dictionary of stock allocations
     allocation_dict = {allocation.name: allocation.target for allocation in allocations}
+
+    # Calculate total market value
     total_market_value = sum(stock.market_value for stock in stocks)
+
+    # Calculate allocation gap and sort by highest gap first
+    stock_gaps = []
+    for stock in stocks:
+        current_allocation = (stock.market_value / total_market_value) * 100 if total_market_value > 0 else 0
+        target_allocation = allocation_dict.get(stock.ticker, 0)
+
+        allocation_gap = target_allocation - current_allocation  # Higher gap = needs more funding
+        stock_gaps.append((stock, allocation_gap))
+
+    # Sort stocks by allocation gap (largest gap first)
+    stock_gaps.sort(key=lambda x: x[1], reverse=True)
 
     suggested_purchases = []
     total_suggested_cost = 0.0
 
-    for stock in stocks:
+    # Purchase stocks starting with the biggest allocation gap
+    for stock, allocation_gap in stock_gaps:
         current_price = stock.current_price
-        if current_price > 0:
+        if current_price > 0 and allocation_gap > 0:  # Ensure there's an actual gap
             target_allocation = allocation_dict.get(stock.ticker, 0) / 100
             target_value = target_allocation * (total_market_value + cash_value)
             target_quantity = int(target_value / current_price)
             max_quantity = int((cash_value - total_suggested_cost) / current_price)
+
+            # Calculate how much should be purchased to close the gap
             quantity_to_purchase = min(target_quantity - stock.quantity, max_quantity)
             estimated_total_cost = round(quantity_to_purchase * current_price, 2)
 
