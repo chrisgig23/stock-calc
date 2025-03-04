@@ -274,3 +274,23 @@ def edit_portfolio(account_id):
     # Initial GET request, load current stocks
     stocks = Stock.query.filter_by(account_id=account_id).all()
     return render_template('edit_portfolio.html', account=account, stocks=stocks)
+
+@portfolio_bp.route('/validate_tickers', methods=['POST'])
+@login_required
+def validate_tickers():
+    data = request.get_json()
+    tickers = data.get('tickers', [])
+    valid_tickers = []
+    invalid_tickers = []
+
+    for ticker in tickers:
+        stock_data = yf.Ticker(ticker).info
+        if 'shortName' in stock_data:
+            valid_tickers.append(f"{ticker} - {stock_data.get('shortName', 'Unknown')}")
+        else:
+            invalid_tickers.append(ticker)
+
+    if invalid_tickers:
+        return jsonify(valid=False, invalid_tickers=invalid_tickers)
+    else:
+        return jsonify(valid=True, matches=valid_tickers)
