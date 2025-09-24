@@ -590,10 +590,30 @@ def validate_tickers():
     invalid_tickers = []
 
     for ticker in tickers:
-        stock_data = yf.Ticker(ticker).info
-        if 'shortName' in stock_data:
-            valid_tickers.append(f"{ticker} - {stock_data.get('shortName', 'Unknown')}")
-        else:
+        try:
+            ticker_obj = yf.Ticker(ticker)
+            # Use fast_info for basic validation to avoid rate limiting
+            if hasattr(ticker_obj, 'fast_info'):
+                stock_data = ticker_obj.fast_info
+                if stock_data and not stock_data.get('lastPrice') is None:
+                    # If basic info works, then get full info for the name
+                    try:
+                        full_info = ticker_obj.info
+                        valid_tickers.append(f"{ticker} - {full_info.get('shortName', ticker)}")
+                        continue
+                    except:
+                        # If full info fails, just use the ticker
+                        valid_tickers.append(ticker)
+                        continue
+            
+            # Fallback to old method
+            stock_data = ticker_obj.info
+            if 'shortName' in stock_data:
+                valid_tickers.append(f"{ticker} - {stock_data.get('shortName', 'Unknown')}")
+            else:
+                invalid_tickers.append(ticker)
+        except Exception as e:
+            print(f"Error validating {ticker}: {str(e)}")
             invalid_tickers.append(ticker)
 
     if invalid_tickers:
