@@ -1,6 +1,21 @@
 # git token
 stock-calc git token.rtf
 
+# Local secrets and environment files
+.env.old
+.env.development
+flask_app/.env.development
+"psql DB passwords.rtf"
+psql\ DB\ passwords.rtf
+
+# Database dumps and backups
+*.dump
+WealthWise_Backup_*/
+stock_calc_backup*
+
+# Local utility scripts
+sync_to_dev.sh
+
 # Byte-compiled / optimized / DLL files
 flask_app/__pycache__/
 __pycache__/
