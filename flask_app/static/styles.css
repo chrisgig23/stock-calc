@@ -1,3 +1,109 @@
+/* ============================================================
+   DESIGN SYSTEM — Color Palette & Tokens (D1)
+   ============================================================ */
+:root {
+    /* Brand colors */
+    --color-primary:        #007BFF;
+    --color-primary-dark:   #0056B3;
+    --color-success:        #28A745;
+    --color-success-dark:   #218838;
+    --color-danger:         #DC3545;
+    --color-danger-dark:    #C82333;
+    --color-warning:        #FFC107;
+
+    /* Neutral scale */
+    --color-dark:           #343A40;
+    --color-dark-hover:     #23272B;
+    --color-muted:          #6C757D;
+    --color-text:           #343A40;
+    --color-text-secondary: #495057;
+    --color-border:         #CED4DA;
+    --color-surface:        #FFFFFF;
+    --color-bg:             #F8F9FA;
+    --color-bg-alt:         #F7F9FB;
+
+    /* Teal accent (table headers) */
+    --color-teal:           #31708E;
+
+    /* Shadows */
+    --shadow-sm:  0 2px 4px rgba(0,0,0,.08);
+    --shadow-md:  0 4px 8px rgba(0,0,0,.10);
+}
+
+/* ============================================================
+   UNIFIED BUTTON SYSTEM (D1)
+   Use these classes instead of one-off styles.
+   .btn-primary  — main CTA (blue)
+   .btn-success  — positive / confirm action (green)
+   .btn-danger   — destructive action (red)
+   .btn-ghost    — low-emphasis / back / cancel (outlined gray)
+   ============================================================ */
+.btn-primary,
+.btn-success,
+.btn-danger,
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 16px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+}
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: #fff;
+}
+
+.btn-success {
+    background-color: var(--color-success);
+    color: #fff;
+    border-color: var(--color-success);
+}
+.btn-success:hover {
+    background-color: var(--color-success-dark);
+    border-color: var(--color-success-dark);
+    color: #fff;
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: #fff;
+    border-color: var(--color-danger);
+}
+.btn-danger:hover {
+    background-color: var(--color-danger-dark);
+    border-color: var(--color-danger-dark);
+    color: #fff;
+}
+
+.btn-ghost {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border-color: var(--color-border);
+}
+.btn-ghost:hover {
+    background-color: #E9ECEF;
+    color: var(--color-text);
+    border-color: #ADB5BD;
+}
+
+/* ============================================================ */
+
 /* Base Styles */
 body {
     font-family: 'Inter', sans-serif;
@@ -325,18 +431,26 @@ input[type="password"]:focus {
 }
 
 .back-button {
-    font-size: 12px;
-    padding: 5px 10px;
-    background-color: #F7F9FB;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    /* Inherits ghost button style from the unified button system */
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
     text-decoration: none;
-    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     margin-top: 10px;
 }
 
 .back-button:hover {
-    background-color: #e0e0e0;
+    background-color: #E9ECEF;
+    color: var(--color-text);
+    border-color: #ADB5BD;
 }
 
 .box-highlight {
@@ -378,21 +492,28 @@ input[type="password"]:focus {
 }
 
 .refresh-button {
-    font-size: 12px;
-    padding: 5px 10px;
-    background-color: #F7F9FB;
-    border: 1px solid #ccc;
-    border-radius: 3px;
+    /* Inherits ghost button style from the unified button system */
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
     text-decoration: none;
-    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     margin-top: 10px;
-    display: inline-block;
-    width: auto; /* Ensure the width is auto to avoid stretching */
-    box-sizing: border-box; /* Ensure padding is calculated correctly */
+    width: auto;
+    box-sizing: border-box;
 }
 
 .refresh-button:hover {
-    background-color: #e0e0e0;
+    background-color: #E9ECEF;
+    color: var(--color-text);
+    border-color: #ADB5BD;
 }
 /* Sidebar and Main Content */
 .container {

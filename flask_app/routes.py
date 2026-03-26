@@ -41,16 +41,20 @@ def extend_session():
 
 @app.context_processor
 def inject_market_state():
-    # Market state logic
-    today = datetime.now().strftime('%Y-%m-%d')
-    schedule = mcal.get_calendar("NYSE").schedule(start_date=today, end_date=today)
+    # Market state logic — wrapped in try/except so a calendar API failure
+    # never crashes the page; it just falls back to showing "Markets are closed".
+    try:
+        today = datetime.now(pytz.timezone('America/New_York')).strftime('%Y-%m-%d')
+        schedule = mcal.get_calendar("NYSE").schedule(start_date=today, end_date=today)
 
-    if not schedule.empty:
-        market_open = schedule.iloc[0]["market_open"].tz_convert('America/New_York')
-        market_close = schedule.iloc[0]["market_close"].tz_convert('America/New_York')
-        current_time = datetime.now(pytz.timezone('America/New_York'))
-        market_state = market_open <= current_time <= market_close
-    else:
+        if not schedule.empty:
+            market_open = schedule.iloc[0]["market_open"].tz_convert('America/New_York')
+            market_close = schedule.iloc[0]["market_close"].tz_convert('America/New_York')
+            current_time = datetime.now(pytz.timezone('America/New_York'))
+            market_state = market_open <= current_time <= market_close
+        else:
+            market_state = False
+    except Exception:
         market_state = False
 
     # Max position logic (only for authenticated users)
@@ -58,7 +62,6 @@ def inject_market_state():
     if current_user.is_authenticated:
         max_position = db.session.query(db.func.max(Account.position)).filter_by(user_id=current_user.id).scalar()
 
-    # Return both variables in the context
     return dict(market_state=market_state, max_position=max_position)
 
 

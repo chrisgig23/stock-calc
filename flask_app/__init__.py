@@ -4,7 +4,9 @@ from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
-from datetime import timedelta
+import pytz
+import pandas_market_calendars as mcal
+from datetime import datetime, timedelta
 
 load_dotenv()  # Load environment variables
 
@@ -48,6 +50,33 @@ def inject_accounts():
         max_position = db.session.query(db.func.max(Account.position)).filter_by(user_id=current_user.id).scalar() or 0
         return {"accounts": user_accounts, "max_position": max_position}
     return {"accounts": [], "max_position": 0}
+
+@app.context_processor
+def inject_market_state():
+    """Injects market open/closed state into all templates.
+    Uses NYSE calendar; falls back to a simple weekday+time check if the
+    calendar library has no data for today."""
+    try:
+        ny_tz = pytz.timezone('America/New_York')
+        now_ny = datetime.now(ny_tz)
+        today = now_ny.strftime('%Y-%m-%d')
+        schedule = mcal.get_calendar('NYSE').schedule(start_date=today, end_date=today)
+
+        if not schedule.empty:
+            market_open  = schedule.iloc[0]['market_open'].tz_convert('America/New_York')
+            market_close = schedule.iloc[0]['market_close'].tz_convert('America/New_York')
+            market_state = market_open <= now_ny <= market_close
+        else:
+            # Fallback: Mon–Fri, 9:30 AM – 4:00 PM ET (no holiday awareness)
+            from datetime import time as dt_time
+            market_state = (
+                now_ny.weekday() < 5 and
+                dt_time(9, 30) <= now_ny.time() <= dt_time(16, 0)
+            )
+    except Exception:
+        market_state = False
+
+    return dict(market_state=market_state)
 
 # Import and register Blueprints
 from flask_app.routes.auth import auth_bp

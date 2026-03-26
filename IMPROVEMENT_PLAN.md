@@ -25,10 +25,12 @@
 
 ## 🎨 Design System & Global UI
 
-- [ ] **D1 — Establish a consistent design system**
-  - Adopt a clean sans-serif font (e.g., Inter via Google Fonts).
-  - Define a formal color palette: primary blue, success green, danger red, warning amber, neutral grays.
-  - Create unified CSS button classes (`.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-ghost`) and apply them everywhere. Currently "← Back to Account", "Exit", "Refresh Market Pricing" use raw browser `<button>` styling while other buttons are custom-styled — this inconsistency appears on every page.
+- [x] **D1 — Establish a consistent design system** ✅
+  - Inter font loaded via Google Fonts (was incorrectly loading Roboto).
+  - CSS custom properties defined in `:root` for full color palette (primary, success, danger, warning, neutrals, teal, shadows).
+  - Unified button classes added: `.btn-primary`, `.btn-success`, `.btn-danger`, `.btn-ghost`.
+  - `.back-button` and `.refresh-button` restyled to match `.btn-ghost` (consistent across all pages without touching every template).
+  - Raw `<button>` in change_username.html given `.btn-primary` class.
 
 - [ ] **D6 — Modernize the header bar**
   - Replace plain "Logged in as: cgiglio | Logout | Manage my account" text with a clean right-aligned profile area (username + dropdown or icon links). Remove the extra line of wasted space in the header.
@@ -170,7 +172,7 @@ Work through these one at a time. Each is a discrete, shippable unit.
 4. ~~`B1`~~ ✅ Fix "Date of Last Purchase" showing "No purchases made yet" incorrectly
 
 ### Phase 2 — Design System Foundation (do this before any visual work)
-5. `D1` — Establish consistent design system: fonts, color palette, unified button classes
+5. ~~`D1`~~ ✅ Establish consistent design system: fonts, color palette, unified button classes
 
 ### Phase 3 — Dashboard (biggest UX transformation)
 6. `DASH1` — Build Portfolio Overview Dashboard with 3 charts (allocation pie, growth line, top performers bar)

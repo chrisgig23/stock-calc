@@ -6,7 +6,7 @@
     <meta name="google-adsense-account" content="ca-pub-8170829086367629">
     <title>{% block title %}WealthWise{% endblock %}</title>
     <!-- Link to Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
@@ -158,7 +158,7 @@
         {% endif %}
         <div class="right-section">
             {% if market_state %}
-                <span><strong></strong>Markets are open</strong></span>
+                <span><strong>Markets are open</strong></span>
             {% else %}
                 <span><strong>Markets are closed</strong></span>
             {% endif %}

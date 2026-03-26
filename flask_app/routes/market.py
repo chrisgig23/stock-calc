@@ -28,18 +28,4 @@ def refresh_market_data(account_id):
     flash('Market pricing updated successfully.', 'success')
     return redirect(url_for('portfolio.view_positions', account_id=account_id))
 
-@market_bp.context_processor
-def inject_market_state():
-    """Determines if the stock market is currently open or closed."""
-    today = datetime.now().strftime('%Y-%m-%d')
-    schedule = mcal.get_calendar("NYSE").schedule(start_date=today, end_date=today)
-
-    if not schedule.empty:
-        market_open = schedule.iloc[0]["market_open"].tz_convert('America/New_York')
-        market_close = schedule.iloc[0]["market_close"].tz_convert('America/New_York')
-        current_time = datetime.now(pytz.timezone('America/New_York'))
-        market_state = market_open <= current_time <= market_close
-    else:
-        market_state = False
-
-    return dict(market_state=market_state)
+# market_state is injected app-wide by inject_market_state() in routes.py — no duplicate needed here.
