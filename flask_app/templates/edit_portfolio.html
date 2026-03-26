@@ -23,8 +23,8 @@
                 <tr>
                     <td><input type="text" name="tickers[]" value="{{ stock.ticker }}" readonly></td>
                     <td><input type="number" name="quantities[]" value="{{ stock.quantity }}"></td>
-                    <td>{{ stock.current_price }}</td>
-                    <td>{{ stock.market_value }}</td>
+                    <td>${{ "%.2f" | format(stock.current_price) }}</td>
+                    <td>${{ "{:,.2f}".format(stock.market_value) }}</td>
                     <td>
                         <input type="checkbox" name="isincluded_{{ stock.ticker }}" 
                             {% if stock.isincluded %}checked{% endif %}>

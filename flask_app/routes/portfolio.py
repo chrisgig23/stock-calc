@@ -203,6 +203,14 @@ def view_positions(account_id):
     account = Account.query.get_or_404(account_id)
     stocks = Stock.query.filter_by(account_id=account_id).all()
 
+    # B1 fix: query the actual last purchase date for this account
+    last_purchase = (Purchase.query
+                     .join(Stock, Purchase.stock_id == Stock.id)
+                     .filter(Stock.account_id == account_id)
+                     .order_by(Purchase.purchase_date.desc())
+                     .first())
+    last_purchase_date = last_purchase.purchase_date if last_purchase else None
+
     stock_data_list = [
         {
             "ticker": stock.ticker,
@@ -218,6 +226,7 @@ def view_positions(account_id):
         'view_positions.html',
         account=account,
         stock_data_list=stock_data_list,
+        last_purchase_date=last_purchase_date,
         total_market_value=sum(stock["market_value"] for stock in stock_data_list),
         included_market_value=sum(stock["market_value"] for stock in stock_data_list if stock["isincluded"]),
         tracked_market_value=sum(stock["market_value"] for stock in stock_data_list if not stock["isincluded"])

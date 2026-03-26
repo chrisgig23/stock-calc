@@ -6,17 +6,17 @@
 
 ## 🐛 Bugs
 
-- [ ] **B1 — "No purchases made yet" on Positions page is wrong**
-  - `view_positions` shows "Date of Last Purchase: No purchases made yet" even though positions exist and `make_purchase` shows "September 24, 2025". The query or display condition for this label is broken.
+- [x] **B1 — "No purchases made yet" on Positions page is wrong** ✅
+  - `view_positions` was missing the `last_purchase_date` query entirely — fixed by adding the same Purchase join query that `make_purchase` uses and passing it to the template.
 
 - [x] **B3 — Browser tab title is "Flask App" on most pages** ✅
   - `/view_positions`, `/edit_portfolio`, `/reset_password` all render `<title>Flask App</title>`. Every page needs a descriptive, branded title (e.g., "WealthWise — Current Positions").
 
-- [ ] **B4 — Edit Portfolio market value column missing dollar sign and formatting**
-  - Shows `2526.2` instead of `$2,526.20`. Inconsistent with all other pages.
+- [x] **B4 — Edit Portfolio market value column missing dollar sign and formatting** ✅
+  - Applied `${{ "%.2f" | format(...) }}` to Current Price and `${{ "{:,.2f}".format(...) }}` to Market Value in `edit_portfolio.html`.
 
-- [ ] **B5 — Reset Password page has no back/exit navigation**
-  - Once on `/reset_password/<id>` there is no "Back" or "Cancel" link. User must use the browser back button.
+- [x] **B5 — Reset Password page has no back/exit navigation** ✅
+  - Added `← Cancel` link back to `manage_user/<user_id>` below the form in `reset_password.html`.
 
 - [ ] **B6 — Adjust Allocations: no validation that percentages sum to 100%**
   - Users can submit any arbitrary numbers with no warning or block if total ≠ 100%.
@@ -165,9 +165,9 @@ Work through these one at a time. Each is a discrete, shippable unit.
 
 ### Phase 1 — Quick Bugs (low risk, high polish value)
 1. ~~`B3`~~ ✅ Fix browser tab titles on all pages — all templates now use "WealthWise — [Page]" format
-2. `B4` — Fix dollar formatting in Edit Portfolio market value column
-3. `B5` — Add back/cancel navigation to Reset Password page
-4. `B1` — Fix "Date of Last Purchase" showing "No purchases made yet" incorrectly
+2. ~~`B4`~~ ✅ Fix dollar formatting in Edit Portfolio market value column
+3. ~~`B5`~~ ✅ Add back/cancel navigation to Reset Password page
+4. ~~`B1`~~ ✅ Fix "Date of Last Purchase" showing "No purchases made yet" incorrectly
 
 ### Phase 2 — Design System Foundation (do this before any visual work)
 5. `D1` — Establish consistent design system: fonts, color palette, unified button classes

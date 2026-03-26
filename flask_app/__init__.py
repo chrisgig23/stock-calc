@@ -9,9 +9,14 @@ from datetime import timedelta
 load_dotenv()  # Load environment variables
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    _flask_env = os.getenv('FLASK_ENV', 'production')
+    SQLALCHEMY_DATABASE_URI = (
+        'sqlite:////tmp/stock_calc_dev.db'
+        if _flask_env == 'development'
+        else os.getenv('DATABASE_URL')
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = os.getenv('SECRET_KEY').encode('utf-8', 'replace')
+    SECRET_KEY = (os.getenv('SECRET_KEY') or 'dev-key-for-local-testing').encode('utf-8', 'replace')
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
 
 # Initialize the app and apply the configuration
