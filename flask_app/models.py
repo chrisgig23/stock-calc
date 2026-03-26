@@ -64,15 +64,16 @@ class Stock(db.Model):
 
     @property
     def current_price(self):
-        stock_data = yf.Ticker(self.ticker).info
-        
-        # Use currentPrice if available, otherwise fall back to regularMarketPreviousClose, then navPrice, and finally open price.
-        price = stock_data.get('currentPrice') or \
-                stock_data.get('regularMarketPreviousClose') or \
-                stock_data.get('navPrice') or \
-                stock_data.get('open') or 0.0
-                
-        return price
+        try:
+            stock_data = yf.Ticker(self.ticker).info
+            # Use currentPrice if available, otherwise fall back to regularMarketPreviousClose, then navPrice, and finally open price.
+            price = stock_data.get('currentPrice') or \
+                    stock_data.get('regularMarketPreviousClose') or \
+                    stock_data.get('navPrice') or \
+                    stock_data.get('open') or 0.0
+            return price
+        except Exception:
+            return 0.0
 
     @property
     def market_value(self):
