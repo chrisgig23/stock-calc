@@ -1,26 +1,222 @@
 {% extends "base.html" %}
-
 {% block title %}WealthWise — Allocations · {{ account.account_name }}{% endblock %}
 
+{% block styles %}
+<style>
+.allocation-layout {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+.chart-container {
+    flex: 0 0 280px;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+.chart-container h3 {
+    font-size: 0.85em;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 16px;
+}
+.chart-wrapper {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    margin: 0 auto;
+}
+.alloc-table-wrap { flex: 1; min-width: 300px; }
+.alloc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+.alloc-table th {
+    background: var(--color-bg);
+    border-bottom: 2px solid var(--color-border);
+    padding: 9px 12px;
+    text-align: right;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.alloc-table th:first-child { text-align: left; }
+.alloc-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+}
+.alloc-table td:first-child { text-align: left; font-weight: 600; }
+.alloc-table tbody tr:hover { background: #f8f9fa; }
+.delta-positive { color: #1a7a3e; font-weight: 500; }  /* under target — needs buying */
+.delta-negative { color: var(--color-danger); font-weight: 500; }  /* over target */
+.delta-zero { color: var(--color-text-secondary); }
+.ticker-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+.action-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.legend-list {
+    list-style: none;
+    padding: 0; margin: 16px 0 0;
+    font-size: 0.82em;
+    text-align: left;
+}
+.legend-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    color: var(--color-text-secondary);
+}
+.legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>{{ account.account_name }} - Current Allocations</h2>
-<table class="allocation-table view-table">
-    <thead>
-        <tr>
-            <th>Stock Symbol</th>
-            <th>Current Allocation (%)</th>
-            <th>Target Allocation (%)</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for allocation in allocations %}
-        <tr>
-            <td>{{ allocation.ticker }}</td>
-            <td>{{ allocation.current_allocation }}%</td>
-            <td>{{ allocation.target_allocation }}%</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+<div class="back-button-container">
+    <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+</div>
+
+<h2>Allocation — {{ account.account_name }}</h2>
+
+<div class="action-row">
+    <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="btn-primary">Adjust Targets</a>
+    <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="btn-ghost">Make a Purchase</a>
+</div>
+
+{% if allocations %}
+<div class="allocation-layout">
+
+    <!-- Donut chart -->
+    <div class="chart-container">
+        <h3>Current Allocation</h3>
+        <div class="chart-wrapper">
+            <canvas id="allocChart"></canvas>
+        </div>
+        <ul class="legend-list" id="chartLegend"></ul>
+    </div>
+
+    <!-- Table -->
+    <div class="alloc-table-wrap">
+        <table class="alloc-table">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Current %</th>
+                    <th>Target %</th>
+                    <th>Difference</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in allocations %}
+                {% set diff = a.current_allocation - a.target_allocation %}
+                <tr>
+                    <td>
+                        <span class="ticker-dot alloc-dot-{{ loop.index0 }}"></span>
+                        {{ a.ticker }}
+                    </td>
+                    <td>{{ "%.2f"|format(a.current_allocation) }}%</td>
+                    <td>{{ "%.2f"|format(a.target_allocation) }}%</td>
+                    <td>
+                        {% if diff > 0.05 %}
+                            <span class="delta-negative">+{{ "%.2f"|format(diff) }}%</span>
+                        {% elif diff < -0.05 %}
+                            <span class="delta-positive">{{ "%.2f"|format(diff) }}%</span>
+                        {% else %}
+                            <span class="delta-zero">≈ 0%</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p style="margin-top:12px; font-size:0.8em; color:var(--color-text-secondary);">
+            <span style="color:#1a7a3e;">■</span> Under target — consider buying &nbsp;
+            <span style="color:var(--color-danger);">■</span> Over target — consider trimming
+        </p>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const PALETTE = [
+    '#2563EB','#16A34A','#DC2626','#D97706','#7C3AED',
+    '#0891B2','#DB2777','#65A30D','#EA580C','#6366F1',
+    '#14B8A6','#F59E0B','#EF4444','#8B5CF6','#10B981',
+];
+
+const labels  = [{% for a in allocations %}"{{ a.ticker }}"{% if not loop.last %},{% endif %}{% endfor %}];
+const current = [{% for a in allocations %}{{ a.current_allocation }}{% if not loop.last %},{% endif %}{% endfor %}];
+const colors  = labels.map((_, i) => PALETTE[i % PALETTE.length]);
+
+// Colour the table ticker dots
+labels.forEach((_, i) => {
+    document.querySelectorAll('.alloc-dot-' + i).forEach(el => {
+        el.style.backgroundColor = colors[i];
+    });
+});
+
+// Build legend
+const legend = document.getElementById('chartLegend');
+labels.forEach((lbl, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="legend-dot" style="background:${colors[i]}"></span>${lbl}`;
+    legend.appendChild(li);
+});
+
+// Draw donut
+new Chart(document.getElementById('allocChart'), {
+    type: 'doughnut',
+    data: {
+        labels,
+        datasets: [{
+            data: current,
+            backgroundColor: colors,
+            borderWidth: 2,
+            borderColor: '#fff',
+            hoverOffset: 6,
+        }]
+    },
+    options: {
+        cutout: '65%',
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ` ${ctx.parsed.toFixed(2)}%`
+                }
+            }
+        }
+    }
+});
+</script>
+
+{% else %}
+<div style="text-align:center; padding:48px 0; color:var(--color-text-secondary);">
+    <p style="margin-bottom:16px;">No holdings found to display allocations.</p>
+    <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="btn-primary">Import Holdings</a>
+</div>
+{% endif %}
+
 {% endblock %}

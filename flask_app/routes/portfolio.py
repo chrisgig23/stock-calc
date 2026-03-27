@@ -169,12 +169,15 @@ def adjust_allocation(account_id):
 
     holdings = Holding.query.filter_by(account_id=account.id).all()
     allocations = []
+    total_mv = sum(h.market_value for h in holdings if h.isincluded)
     for h in holdings:
-        target_row = Allocation.query.filter_by(account_id=account.id, name=h.ticker).first()
+        target_row  = Allocation.query.filter_by(account_id=account.id, name=h.ticker).first()
+        current_pct = round(h.market_value / total_mv * 100, 2) if (total_mv > 0 and h.isincluded) else 0
         allocations.append({
             'name':       h.ticker,
             'target':     round(target_row.target, 2) if target_row else 0,
             'isincluded': h.isincluded,
+            'current':    current_pct,
         })
 
     return render_template('adjust_allocation.html', account=account, allocations=allocations)

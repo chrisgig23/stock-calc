@@ -18,8 +18,8 @@
 - [x] **B5 — Reset Password page has no back/exit navigation** ✅
   - Added `← Cancel` link back to `manage_user/<user_id>` below the form in `reset_password.html`.
 
-- [ ] **B6 — Adjust Allocations: no validation that percentages sum to 100%**
-  - Users can submit any arbitrary numbers with no warning or block if total ≠ 100%.
+- [x] **B6 — Adjust Allocations: validation that percentages sum to 100%** ✅
+  - Live total bar + submit-time guard both block saving unless total is exactly 100%.
 
 ---
 
@@ -87,17 +87,17 @@
 
 ## 📐 Allocation Pages (`/view_allocation`, `/adjust_allocation`)
 
-- [ ] **D11 — Add a pie/donut chart to View Allocation**
-  - Visual allocation chart (current vs. target) alongside the table. Chart.js or a similar lightweight library.
+- [x] **D11 — Add a pie/donut chart to View Allocation** ✅
+  - Chart.js donut chart showing current allocation by ticker, with colour-coded legend.
 
-- [ ] **D12 — Add color coding + delta column to View Allocation**
-  - New "Difference" column: current % − target %. Red if overweight, green if underweight.
+- [x] **D12 — Add color coding + delta column to View Allocation** ✅
+  - "Difference" column shows current % − target %. Green if under target (needs buying), red if over target.
 
-- [ ] **D13 — Show current allocation alongside inputs in Adjust Allocations**
-  - Add a read-only "Current %" column next to "Desired %" so users have a reference point.
+- [x] **D13 — Show current allocation alongside inputs in Adjust Allocations** ✅
+  - Read-only "Current %" column added next to "Target %" input.
 
-- [ ] **D14 — Live-updating total % on Adjust Allocations**
-  - Show a running "Total: X%" that updates as the user types, turns green at exactly 100%.
+- [x] **D14 — Live-updating total % on Adjust Allocations** ✅
+  - Live total bar updates on every keystroke: grey → green at 100%, red if over. Shows remaining or overage.
 
 ---
 
@@ -194,10 +194,18 @@ Two-step CSV import flow at `/import/<account_id>`:
   - Yahoo Finance rate-limits PythonAnywhere's shared IPs (429 errors already patched to return 0.0). Better fix: cache fetched prices in the DB with a 15-minute TTL, or migrate to a keyed free API (Polygon.io, Alpha Vantage, Twelve Data).
 
 - [ ] **F6 — Password recovery via email**
-  - No self-service forgotten-password flow exists. Add a "Forgot Password" link on the login page that sends a reset email.
+  - No self-service forgotten-password flow exists. Add a "Forgot Password" link on the login page that sends a time-limited reset link to the user's registered email address.
 
 - [ ] **F7 — CSV export**
   - Let users download positions and purchase history as a CSV file for use in Excel/Sheets.
+
+- [ ] **F8 — Self-service account creation with email verification**
+  - Currently only admins can create accounts (via `/add_user`). Add a public "Create Account" flow on the login page: user enters username + email + password → receives a verification email → clicks link → account activated.
+  - Requires: storing `email` + `is_verified` + `verification_token` on the User model; sending email via Flask-Mail or similar; a `/verify/<token>` route.
+  - Security note: token should be time-limited (e.g. 24 hrs) and single-use.
+
+- [ ] **F9 — Store user email for account recovery**
+  - Even before F6/F8 are built, add an optional `email` field to the User model so existing users can register their email for future password recovery. Can be done via the Manage Account page.
 
 ---
 
@@ -230,13 +238,13 @@ Work through these one at a time. Each is a discrete, shippable unit.
 11. ~~`D8`~~ ✅ Add cost basis + P&L columns to Positions page
 12. ~~`D9`~~ ✅ Color-code gains/losses on Positions page
 13. ~~`D10`~~ ✅ Add summary card to top of Positions page
-14. `D11` — Add donut chart to View Allocation
-15. `D12` — Add delta column + color coding to View Allocation
-16. `B6` — Add 100% validation to Adjust Allocations
+14. ~~`D11`~~ ✅ Add donut chart to View Allocation
+15. ~~`D12`~~ ✅ Add delta column + color coding to View Allocation
+16. ~~`B6`~~ ✅ Add 100% validation to Adjust Allocations
 
 ### Phase 5 — Form & Flow Polish
-17. `D13` — Show current % alongside inputs in Adjust Allocations
-18. `D14` — Live-updating total % on Adjust Allocations
+17. ~~`D13`~~ ✅ Show current % alongside inputs in Adjust Allocations
+18. ~~`D14`~~ ✅ Live-updating total % on Adjust Allocations
 19. `D15` — Rename "Cash Value" to "Amount to Invest" with explanation
 20. `D16` — Show all rebalancing suggestions on purchase step 2
 21. `D17` — Add post-purchase success/redirect state
@@ -256,7 +264,11 @@ Work through these one at a time. Each is a discrete, shippable unit.
 31. `F1` — Full Reports page (history table + charts)
 32. `F5` — Price caching / rate-limit resilience
 33. `F7` — CSV export
-34. `F6` — Password recovery via email
+
+### Phase 8 — User Management & Auth
+34. `F9` — Add `email` field to User model (foundation for F6 + F8)
+35. `F6` — Password recovery via email ("Forgot Password" on login page)
+36. `F8` — Self-service account creation with email verification
 
 ---
 

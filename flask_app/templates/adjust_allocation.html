@@ -1,50 +1,195 @@
 {% extends "base.html" %}
-
 {% block title %}WealthWise — Adjust Allocations · {{ account.account_name }}{% endblock %}
 
+{% block styles %}
+<style>
+.alloc-form-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin-bottom: 20px;
+}
+.alloc-form-table th {
+    background: var(--color-bg);
+    border-bottom: 2px solid var(--color-border);
+    padding: 9px 12px;
+    text-align: right;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.alloc-form-table th:first-child { text-align: left; }
+.alloc-form-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+    vertical-align: middle;
+}
+.alloc-form-table td:first-child { text-align: left; font-weight: 600; }
+.alloc-form-table input[type="number"] {
+    width: 90px;
+    padding: 6px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-align: right;
+}
+.alloc-form-table input[disabled] {
+    background: var(--color-bg);
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+}
+.tracked-row td { color: var(--color-text-secondary); font-style: italic; }
+.total-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    background: #fff;
+    margin-bottom: 20px;
+    transition: border-color 0.2s, background 0.2s;
+}
+.total-bar.at-100 {
+    border-color: #16a34a;
+    background: #f0fdf4;
+}
+.total-bar.over-100 {
+    border-color: var(--color-danger);
+    background: #fff5f5;
+}
+.total-label {
+    font-size: 0.85em;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+.total-value {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--color-text);
+    min-width: 60px;
+}
+.total-hint {
+    font-size: 0.82em;
+    color: var(--color-text-secondary);
+    margin-left: auto;
+}
+.form-actions { display: flex; gap: 10px; align-items: center; }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>{{ account.account_name }} - Adjust Allocations</h2>
+<div class="back-button-container">
+    <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="back-button">← Back to Allocations</a>
+</div>
+
+<h2>Adjust Allocations — {{ account.account_name }}</h2>
+<p style="color:var(--color-text-secondary); font-size:0.9em; margin-bottom:20px;">
+    Set target percentages for included holdings. Must total exactly 100%.
+    Tracked holdings (not in allocation) are shown for reference only.
+</p>
+
+<!-- Live total bar -->
+<div class="total-bar" id="totalBar">
+    <span class="total-label">Total</span>
+    <span class="total-value" id="totalDisplay">0%</span>
+    <span class="total-hint" id="totalHint">Enter targets for included holdings</span>
+</div>
+
 <form method="post" action="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" onsubmit="return validateAllocations()">
-    <table class="edit-portfolio-table">
+    <table class="alloc-form-table">
         <thead>
             <tr>
-                <th>Stock Symbol</th>
-                <th>Desired Allocation (%)</th>
+                <th>Symbol</th>
+                <th>Current %</th>
+                <th>Target %</th>
             </tr>
         </thead>
         <tbody>
             {% for stock in allocations %}
-                <tr>
-                    <td>{{ stock.name }}</td>
-                    <td>
-                        {% if stock.isincluded %}
-                            <input type="number" name="allocation_target" value="{{ stock.target }}" required>
-                            <input type="hidden" name="allocation_name" value="{{ stock.name }}"> <!-- ✅ Only included stocks have this -->
-                        {% else %}
-                            <input type="number" name="allocation_target" value="0" disabled 
-                                title="Navigate to Edit Portfolio and select Include to adjust allocations">
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
+            <tr {% if not stock.isincluded %}class="tracked-row"{% endif %}>
+                <td>
+                    {{ stock.name }}
+                    {% if not stock.isincluded %}
+                        <span style="font-size:0.75em; margin-left:6px; color:var(--color-text-secondary);">tracked only</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.isincluded %}
+                        {{ stock.current }}%
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stock.isincluded %}
+                        <input type="number" name="allocation_target" value="{{ stock.target }}"
+                               min="0" max="100" step="0.01" required
+                               oninput="updateTotal()" class="alloc-input">
+                        <input type="hidden" name="allocation_name" value="{{ stock.name }}">
+                    {% else %}
+                        <input type="number" value="0" disabled
+                               title="Enable in Edit Portfolio → Include in Allocation">
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
         </tbody>
     </table>
-    <input type="submit" value="Submit">
+
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Save Allocations</button>
+        <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="btn-ghost">Cancel</a>
+    </div>
 </form>
-<a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
 
 <script>
+function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('.alloc-input').forEach(input => {
+        total += parseFloat(input.value) || 0;
+    });
+    total = Math.round(total * 100) / 100;
+
+    const display = document.getElementById('totalDisplay');
+    const bar     = document.getElementById('totalBar');
+    const hint    = document.getElementById('totalHint');
+
+    display.textContent = total + '%';
+
+    bar.classList.remove('at-100', 'over-100');
+    if (Math.abs(total - 100) < 0.01) {
+        bar.classList.add('at-100');
+        display.style.color = '#16a34a';
+        hint.textContent = '✓ Ready to save';
+    } else if (total > 100) {
+        bar.classList.add('over-100');
+        display.style.color = 'var(--color-danger)';
+        hint.textContent = 'Over by ' + (total - 100).toFixed(2) + '%';
+    } else {
+        display.style.color = 'var(--color-text)';
+        hint.textContent = (100 - total).toFixed(2) + '% remaining';
+    }
+}
+
 function validateAllocations() {
     let total = 0;
-    const inputs = document.querySelectorAll('input[type="number"]:not([disabled])');
-    inputs.forEach(input => {
-        total += parseFloat(input.value);
+    document.querySelectorAll('.alloc-input').forEach(input => {
+        total += parseFloat(input.value) || 0;
     });
-    if (total !== 100) {
-        alert('Allocations must add up to 100%. Current total: ' + total + '%');
+    total = Math.round(total * 100) / 100;
+    if (Math.abs(total - 100) > 0.01) {
+        alert('Allocations must total 100%. Current total: ' + total + '%');
         return false;
     }
     return true;
 }
+
+// Run on load so the total reflects saved values
+updateTotal();
 </script>
 {% endblock %}
