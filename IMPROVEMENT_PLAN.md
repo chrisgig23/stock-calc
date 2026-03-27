@@ -274,14 +274,14 @@ Work through these one at a time. Each is a discrete, shippable unit.
 
 ## 🗒️ Session Notes
 
-- **Production URL:** `www.stock-calc.com` (PythonAnywhere, runs `production` git branch)
+- **Production URL:** `www.wealthtrackapp.com` (PythonAnywhere, runs `production` git branch)
 - **Local dev:** `http://127.0.0.1:5001` (runs inside sandbox — not accessible from user's browser)
 - **Production DB:** PostgreSQL on PythonAnywhere
 - **Dev DB:** SQLite at `/tmp/stock_calc_dev.db` (resets on VM restart)
 - **Login:** `cgiglio` / `StockCalc2026!`
 - **Superuser note:** The "Add New User" form on `/manage_user` is intentional and visible only to the `cgiglio` account — not a bug.
 - **Yahoo Finance fix:** Already applied to `models.py` on production — `current_price` returns `0.0` on rate-limit errors rather than crashing.
-- **DNS:** `stock-calc.com` bare domain now has ALIAS record → `webapp-2769154.pythonanywhere.com` (propagating).
+- **DNS:** `www.wealthtrackapp.com` CNAME → `webapp-2769154.pythonanywhere.com` (Squarespace, propagated 2026-03-26). Bare domain `wealthtrackapp.com` forwards → `https://www.wealthtrackapp.com`.
 - **PythonAnywhere API token:** `3116453ae30a968dfc5eb596939f9b742d4bf2a8`
 
 ---
@@ -305,7 +305,7 @@ Work through these one at a time. Each is a discrete, shippable unit.
 cd /home/chrisgig23/stock-calc
 git checkout production
 git merge dev
-touch /var/www/www_stock-calc_com_wsgi.py
+touch /var/www/www_wealthtrackapp_com_wsgi.py
 ```
 
 ### Local VS Code Workflow
