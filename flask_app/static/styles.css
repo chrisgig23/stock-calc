@@ -975,9 +975,22 @@ th {
 }
 
 .menu-card-icon {
-    font-size: 22px;
+    font-size: 18px;
     line-height: 1;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #EEF2FF;
+    color: var(--color-primary);
+}
+
+.menu-card.highlight-card .menu-card-icon {
+    background: #D1FAE5;
+    color: var(--color-success);
 }
 
 .menu-card-title {
