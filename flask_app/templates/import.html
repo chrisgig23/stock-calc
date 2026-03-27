@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}WealthWise — Import Data{% endblock %}
+
+{% block styles %}
+<style>
+.import-section {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    max-width: 680px;
+}
+.import-section h3 {
+    margin: 0 0 6px;
+    font-size: 1.1em;
+    color: var(--color-text);
+}
+.import-section .subtitle {
+    color: var(--color-text-secondary);
+    font-size: 0.9em;
+    margin: 0 0 20px;
+}
+.step-list {
+    padding-left: 0;
+    list-style: none;
+    counter-reset: steps;
+    margin: 0 0 20px;
+}
+.step-list li {
+    counter-increment: steps;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 6px 0;
+    font-size: 0.9em;
+    color: var(--color-text-secondary);
+    border: none;
+}
+.step-list li::before {
+    content: counter(steps);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    background: var(--color-primary);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.step-list li strong { color: var(--color-text); }
+.file-upload-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.file-upload-row input[type="file"] {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    padding: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    background: var(--color-bg);
+}
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.badge-step1 { background: #E3F2FD; color: #1565C0; }
+.badge-step2 { background: #E8F5E9; color: #2E7D32; }
+.badge-coming { background: #FFF8E1; color: #F57F17; }
+.divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 28px 0;
+}
+.tip-box {
+    background: #F0F7FF;
+    border-left: 3px solid var(--color-primary);
+    border-radius: 0 5px 5px 0;
+    padding: 10px 14px;
+    font-size: 0.85em;
+    color: var(--color-text-secondary);
+    margin-bottom: 20px;
+}
+.tip-box strong { color: var(--color-primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="back-button-container">
+    <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+</div>
+
+<h2>Import Data — {{ account.account_name }}</h2>
+<p style="color: var(--color-text-secondary); max-width: 600px; margin-bottom: 28px;">
+    Import your holdings and transaction history directly from a Schwab CSV export.
+    Start with <strong>Step 1</strong> to seed your current positions, then optionally
+    add transaction history in <strong>Step 2</strong> for full analytics.
+</p>
+
+<!-- ================================================================
+     STEP 1 — Positions CSV
+     ================================================================ -->
+<div class="import-section">
+    <h3><span class="badge badge-step1">Step 1 — Recommended First</span></h3>
+    <h3 style="margin-top:8px;">Import Current Positions</h3>
+    <p class="subtitle">
+        Imports your current holdings, share counts, and total cost basis — even for
+        shares purchased before the transaction history window.
+    </p>
+
+    <p style="font-size:0.9em; font-weight:600; color: var(--color-text); margin-bottom:8px;">
+        How to export from Schwab:
+    </p>
+    <ol class="step-list">
+        <li>Log in to <strong>schwab.com</strong> and go to <strong>Accounts</strong></li>
+        <li>Click the <strong>Positions</strong> tab</li>
+        <li>Click <strong>Export</strong> (top-right of the positions table)</li>
+        <li>Save the downloaded <code>.csv</code> file — it will be named something like
+            <code>Personal-Positions-2026-03-26-211018.csv</code></li>
+        <li>Select that file below and click <strong>Import Positions</strong></li>
+    </ol>
+
+    <div class="tip-box">
+        <strong>Tip:</strong> You can re-import anytime to refresh quantities and cost basis.
+        Existing holdings will be updated; nothing will be deleted.
+    </div>
+
+    <form method="POST" action="{{ url_for('import_data.import_positions', account_id=account.id) }}"
+          enctype="multipart/form-data">
+        <div class="file-upload-row">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit" class="btn-primary">Import Positions</button>
+        </div>
+    </form>
+</div>
+
+<hr class="divider">
+
+<!-- ================================================================
+     STEP 2 — Transactions CSV
+     ================================================================ -->
+<div class="import-section">
+    <h3><span class="badge badge-step2">Step 2 — Optional</span></h3>
+    <h3 style="margin-top:8px;">Import Transaction History</h3>
+    <p class="subtitle">
+        Adds buy/sell history, dividends, and cash transfers — used to power
+        analytics like dividend income, growth charts, and total return calculations.
+        Schwab exports up to several years of history.
+    </p>
+
+    <p style="font-size:0.9em; font-weight:600; color: var(--color-text); margin-bottom:8px;">
+        How to export from Schwab:
+    </p>
+    <ol class="step-list">
+        <li>Log in to <strong>schwab.com</strong> and go to <strong>Accounts</strong></li>
+        <li>Click the <strong>History</strong> tab</li>
+        <li>Set the date range as far back as available (Schwab typically goes back 2–4 years)</li>
+        <li>Click <strong>Export</strong> — the file will be named something like
+            <code>Personal_XXX703_Transactions_20260326-205510.csv</code></li>
+        <li>Select that file below and click <strong>Import Transactions</strong></li>
+    </ol>
+
+    <div class="tip-box">
+        <strong>Tip:</strong> You can re-import safely — duplicates are automatically
+        detected and skipped so you won't get double entries.
+    </div>
+
+    <form method="POST" action="{{ url_for('import_data.import_transactions', account_id=account.id) }}"
+          enctype="multipart/form-data">
+        <div class="file-upload-row">
+            <input type="file" name="file" accept=".csv" required>
+            <button type="submit" class="btn-success">Import Transactions</button>
+        </div>
+    </form>
+</div>
+
+<hr class="divider">
+
+<!-- ================================================================
+     COMING SOON — Schwab API
+     ================================================================ -->
+<div class="import-section" style="background: var(--color-bg); border-style: dashed;">
+    <h3><span class="badge badge-coming">Coming Soon</span></h3>
+    <h3 style="margin-top:8px; color: var(--color-text-secondary);">Connect Your Schwab Account</h3>
+    <p class="subtitle">
+        Skip the manual export entirely. Connect directly via the official Schwab API
+        to automatically sync positions, transactions, real-time quotes, and more —
+        all with one click.
+    </p>
+    <button class="btn-ghost" disabled style="cursor: not-allowed; opacity: 0.6;">
+        Connect Schwab Account (Coming Soon)
+    </button>
+</div>
+
+{% endblock %}

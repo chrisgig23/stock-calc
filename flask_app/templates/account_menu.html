@@ -11,6 +11,7 @@
         <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="button">View Current Allocation</a>
         <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="button">Adjust Allocations</a>
         <a href="{{ url_for('reports.view_reports', account_id=account.id) }}" class="button">View Reports</a>
+        <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="button">Import Data</a>
         <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="button highlight">Make a Purchase</a>
     {% endif %}
 </div>

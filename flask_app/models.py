@@ -4,13 +4,18 @@ from flask_login import UserMixin
 import yfinance as yf
 from datetime import datetime
 
+
+# ---------------------------------------------------------------------------
+# User
+# ---------------------------------------------------------------------------
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
+
+    id            = db.Column(db.Integer, primary_key=True)
+    username      = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-    
-    # Relationship with Account
+
     accounts = db.relationship('Account', backref='owner', lazy=True)
 
     def set_password(self, password):
@@ -18,105 +23,180 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-    
+
     def get_accounts(self):
         return Account.query.filter_by(user_id=self.id).order_by(Account.position.asc()).all()
 
+
+# ---------------------------------------------------------------------------
+# Account
+# ---------------------------------------------------------------------------
+
 class Account(db.Model):
     __tablename__ = 'accounts'
-    
-    id = db.Column(db.Integer, primary_key=True)
+
+    id           = db.Column(db.Integer, primary_key=True)
     account_name = db.Column(db.String(50), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    position = db.Column(db.Integer, nullable=False, default=0)
-    
-    # Relationships with Stock, Position, and Allocation
-    stocks = db.relationship('Stock', backref='account', lazy=True)
-    positions = db.relationship('Position', backref='account', lazy=True)
-    allocations = db.relationship('Allocation', backref='account', lazy=True)
-    
-    def __repr__(self):
-        return f'<Account {self.account_name} of User {self.user_id}>'
+    user_id      = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    position     = db.Column(db.Integer, nullable=False, default=0)
+    brokerage    = db.Column(db.String(50), nullable=True)   # e.g. "Schwab", "Fidelity"
 
-    def get_stocks(self):
-        return self.stocks
+    holdings    = db.relationship('Holding',           backref='account', lazy=True, cascade='all, delete-orphan')
+    allocations = db.relationship('Allocation',        backref='account', lazy=True, cascade='all, delete-orphan')
+    transactions= db.relationship('Transaction',       backref='account', lazy=True, cascade='all, delete-orphan')
+    snapshots   = db.relationship('PortfolioSnapshot', backref='account', lazy=True, cascade='all, delete-orphan')
 
-    def get_positions(self):
-        return self.positions
+    def get_holdings(self):
+        return Holding.query.filter_by(account_id=self.id).all()
 
     def get_allocations(self):
-        return self.allocations
+        return Allocation.query.filter_by(account_id=self.id).all()
 
-class Stock(db.Model):
-    __tablename__ = 'stocks'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    ticker = db.Column(db.String(10), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False, default=0)
-    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
-    isincluded = db.Column(db.Boolean, nullable=False, default=True)  # Added this line
+    def __repr__(self):
+        return f'<Account {self.account_name} (user {self.user_id})>'
 
-    def __init__(self, ticker, quantity, account_id, isincluded=True):
-        self.ticker = ticker.upper()  # Ensure ticker symbols are uppercase
-        self.quantity = quantity
-        self.account_id = account_id
-        self.isincluded = isincluded  # Initialize isincluded with a default value
+
+# ---------------------------------------------------------------------------
+# Holding  (replaces Stock)
+# Current share positions — seeded by Schwab import, editable manually.
+# ---------------------------------------------------------------------------
+
+class Holding(db.Model):
+    __tablename__ = 'holdings'
+
+    id           = db.Column(db.Integer, primary_key=True)
+    account_id   = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
+    ticker       = db.Column(db.String(10), nullable=False)
+    quantity     = db.Column(db.Float, nullable=False, default=0)
+    cost_basis   = db.Column(db.Float, nullable=True)   # total cost basis (all lots)
+    isincluded   = db.Column(db.Boolean, nullable=False, default=True)
+    last_updated = db.Column(db.DateTime, nullable=True)
+
+    def __init__(self, ticker, quantity, account_id, cost_basis=None, isincluded=True, last_updated=None):
+        self.ticker       = ticker.upper()
+        self.quantity     = quantity
+        self.account_id   = account_id
+        self.cost_basis   = cost_basis
+        self.isincluded   = isincluded
+        self.last_updated = last_updated
+
+    # ---- live price (yfinance) ----
 
     @property
     def current_price(self):
         try:
-            stock_data = yf.Ticker(self.ticker).info
-            # Use currentPrice if available, otherwise fall back to regularMarketPreviousClose, then navPrice, and finally open price.
-            price = stock_data.get('currentPrice') or \
-                    stock_data.get('regularMarketPreviousClose') or \
-                    stock_data.get('navPrice') or \
-                    stock_data.get('open') or 0.0
-            return price
+            info = yf.Ticker(self.ticker).info
+            return (info.get('currentPrice')
+                    or info.get('regularMarketPreviousClose')
+                    or info.get('navPrice')
+                    or info.get('open')
+                    or 0.0)
         except Exception:
             return 0.0
+
+    # ---- derived properties ----
 
     @property
     def market_value(self):
         return round(self.quantity * self.current_price, 2)
 
-    def __repr__(self):
-        return f'<Stock {self.ticker} in Account {self.account_id}>'
+    @property
+    def cost_basis_per_share(self):
+        if self.cost_basis and self.quantity and self.quantity > 0:
+            return round(self.cost_basis / self.quantity, 4)
+        return None
 
-class Position(db.Model):
-    __tablename__ = 'positions'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
+    @property
+    def unrealized_gain(self):
+        if self.cost_basis is not None:
+            return round(self.market_value - self.cost_basis, 2)
+        return None
+
+    @property
+    def unrealized_gain_pct(self):
+        if self.cost_basis and self.cost_basis > 0:
+            return round((self.market_value - self.cost_basis) / self.cost_basis * 100, 2)
+        return None
 
     def __repr__(self):
-        return f'<Position {self.name} with quantity {self.quantity} in Account {self.account_id}>'
+        return f'<Holding {self.ticker} x{self.quantity} in account {self.account_id}>'
+
+
+# ---------------------------------------------------------------------------
+# Allocation  (unchanged)
+# ---------------------------------------------------------------------------
 
 class Allocation(db.Model):
     __tablename__ = 'allocations'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), nullable=False)
-    target = db.Column(db.Float, nullable=False)
+
+    id         = db.Column(db.Integer, primary_key=True)
+    name       = db.Column(db.String(64), nullable=False)   # ticker symbol
+    target     = db.Column(db.Float, nullable=False)         # target %
     account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
 
     def __repr__(self):
-        return f'<Allocation {self.name} with target {self.target}% in Account {self.account_id}>'
+        return f'<Allocation {self.name} → {self.target}% in account {self.account_id}>'
 
-class Purchase(db.Model):
-    __tablename__ = 'purchases'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    stock_id = db.Column(db.Integer, db.ForeignKey('stocks.id'), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    price_paid = db.Column(db.Float, nullable=False)
-    purchase_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    transaction_id = db.Column(db.String(36), nullable=False)  # Add this line
-    
-    user = db.relationship('User', backref=db.backref('purchases', lazy=True))
-    stock = db.relationship('Stock', backref=db.backref('purchases', lazy=True))
+
+# ---------------------------------------------------------------------------
+# Transaction  (replaces Purchase)
+# Every financial event: buy, sell, dividend, transfer, interest, fee, …
+# ---------------------------------------------------------------------------
+
+# Canonical action_type values
+ACTION_BUY               = 'buy'
+ACTION_SELL              = 'sell'
+ACTION_DIVIDEND          = 'dividend'
+ACTION_REINVEST_DIVIDEND = 'reinvest_dividend'
+ACTION_REINVEST_SHARES   = 'reinvest_shares'
+ACTION_TRANSFER_IN       = 'transfer_in'
+ACTION_TRANSFER_OUT      = 'transfer_out'
+ACTION_INTEREST          = 'interest'
+ACTION_FEE               = 'fee'
+ACTION_OTHER             = 'other'
+
+class Transaction(db.Model):
+    __tablename__ = 'transactions'
+
+    id          = db.Column(db.Integer, primary_key=True)
+    account_id  = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
+    date        = db.Column(db.Date, nullable=False)
+    action_type = db.Column(db.String(25), nullable=False)   # see ACTION_* constants above
+    ticker      = db.Column(db.String(10), nullable=True)    # null for cash-only events
+    description = db.Column(db.String(200), nullable=True)
+    quantity    = db.Column(db.Float, nullable=True)         # shares
+    price       = db.Column(db.Float, nullable=True)         # per-share price
+    fees        = db.Column(db.Float, nullable=True)
+    amount      = db.Column(db.Float, nullable=False)        # net cash: + = credit, - = debit
+    import_source = db.Column(db.String(50), nullable=True)  # e.g. 'schwab_transactions_csv'
+    raw_action    = db.Column(db.String(50), nullable=True)  # original string from brokerage
 
     def __repr__(self):
-        return f'<Purchase {self.id} - User: {self.user_id}, Stock: {self.stock_id}, Quantity: {self.quantity}, Price Paid: {self.price_paid}, Date: {self.purchase_date}, Transaction ID: {self.transaction_id}>'
+        return (f'<Transaction {self.date} {self.action_type} '
+                f'{self.ticker or "CASH"} ${self.amount}>')
+
+
+# ---------------------------------------------------------------------------
+# PortfolioSnapshot  (new)
+# One row per account per day — powers the growth chart.
+# Written by the /snapshot route or a scheduled task.
+# ---------------------------------------------------------------------------
+
+class PortfolioSnapshot(db.Model):
+    __tablename__ = 'portfolio_snapshots'
+
+    id                 = db.Column(db.Integer, primary_key=True)
+    account_id         = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
+    snapshot_date      = db.Column(db.Date, nullable=False)
+    total_market_value = db.Column(db.Float, nullable=False)
+    total_cost_basis   = db.Column(db.Float, nullable=True)
+    cash_balance       = db.Column(db.Float, nullable=True, default=0.0)
+    dividend_income    = db.Column(db.Float, nullable=True, default=0.0)  # cumulative YTD
+    created_at         = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('account_id', 'snapshot_date', name='uq_snapshot_account_date'),
+    )
+
+    def __repr__(self):
+        return f'<PortfolioSnapshot {self.snapshot_date} account {self.account_id} ${self.total_market_value}>'

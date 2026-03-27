@@ -74,16 +74,14 @@
 
 ## 📊 Positions Page (`/view_positions`)
 
-- [ ] **D8 — Add cost basis and gain/loss columns**
-  - Currently shows: Symbol, Quantity, Current Price, Market Value.
-  - Add: Cost Basis (per share), Total Cost Basis, Unrealized P&L ($), Unrealized P&L (%).
-  - This is the single most important missing data for a portfolio tracker.
+- [x] **D8 — Add cost basis and gain/loss columns** ✅
+  - Added: Avg Cost/Share, Unrealized G/L ($), Unrealized G/L (%) — powered by the new `Holding` model with `cost_basis`, `cost_basis_per_share`, `unrealized_gain`, and `unrealized_gain_pct` properties.
 
-- [ ] **D9 — Color-code gain/loss values**
-  - Green text for positive P&L, red for negative. Standard in every financial app.
+- [x] **D9 — Color-code gain/loss values** ✅
+  - Green for positive, red for negative — applied across all gain/loss cells in the new positions table.
 
-- [ ] **D10 — Add a summary card at the top of the positions page**
-  - Show: Total Market Value, Total Cost Basis, Total Unrealized P&L ($), Total Unrealized P&L (%).
+- [x] **D10 — Add a summary card at the top of the positions page** ✅
+  - Summary cards row shows: Total Market Value, Total Cost Basis, Total Unrealized G/L (color-coded).
 
 ---
 
@@ -118,11 +116,11 @@
 
 ## ✏️ Edit Portfolio (`/edit_portfolio`)
 
-- [ ] **D18 — Remove the persistent empty row; add a proper "+ Add Stock" button**
-  - The blank row at the bottom of the table is confusing. Replace with a "+ Add Stock" button that appends a new empty row on click.
+- [x] **D18 — Remove the persistent empty row; add a proper "+ Add Holding" button** ✅
+  - Replaced the always-visible blank row with a "+ Add Holding" button that appends rows on click.
 
-- [ ] **D19 — Add ticker symbol validation**
-  - Free-text input with no validation. At minimum, validate on blur against a known list or the Yahoo Finance API. Ideally add a typeahead/autocomplete for stock symbols.
+- [x] **D19 — Add ticker symbol validation** ✅
+  - New tickers are validated against Yahoo Finance via `/validate_tickers` before saving. Invalid tickers show an alert and block submission.
 
 ---
 
@@ -133,6 +131,48 @@
 
 - [ ] **D21 — Clean up the Manage User Account page layout**
   - The page has three buttons (Reset Password, Change Username, Exit) where "Exit" uses inconsistent plain styling. Unify button styles and make the flow clearer.
+
+---
+
+## 🗄️ Database Schema Redesign (completed 2026-03-26)
+
+The original `Stock` / `Purchase` / `Position` schema was replaced with a production-grade financial data model. The database was wiped and rebuilt from scratch.
+
+**Old models (dropped):** `Stock`, `Purchase`, `Position`
+
+**New models:**
+
+| Model | Purpose |
+|---|---|
+| `Holding` | Current share positions. Fields: `ticker`, `quantity`, `cost_basis` (total), `isincluded`, `last_updated`. Computed properties: `current_price` (live yfinance), `market_value`, `cost_basis_per_share`, `unrealized_gain`, `unrealized_gain_pct`. |
+| `Transaction` | Complete financial event log: buy, sell, dividend, transfer, interest, fee, other. Fields: `date`, `action_type`, `raw_action`, `ticker`, `description`, `quantity`, `price`, `fees`, `amount`, `import_source`. |
+| `PortfolioSnapshot` | One row per account per day — powers a future growth chart. Fields: `snapshot_date`, `total_market_value`, `total_cost_basis`, `cash_balance`, `dividend_income`. Unique constraint on `(account_id, snapshot_date)`. |
+
+**Canonical `action_type` values:** `buy`, `sell`, `dividend`, `reinvest_dividend`, `reinvest_shares`, `transfer_in`, `transfer_out`, `interest`, `fee`, `other`
+
+---
+
+## 📥 Schwab CSV Import (completed 2026-03-26)
+
+Two-step CSV import flow at `/import/<account_id>`:
+
+**Step 1 — Positions CSV** (`Accounts → Positions → Export` in Schwab web app)
+- Parses the non-standard Schwab positions format (account info header + blank line before column headers)
+- Upserts `Holding` records: updates quantity + cost_basis for existing holdings, inserts new ones — never deletes
+- Re-importable at any time to refresh data
+
+**Step 2 — Transaction History CSV** (`Accounts → History → Export` in Schwab web app)
+- Maps 20+ Schwab action strings to canonical `action_type` values
+- Handles special date formats like `"03/16/2026 as of 03/15/2026"` (takes first date)
+- Handles `$`-prefixed amounts, comma separators, parenthetical negatives `(1,234.56)`
+- Deduplicates on `(account_id, date, action_type, ticker, amount)` — safe to re-import
+
+**Files:**
+- `flask_app/utils/schwab_parser.py` — `parse_schwab_positions()` and `parse_schwab_transactions()`
+- `flask_app/routes/import_data.py` — `import_bp` blueprint with 3 routes
+- `flask_app/templates/import.html` — two-section UI with numbered Schwab export instructions
+
+**Roadmap:** Direct Schwab API integration (OAuth) — marked "Coming Soon" in the UI.
 
 ---
 
@@ -181,10 +221,15 @@ Work through these one at a time. Each is a discrete, shippable unit.
 9. `D4` — Active account highlight in navigation
 10. `D6` — Modernize the header bar
 
+### Phase 3.5 — Schema Redesign + Data Import (completed 2026-03-26)
+- ~~Schema redesign~~ ✅ `Holding` / `Transaction` / `PortfolioSnapshot` replace old models
+- ~~Schwab Positions CSV importer~~ ✅ Step 1 on Import Data page
+- ~~Schwab Transactions CSV importer~~ ✅ Step 2 on Import Data page
+
 ### Phase 4 — Core Data Pages (highest day-to-day value)
-11. `D8` — Add cost basis + P&L columns to Positions page
-12. `D9` — Color-code gains/losses on Positions page
-13. `D10` — Add summary card to top of Positions page
+11. ~~`D8`~~ ✅ Add cost basis + P&L columns to Positions page
+12. ~~`D9`~~ ✅ Color-code gains/losses on Positions page
+13. ~~`D10`~~ ✅ Add summary card to top of Positions page
 14. `D11` — Add donut chart to View Allocation
 15. `D12` — Add delta column + color coding to View Allocation
 16. `B6` — Add 100% validation to Adjust Allocations
@@ -195,8 +240,8 @@ Work through these one at a time. Each is a discrete, shippable unit.
 19. `D15` — Rename "Cash Value" to "Amount to Invest" with explanation
 20. `D16` — Show all rebalancing suggestions on purchase step 2
 21. `D17` — Add post-purchase success/redirect state
-22. `D18` — Remove empty row in Edit Portfolio; add "+ Add Stock" button
-23. `D19` — Ticker symbol validation in Edit Portfolio
+22. ~~`D18`~~ ✅ Remove empty row in Edit Portfolio; add "+ Add Holding" button
+23. ~~`D19`~~ ✅ Ticker symbol validation in Edit Portfolio
 
 ### Phase 6 — Layout & Accessibility
 24. `D5` — Responsive/mobile layout

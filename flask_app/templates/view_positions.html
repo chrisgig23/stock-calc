@@ -1,79 +1,255 @@
 {% extends "base.html" %}
 {% block title %}WealthWise — Positions · {{ account.account_name }}{% endblock %}
 
+{% block styles %}
+<style>
+.positions-summary {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+.summary-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    min-width: 160px;
+    flex: 1;
+}
+.summary-card .label {
+    font-size: 0.8em;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+.summary-card .value {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.summary-card .value.positive { color: #1a7a3e; }
+.summary-card .value.negative { color: var(--color-danger); }
+.positions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin-bottom: 24px;
+}
+.positions-table th {
+    background: var(--color-bg);
+    border-bottom: 2px solid var(--color-border);
+    padding: 10px 12px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.positions-table th:first-child { text-align: left; }
+.positions-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+    color: var(--color-text);
+}
+.positions-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+}
+.positions-table tbody tr:hover { background: #f8f9fa; }
+.gain-positive { color: #1a7a3e; font-weight: 500; }
+.gain-negative { color: var(--color-danger); font-weight: 500; }
+.na-dash { color: var(--color-text-secondary); }
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 12px;
+}
+.section-header h3 { margin: 0; font-size: 1em; color: var(--color-text-secondary); }
+.action-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+</style>
+{% endblock %}
+
 {% block content %}
-    <h2>Current Positions for {{ account.account_name }}</h2>
-
-    {% if last_purchase_date %}
-        <p><strong>Date of Last Purchase:</strong> {{ last_purchase_date.strftime('%B %-d, %Y') }}</p>
-    {% else %}
-        <p><strong>Date of Last Purchase:</strong> No purchases made yet.</p>
-    {% endif %}
-
-    {% if last_refresh %}
-        <p><strong>Market data updated as of:</strong> {{ last_refresh.strftime('%B %-d, %Y %-I:%M:%S %p') }}</p>
-    {% endif %}
-
-    {% if stock_data_list %}
-        <p style="font-size: 1.2em; font-weight: bold;">
-            Total Account Value: ${{ "{:,.2f}".format(total_market_value) }}
-        </p>
-
-        <div class="refresh-button-container">
-            <a href="{{ url_for('market.refresh_market_data', account_id=account.id) }}" class="refresh-button">Refresh Market Pricing</a>
-        </div>
-
-        <!-- Included Stocks Table -->
-        <h3>Included Stocks</h3>
-        <table class="allocation-table view-table">
-            <thead>
-                <tr>
-                    <th>Stock Symbol</th>
-                    <th>Quantity</th>
-                    <th>Current Market Price</th>
-                    <th>Market Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for stock in stock_data_list if stock.isincluded %}
-                <tr>
-                    <td>{{ stock.ticker }}</td>
-                    <td>{{ stock.quantity }}</td>
-                    <td>${{ "%.2f" | format(stock.current_price) }}</td>
-                    <td>${{ "{:,.2f}".format(stock.market_value) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <p><strong>Included Stocks Value: ${{ "{:,.2f}".format(included_market_value) }}</strong></p>
-
-        <!-- Tracked (Not Included) Stocks Table -->
-        <h3>Tracked Stocks (Not Included in Allocation)</h3>
-        <table class="allocation-table view-table">
-            <thead>
-                <tr>
-                    <th>Stock Symbol</th>
-                    <th>Quantity</th>
-                    <th>Current Market Price</th>
-                    <th>Market Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for stock in stock_data_list if not stock.isincluded %}
-                <tr>
-                    <td>{{ stock.ticker }}</td>
-                    <td>{{ stock.quantity }}</td>
-                    <td>${{ "%.2f" | format(stock.current_price) }}</td>
-                    <td>${{ "{:,.2f}".format(stock.market_value) }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <p><strong>Tracked Stocks Value: ${{ "{:,.2f}".format(tracked_market_value) }}</strong></p>
-
-    {% else %}
-        <p>No positions found.</p>
-    {% endif %}
-
+<div class="back-button-container">
     <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+</div>
+
+<h2>Positions — {{ account.account_name }}</h2>
+
+{% if last_txn_date %}
+    <p style="color: var(--color-text-secondary); font-size:0.9em; margin-bottom:16px;">
+        Last transaction: <strong>{{ last_txn_date.strftime('%B %-d, %Y') }}</strong>
+    </p>
+{% endif %}
+
+{% if holdings %}
+
+<!-- Summary Cards -->
+<div class="positions-summary">
+    <div class="summary-card">
+        <div class="label">Total Market Value</div>
+        <div class="value">${{ "{:,.2f}".format(total_market_value) }}</div>
+    </div>
+    {% if total_cost_basis %}
+    <div class="summary-card">
+        <div class="label">Total Cost Basis</div>
+        <div class="value">${{ "{:,.2f}".format(total_cost_basis) }}</div>
+    </div>
+    {% if total_unrealized is not none %}
+    <div class="summary-card">
+        <div class="label">Unrealized Gain / Loss</div>
+        <div class="value {% if total_unrealized >= 0 %}positive{% else %}negative{% endif %}">
+            {% if total_unrealized >= 0 %}+{% endif %}${{ "{:,.2f}".format(total_unrealized) }}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<!-- Action buttons -->
+<div class="action-row">
+    <a href="{{ url_for('market.refresh_market_data', account_id=account.id) }}" class="btn-ghost refresh-button">↻ Refresh Prices</a>
+    <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="btn-ghost">⬆ Import Data</a>
+    <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="btn-ghost">✏ Edit Holdings</a>
+</div>
+
+<!-- Included Holdings -->
+{% set included = holdings | selectattr('isincluded') | list %}
+{% if included %}
+<div class="section-header">
+    <h3>Included Holdings</h3>
+    <span style="color:var(--color-text-secondary);font-size:0.85em;">
+        Value: ${{ "{:,.2f}".format(included_market_value) }}
+    </span>
+</div>
+<table class="positions-table">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Shares</th>
+            <th>Avg Cost/Share</th>
+            <th>Current Price</th>
+            <th>Market Value</th>
+            <th>Unrealized G/L</th>
+            <th>G/L %</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for h in included %}
+        <tr>
+            <td>{{ h.ticker }}</td>
+            <td>{{ "{:,.4g}".format(h.quantity) }}</td>
+            <td>
+                {% if h.cost_basis_per_share is not none %}
+                    ${{ "%.2f"|format(h.cost_basis_per_share) }}
+                {% else %}
+                    <span class="na-dash">—</span>
+                {% endif %}
+            </td>
+            <td>${{ "%.2f"|format(h.current_price) }}</td>
+            <td>${{ "{:,.2f}".format(h.market_value) }}</td>
+            <td>
+                {% if h.unrealized_gain is not none %}
+                    <span class="{% if h.unrealized_gain >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                        {% if h.unrealized_gain >= 0 %}+{% endif %}${{ "{:,.2f}".format(h.unrealized_gain) }}
+                    </span>
+                {% else %}
+                    <span class="na-dash">—</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if h.unrealized_gain_pct is not none %}
+                    <span class="{% if h.unrealized_gain_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                        {% if h.unrealized_gain_pct >= 0 %}+{% endif %}{{ "%.2f"|format(h.unrealized_gain_pct) }}%
+                    </span>
+                {% else %}
+                    <span class="na-dash">—</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+<!-- Tracked (Not Included) Holdings -->
+{% set tracked = holdings | rejectattr('isincluded') | list %}
+{% if tracked %}
+<div class="section-header">
+    <h3>Tracked Holdings (not in allocation)</h3>
+    <span style="color:var(--color-text-secondary);font-size:0.85em;">
+        Value: ${{ "{:,.2f}".format(tracked_market_value) }}
+    </span>
+</div>
+<table class="positions-table">
+    <thead>
+        <tr>
+            <th>Symbol</th>
+            <th>Shares</th>
+            <th>Avg Cost/Share</th>
+            <th>Current Price</th>
+            <th>Market Value</th>
+            <th>Unrealized G/L</th>
+            <th>G/L %</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for h in tracked %}
+        <tr>
+            <td>{{ h.ticker }}</td>
+            <td>{{ "{:,.4g}".format(h.quantity) }}</td>
+            <td>
+                {% if h.cost_basis_per_share is not none %}
+                    ${{ "%.2f"|format(h.cost_basis_per_share) }}
+                {% else %}
+                    <span class="na-dash">—</span>
+                {% endif %}
+            </td>
+            <td>${{ "%.2f"|format(h.current_price) }}</td>
+            <td>${{ "{:,.2f}".format(h.market_value) }}</td>
+            <td>
+                {% if h.unrealized_gain is not none %}
+                    <span class="{% if h.unrealized_gain >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                        {% if h.unrealized_gain >= 0 %}+{% endif %}${{ "{:,.2f}".format(h.unrealized_gain) }}
+                    </span>
+                {% else %}
+                    <span class="na-dash">—</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if h.unrealized_gain_pct is not none %}
+                    <span class="{% if h.unrealized_gain_pct >= 0 %}gain-positive{% else %}gain-negative{% endif %}">
+                        {% if h.unrealized_gain_pct >= 0 %}+{% endif %}{{ "%.2f"|format(h.unrealized_gain_pct) }}%
+                    </span>
+                {% else %}
+                    <span class="na-dash">—</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% else %}
+<div style="text-align:center; padding: 48px 0; color: var(--color-text-secondary);">
+    <p style="font-size:1.1em; margin-bottom:16px;">No holdings found for this account.</p>
+    <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="btn-primary">Import from Schwab CSV</a>
+    &nbsp;
+    <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="btn-ghost">Add Manually</a>
+</div>
+{% endif %}
+
 {% endblock %}

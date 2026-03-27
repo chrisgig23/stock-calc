@@ -35,7 +35,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'auth.login'  # Redirects to login if not authenticated
 
 # Import models
-from flask_app.models import User, Account, Stock, Purchase
+from flask_app.models import User, Account, Holding
 
 # User loader for Flask-Login
 @login_manager.user_loader
@@ -86,6 +86,7 @@ from flask_app.routes.market import market_bp
 from flask_app.routes.reports import reports_bp
 from flask_app.routes.main import main_bp
 from flask_app.routes.admin import admin_bp
+from flask_app.routes.import_data import import_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(accounts_bp)
@@ -94,3 +95,4 @@ app.register_blueprint(market_bp)
 app.register_blueprint(reports_bp)
 app.register_blueprint(main_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(import_bp)
