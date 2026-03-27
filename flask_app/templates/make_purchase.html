@@ -1,98 +1,280 @@
 {% extends "base.html" %}
-
 {% block title %}WealthWise — Make a Purchase · {{ account.account_name }}{% endblock %}
 
+{% block styles %}
+<style>
+/* ── Step 1 card ───────────────────────────────────── */
+.invest-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    max-width: 480px;
+    margin-bottom: 24px;
+}
+.invest-card h3 {
+    margin: 0 0 6px;
+    font-size: 1.05em;
+    font-weight: 600;
+}
+.invest-card p {
+    color: var(--color-text-secondary);
+    font-size: 0.88em;
+    margin: 0 0 18px;
+}
+.invest-card label {
+    display: block;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.invest-card input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 1em;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+}
+
+/* ── Info bar (step 2 header) ──────────────────────── */
+.purchase-info-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #f0f4ff;
+    border: 1px solid #c7d7ff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+    color: var(--color-text);
+}
+
+/* ── Suggestions table ─────────────────────────────── */
+.purchase-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin-bottom: 16px;
+}
+.purchase-table th {
+    background: var(--color-bg);
+    border-bottom: 2px solid var(--color-border);
+    padding: 9px 12px;
+    text-align: right;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+.purchase-table th:first-child { text-align: left; }
+.purchase-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+    vertical-align: middle;
+}
+.purchase-table td:first-child { text-align: left; font-weight: 600; }
+.purchase-table tbody tr:hover { background: #f8f9fa; }
+.purchase-table tr.over-allocated td {
+    color: var(--color-text-secondary);
+}
+.purchase-table tr.over-allocated td:first-child {
+    font-weight: 400;
+}
+.purchase-table input[type="number"] {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-align: right;
+}
+
+/* ── Delta colours (same as view_allocation) ───────── */
+.delta-positive { color: #1a7a3e; font-weight: 500; }
+.delta-negative { color: var(--color-danger); font-weight: 500; }
+.delta-zero     { color: var(--color-text-secondary); }
+
+/* ── Cost summary bar ──────────────────────────────── */
+.cost-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    border: 2px solid var(--color-border);
+    background: #fff;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+}
+.cost-bar.over-budget {
+    border-color: var(--color-danger);
+    background: #fff5f5;
+}
+.cost-bar-label { font-size: 0.85em; color: var(--color-text-secondary); font-weight: 500; }
+.cost-bar-value { font-size: 1.4em; font-weight: 700; min-width: 80px; }
+.cost-bar-hint  { font-size: 0.82em; color: var(--color-text-secondary); margin-left: auto; }
+
+.form-actions { display: flex; gap: 10px; align-items: center; }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>{{ account.account_name }} - Make a Purchase</h2>
+<div class="back-button-container">
+    <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+</div>
+
+<h2>Make a Purchase — {{ account.account_name }}</h2>
 
 {% if last_purchase_date %}
-<p><strong>Date of Last Purchase:</strong> {{ last_purchase_date.strftime('%B %-d, %Y') }}</p>
-{% else %}
-<p><strong>Date of Last Purchase:</strong> No purchases made yet.</p>
+<p style="color:var(--color-text-secondary); font-size:0.9em; margin-bottom:20px;">
+    Last purchase: {{ last_purchase_date.strftime('%B %-d, %Y') }}
+</p>
 {% endif %}
 
-{% if cash_value is not defined %}
-<form method="post" action="{{ url_for('portfolio.make_purchase', account_id=account.id) }}">
-    <label for="cash_value">Enter Current Cash Value:</label>
-    <input type="number" id="cash_value" name="cash_value" step="0.01" required>
-    <input type="submit" value="Next">
-</form>
+{% if suggested_purchases is undefined %}
+
+<!-- ── Step 1: Enter amount to invest ──────────────── -->
+<div class="invest-card">
+    <h3>How much would you like to invest?</h3>
+    <p>Enter the cash you want to deploy across your portfolio targets.</p>
+    <form method="post" action="{{ url_for('portfolio.make_purchase', account_id=account.id) }}">
+        <label for="cash_value">Amount to Invest ($)</label>
+        <input type="number" id="cash_value" name="cash_value"
+               step="0.01" min="0.01" required placeholder="e.g. 1000.00">
+        <button type="submit" class="btn-primary">Calculate Suggestions →</button>
+    </form>
+</div>
+
 {% else %}
+
+<!-- ── Step 2: Suggestions table ───────────────────── -->
+<div class="purchase-info-bar">
+    Investing <strong style="margin: 0 4px;">${{ "%.2f"|format(cash_value) }}</strong> across your portfolio.
+    <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}"
+       class="btn-ghost" style="margin-left:auto; padding:6px 14px; font-size:0.85em;">
+        ← Change Amount
+    </a>
+</div>
+
 <form method="post" action="{{ url_for('portfolio.make_purchase', account_id=account.id) }}">
-    <a href="#" onclick="document.getElementById('refresh_form').submit(); return false;">Refresh Pricing</a>
-    <table class="edit-portfolio-table">
+    <input type="hidden" name="cash_value" value="{{ cash_value }}">
+
+    <table class="purchase-table">
         <thead>
             <tr>
-                <th>Stock Symbol</th>
-                <th>Current Price</th>
-                <th>Current Position</th>
-                <th>Suggested Quantity</th>
-                <th>Estimated Total Cost</th>
-                <th>Purchase Quantity</th>
+                <th>Symbol</th>
+                <th>Price</th>
+                <th>Shares Held</th>
+                <th>Current %</th>
+                <th>Target %</th>
+                <th>Gap</th>
+                <th>Buy Qty</th>
+                <th>Est. Cost</th>
             </tr>
         </thead>
         <tbody>
-            {% for purchase in suggested_purchases %}
-            <tr>
-                <td>{{ purchase.name }}</td>
-                <td>${{ "%.2f" | format(purchase.current_price) }}</td>
-                <td>{{ purchase.current_position }}</td>
-                <td>{{ purchase.suggested_quantity }}</td>
-                <td id="estimated_total_{{ purchase.name }}">${{ "%.2f" | format(purchase.estimated_total_cost) }}</td>
+            {% for p in suggested_purchases %}
+            <tr {% if p.gap_pct <= 0 %}class="over-allocated"{% endif %}>
+                <td>{{ p.name }}</td>
+                <td>${{ "%.2f"|format(p.current_price) }}</td>
+                <td>{{ "%.4g"|format(p.current_position) }}</td>
+                <td>{{ "%.2f"|format(p.current_pct) }}%</td>
+                <td>{{ "%.2f"|format(p.target_pct) }}%</td>
                 <td>
-                    <input type="number" name="quantity_{{ purchase.name }}" value="{{ purchase.suggested_quantity }}" required
-                        data-price="{{ purchase.current_price }}"
-                        oninput="updateTotal('{{ purchase.name }}')">
+                    {% if p.gap_pct > 0.05 %}
+                        <span class="delta-positive">+{{ "%.2f"|format(p.gap_pct) }}%</span>
+                    {% elif p.gap_pct < -0.05 %}
+                        <span class="delta-negative">{{ "%.2f"|format(p.gap_pct) }}%</span>
+                    {% else %}
+                        <span class="delta-zero">≈ 0%</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <input type="number" name="quantity_{{ p.name }}"
+                           value="{{ p.suggested_quantity }}"
+                           min="0" step="1"
+                           data-price="{{ p.current_price }}"
+                           oninput="updateRow('{{ p.name }}')"
+                           class="qty-input">
+                </td>
+                <td id="cost_{{ p.name }}">
+                    ${{ "%.2f"|format(p.estimated_total_cost) }}
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <div id="total_cost">
-        <strong>Total Cost: $<span id="total_cost_value">0.00</span></strong>
+
+    <div class="cost-bar" id="costBar">
+        <span class="cost-bar-label">Total Cost</span>
+        <span class="cost-bar-value" id="totalCostValue">$0.00</span>
+        <span class="cost-bar-hint" id="budgetHint"></span>
     </div>
-    <input type="hidden" name="cash_value" value="{{ cash_value }}">
-    <input type="submit" name="submit_purchase" id="confirm_purchases" class="button highlight" value="Confirm Purchases">
+
+    <p style="font-size:0.8em; color:var(--color-text-secondary); margin-bottom:16px;">
+        <span style="color:#1a7a3e;">■</span> Under target — suggested for purchase &nbsp;
+        <span style="color:var(--color-text-secondary);">■</span> Over target — no purchase suggested
+    </p>
+
+    <div class="form-actions">
+        <button type="submit" name="submit_purchase" class="btn-primary">Confirm Purchases</button>
+        <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="btn-ghost">Cancel</a>
+    </div>
 </form>
-{% endif %}
-<a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button" style="float: left;">←  Back to Account</a>
 
 <script>
-function updateTotal(name) {
-    const quantityInput = document.querySelector(`input[name="quantity_${name}"]`);
-    const totalCell = document.getElementById(`estimated_total_${name}`);
-    const price = parseFloat(quantityInput.getAttribute('data-price'));
-    let quantity = parseFloat(quantityInput.value);
+const BUDGET = {{ cash_value }};
 
-    if (isNaN(quantity) || quantity < 0) {
-        quantity = 0;
-    }
-
-    const total = quantity * price;
-    totalCell.textContent = `$${total.toFixed(2)}`;
-    updateTotalCost();
+function updateRow(name) {
+    const input   = document.querySelector(`input[name="quantity_${name}"]`);
+    const cell    = document.getElementById(`cost_${name}`);
+    const price   = parseFloat(input.getAttribute('data-price'));
+    const qty     = parseFloat(input.value) || 0;
+    cell.textContent = '$' + (qty * price).toFixed(2);
+    updateTotal();
 }
 
-function updateTotalCost() {
-    let totalCost = 0;
-    document.querySelectorAll('input[type="number"]').forEach(input => {
-        const quantity = parseFloat(input.value);
+function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('.qty-input').forEach(input => {
+        const qty   = parseFloat(input.value) || 0;
         const price = parseFloat(input.getAttribute('data-price'));
-        if (!isNaN(quantity) && quantity >= 0) {
-            totalCost += quantity * price;
-        }
+        total += qty * price;
     });
-    document.getElementById("total_cost_value").textContent = totalCost.toFixed(2);
+    total = Math.round(total * 100) / 100;
+
+    const valEl   = document.getElementById('totalCostValue');
+    const hintEl  = document.getElementById('budgetHint');
+    const bar     = document.getElementById('costBar');
+
+    valEl.textContent = '$' + total.toFixed(2);
+
+    const remaining = Math.round((BUDGET - total) * 100) / 100;
+    bar.classList.remove('over-budget');
+
+    if (remaining < -0.01) {
+        bar.classList.add('over-budget');
+        valEl.style.color = 'var(--color-danger)';
+        hintEl.textContent = `Over budget by $${Math.abs(remaining).toFixed(2)}`;
+        hintEl.style.color = 'var(--color-danger)';
+    } else {
+        valEl.style.color = 'var(--color-text)';
+        hintEl.textContent = `$${remaining.toFixed(2)} remaining of $${BUDGET.toFixed(2)}`;
+        hintEl.style.color = 'var(--color-text-secondary)';
+    }
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    updateTotalCost();
-    document.querySelectorAll('input[type="number"]').forEach(input => {
-        input.addEventListener('input', function() {
-            const name = this.name.split('_')[1];
-            updateTotal(name);
-        });
-    });
-});
+document.addEventListener('DOMContentLoaded', updateTotal);
 </script>
+
+{% endif %}
 {% endblock %}

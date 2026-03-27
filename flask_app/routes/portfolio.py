@@ -259,11 +259,12 @@ def make_purchase(account_id):
 
         elif 'cash_value' in request.form:
             cash_value = float(request.form['cash_value'])
-            suggested  = _get_suggested_purchases(account, included, cash_value)
+            suggested, suggested_total = _get_suggested_purchases(account, included, cash_value)
             return render_template(
                 'make_purchase.html',
                 account=account,
                 suggested_purchases=suggested,
+                suggested_total=suggested_total,
                 cash_value=cash_value,
                 last_purchase_date=last_purchase_date,
             )
@@ -272,39 +273,57 @@ def make_purchase(account_id):
 
 
 def _get_suggested_purchases(account, included_holdings, cash_value):
-    """Calculates suggested share purchases to close allocation gaps."""
+    """Calculates suggested share purchases to close allocation gaps.
+
+    Returns ALL included holdings as a list (over-allocated holdings get
+    suggested_quantity=0) plus the total suggested spend as a 2-tuple:
+        (suggestions: list[dict], total_suggested_cost: float)
+    """
     allocations = Allocation.query.filter_by(account_id=account.id).all()
     alloc_dict  = {a.name: a.target for a in allocations}
     total_mv    = sum(h.market_value for h in included_holdings)
-    suggestions = []
-    total_cost  = 0.0
+    new_total   = total_mv + cash_value
 
-    gaps = []
+    # Sort by gap descending so most under-allocated get buying priority
+    rows = []
     for h in included_holdings:
         current_pct = (h.market_value / total_mv * 100) if total_mv > 0 else 0
         target_pct  = alloc_dict.get(h.ticker, 0)
-        gaps.append((h, target_pct - current_pct))
-    gaps.sort(key=lambda x: x[1], reverse=True)
+        gap         = target_pct - current_pct
+        rows.append((h, gap, current_pct, target_pct))
+    rows.sort(key=lambda x: x[1], reverse=True)
 
-    for h, gap in gaps:
-        price = h.current_price
+    suggestions  = []
+    budget_used  = 0.0
+
+    for h, gap, current_pct, target_pct in rows:
+        price         = h.current_price
+        suggested_qty = 0
+        cost          = 0.0
+
         if price > 0 and gap > 0:
-            target_value = alloc_dict.get(h.ticker, 0) / 100 * (total_mv + cash_value)
+            target_value = target_pct / 100 * new_total
             target_qty   = int(target_value / price)
-            max_qty      = int((cash_value - total_cost) / price)
+            max_qty      = int((cash_value - budget_used) / price)
             qty          = min(target_qty - int(h.quantity), max_qty)
-            cost         = round(qty * price, 2)
-            if qty > 0 and total_cost + cost <= cash_value:
-                suggestions.append({
-                    'name':                h.ticker,
-                    'current_price':       price,
-                    'current_position':    h.quantity,
-                    'suggested_quantity':  qty,
-                    'estimated_total_cost': cost,
-                })
-                total_cost += cost
+            if qty > 0 and budget_used + qty * price <= cash_value:
+                suggested_qty = qty
+                cost          = round(qty * price, 2)
+                budget_used  += cost
 
-    return suggestions
+        suggestions.append({
+            'name':                 h.ticker,
+            'current_price':        price,
+            'current_position':     h.quantity,
+            'current_value':        round(h.market_value, 2),
+            'current_pct':          round(current_pct, 2),
+            'target_pct':           round(target_pct, 2),
+            'gap_pct':              round(gap, 2),
+            'suggested_quantity':   suggested_qty,
+            'estimated_total_cost': cost,
+        })
+
+    return suggestions, round(budget_used, 2)
 
 
 # ---------------------------------------------------------------------------

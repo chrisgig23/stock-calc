@@ -103,14 +103,14 @@
 
 ## 🛒 Make a Purchase (`/make_purchase`)
 
-- [ ] **D15 — Rename "Enter Current Cash Value" to "Amount to Invest"**
-  - The current label is ambiguous. Rename to "Amount to Invest ($)" with a one-line explanation: "Enter the cash you want to deploy across your portfolio."
+- [x] **D15 — Rename "Enter Current Cash Value" to "Amount to Invest"** ✅
+  - Renamed to "Amount to Invest ($)" with description: "Enter the cash you want to deploy across your portfolio targets."
 
-- [ ] **D16 — Show all rebalancing suggestions, not just the top stock**
-  - Currently shows only the single most-underweight stock. Should show all stocks that need buying to rebalance toward targets, with editable quantities.
+- [x] **D16 — Show all rebalancing suggestions, not just the top stock** ✅
+  - `_get_suggested_purchases` now returns ALL included holdings (over-allocated ones get qty=0 and are greyed out). Template shows Symbol, Price, Shares Held, Current %, Target %, Gap, Buy Qty (editable), Est. Cost. Live cost bar tracks total vs budget.
 
-- [ ] **D17 — Add a post-purchase success state**
-  - After "Confirm Purchases", show a clear confirmation message (flash banner or success page) then redirect to the positions page.
+- [x] **D17 — Add a post-purchase success state** ✅
+  - Flash messages now use `with_categories=True` in base.html. Success (green), error (red), warning (yellow), info (blue) styled with left-border accent. "Purchase recorded successfully!" flashes on redirect to positions page.
 
 ---
 
