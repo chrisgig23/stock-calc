@@ -5,219 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-8170829086367629">
     <title>{% block title %}WealthWise{% endblock %}</title>
-    <!-- Link to Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <script>
-        let countdownTime = 60; // 60 seconds until session timeout
-        let countdownInterval;
-
-        function startCountdown() {
-            const countdownElement = document.getElementById('countdown-timer');
-            
-            countdownInterval = setInterval(() => {
-                countdownTime--;
-
-                countdownElement.textContent = countdownTime;
-
-                if (countdownTime <= 0) {
-                    clearInterval(countdownInterval);
-                    // Redirect to the login page or any other action you want to take when time runs out
-                    window.location.href = '/login';
-                }
-            }, 1000); // Update every second
-        }
-
-        // Show the session warning modal and start the countdown
-        function showSessionModal() {
-            document.getElementById('sessionModal').style.display = 'block';
-            startCountdown();
-        }
-
-        // Extend session when user clicks the button
-        function extendSession() {
-            fetch('/extend-session', { method: 'POST' })
-                .then(response => {
-                    if (response.ok) {
-                        clearInterval(countdownInterval); // Stop the countdown
-                        countdownTime = 60; // Reset the countdown timer
-                        document.getElementById('sessionModal').style.display = 'none'; // Hide the modal
-                    } else {
-                        alert('Failed to extend session.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const sessionLifetime = {{ config['PERMANENT_SESSION_LIFETIME'].total_seconds() }};
-            const warningTime = 60; // 1 minute before expiration
-            const warningTimeout = (sessionLifetime - warningTime) * 1000;
-
-            setTimeout(function() {
-                showSessionModal(); // Show modal and start countdown
-            }, warningTimeout);
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const editButton = document.getElementById('edit-button');
-            const editIcon = document.getElementById('edit-icon');  // Reference to the image inside the button
-            const reorderButtons = document.querySelectorAll('.reorder-buttons');
-    
-            let editMode = false;
-    
-            editButton.addEventListener('click', function() {
-                editMode = !editMode;
-    
-                // Toggle visibility of the arrows
-                reorderButtons.forEach(button => {
-                    if (editMode) {
-                        button.style.display = 'inline-block';  // Show arrows
-                        editIcon.src = "{{ url_for('static', filename='images/done.png') }}";  // Change icon to 'done'
-                        editIcon.title = "Done";  // Update the tooltip
-                    } else {
-                        button.style.display = 'none';  // Hide arrows
-                        editIcon.src = "{{ url_for('static', filename='images/edit.png') }}";  // Change icon back to 'edit'
-                        editIcon.title = "Edit";  // Update the tooltip
-                    }
-                });
-            });
-        });
-    </script>
-    <style>
-        /* Modal styles */
-        #sessionModal {
-            display: none; 
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
-        }
-        #sessionModal .modal-content {
-            background-color: white;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 300px;
-            text-align: center;
-            border-radius: 8px;
-        }
-        #sessionModal button {
-            padding: 10px 20px;
-            margin-top: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        #sessionModal button:hover {
-            background-color: #0056b3;
-        }
-        #sessionModal .logout-button {
-            background-color: #DC3545;
-        }
-        #sessionModal .logout-button:hover {
-            background-color: #C82333;
-        }
-    </style>
-
     {% block styles %}{% endblock %}
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170829086367629"
-     crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170829086367629" crossorigin="anonymous"></script>
 </head>
-<body>
-    <header>
-        <h1>WealthWise™</h1>
-        <div class="login-info">
-            {% if current_user.is_authenticated %}
-            <div class="user-details">
-                Logged in as: {{ current_user.username }}
-            </div>
-            <div class="user-controls">
-                <a href="{{ url_for('auth.logout') }}">Logout</a> | 
-                <a href={{ url_for('admin.manage_user', user_id=current_user.id) }}>Manage my account</a>
-            </div>
-            {% endif %}
-        </div>
-    </header>
+<body class="{% if current_user.is_authenticated %}app-layout{% else %}auth-layout{% endif %}">
 
-    <nav style="background-color: {% if market_state %}#6BA368{% else %}#31708E{% endif %};">
-        {% if current_user.is_authenticated %}
-            <div class="left-section">
-            </div>
-        {% endif %}
-        <div class="right-section">
-            {% if market_state %}
-                <span><strong>Markets are open</strong></span>
-            {% else %}
-                <span><strong>Markets are closed</strong></span>
-            {% endif %}
-        </div>
-    </nav>
+{% if current_user.is_authenticated %}
 
-    {% if current_user.is_authenticated %}
-        <!-- The Modal -->
-        <div id="sessionModal" class="modal">
-            <div class="modal-content">
-                <h2>Session Expiring Soon</h2>
-                <p>Your session will expire in <span id="countdown-timer">60</span> seconds.</p>
-                <div>
-                    <button onclick="extendSession()">Keep Working</button>
-                    <a href="{{ url_for('auth.logout') }}">
-                        <button class="logout-button">Log Out Now</button>
-                    </a>
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    
-    <!-- Hamburger Menu for Mobile -->
-    <div class="hamburger">
-        <div></div>
-        <div></div>
-        <div></div>
-    </div>
+    {# ── SIDEBAR ──────────────────────────────────────────── #}
+    <aside class="sidebar" id="sidebar">
 
-    <div class="container">
-        {% if current_user.is_authenticated %}
-        <aside class="sidebar">
-            <div class="accounts-header">
-                <h2>Your Accounts</h2>
-                <button id="edit-button" class="edit-toggle-button">
+        <div class="sidebar-brand">
+            <span class="brand-wordmark">WealthWise™</span>
+            <span class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
+                {% if market_state %}● Markets Open{% else %}● Markets Closed{% endif %}
+            </span>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-header">
+                <span class="sidebar-section-label">Accounts</span>
+                <button id="edit-button" class="edit-toggle-button" title="Reorder accounts">
                     <img src="{{ url_for('static', filename='images/edit.png') }}" title="Edit" class="edit-img" id="edit-icon">
                 </button>
             </div>
-            <ul>
+            <ul class="sidebar-nav-list">
                 {% for account in accounts %}
                 <li>
                     <div class="account-item">
-                        <a href="{{ url_for('accounts.view_account', account_id=account.id) }}">{{ account.account_name }}</a>
-        
+                        <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="sidebar-nav-link">
+                            {{ account.account_name }}
+                        </a>
                         <div class="reorder-buttons" style="display:none;">
-                            <!-- ✅ Show a star icon for the default account (position 0) -->
                             {% if account.position == 0 %}
                                 <img src="{{ url_for('static', filename='images/star.png') }}" title="Default account" class="star-img">
                             {% else %}
-                                <form class="button-form" method="POST" action="{{ url_for('accounts.move_account_up', account_id=account.id) }}" style="display: inline;">
+                                <form class="button-form" method="POST" action="{{ url_for('accounts.move_account_up', account_id=account.id) }}" style="display:inline;">
                                     <button type="submit" class="arrow-button" title="Move Up">
                                         <img src="{{ url_for('static', filename='images/arrow-up.png') }}" alt="Move Up" class="arrow-icon">
                                     </button>
                                 </form>
                             {% endif %}
-        
-                            <!-- ✅ Ensure the down arrow appears correctly for non-last accounts -->
                             {% if account.position < max_position %}
-                                <form class="button-form" method="POST" action="{{ url_for('accounts.move_account_down', account_id=account.id) }}" style="display: inline;">
+                                <form class="button-form" method="POST" action="{{ url_for('accounts.move_account_down', account_id=account.id) }}" style="display:inline;">
                                     <button type="submit" class="arrow-button" title="Move Down">
                                         <img src="{{ url_for('static', filename='images/arrow-down.png') }}" alt="Move Down" class="arrow-icon">
                                     </button>
@@ -228,40 +61,148 @@
                 </li>
                 {% endfor %}
             </ul>
-            <div class="sidebar-buttons">
-                <a href="{{ url_for('accounts.add_account') }}" class="button">Add Account</a>
-                <a href="{{ url_for('accounts.remove_account', account_id=current_user.id) }}" class="button">Remove Account</a>
-            </div>
-        </aside>
-        <div class="sidebar-strip"></div>
-        {% endif %}
-        <main class="main-content">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <ul class="flashes">
-                    {% for category, message in messages %}
-                        <li class="{{ category }}">{{ message }}</li>
-                    {% endfor %}
-                    </ul>
-                {% endif %}
-            {% endwith %}
+        </div>
 
-            {% block content %}{% endblock %}
-        </main>
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-actions">
+                <a href="{{ url_for('accounts.add_account') }}" class="sidebar-footer-link sidebar-add-link">+ Add Account</a>
+                <a href="{{ url_for('accounts.remove_account', account_id=current_user.id) }}" class="sidebar-footer-link sidebar-remove-link">Remove Account</a>
+            </div>
+            <div class="sidebar-user">
+                <span class="sidebar-username">{{ current_user.username }}</span>
+                <div class="sidebar-user-links">
+                    <a href="{{ url_for('admin.manage_user', user_id=current_user.id) }}" class="sidebar-footer-link">Settings</a>
+                    <a href="{{ url_for('auth.logout') }}" class="sidebar-footer-link">Logout</a>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <div id="sessionModal" class="modal">
+        <div class="modal-content">
+            <h2>Session Expiring Soon</h2>
+            <p>Your session will expire in <span id="countdown-timer">60</span> seconds.</p>
+            <div>
+                <button onclick="extendSession()">Keep Working</button>
+                <a href="{{ url_for('auth.logout') }}">
+                    <button class="logout-button">Log Out Now</button>
+                </a>
+            </div>
+        </div>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const hamburger = document.querySelector(".hamburger");
-            const sidebar = document.querySelector(".sidebar");
-            const body = document.querySelector("body");
-        
-            hamburger.addEventListener("click", function() {
-                sidebar.classList.toggle("active");  // Toggle sidebar visibility
-                body.classList.toggle("no-scroll");  // Prevent body scroll when sidebar is open
-                hamburger.classList.toggle("active");  // Toggle hamburger to X icon
+{% endif %}
+
+{# ── MAIN WRAPPER — used for both layouts ─────────────── #}
+<div class="main-wrapper">
+    <main class="main-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+</div>
+
+<script>
+    let countdownTime = 60;
+    let countdownInterval;
+
+    function startCountdown() {
+        const el = document.getElementById('countdown-timer');
+        countdownInterval = setInterval(() => {
+            countdownTime--;
+            el.textContent = countdownTime;
+            if (countdownTime <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = '/login';
+            }
+        }, 1000);
+    }
+
+    function showSessionModal() {
+        document.getElementById('sessionModal').style.display = 'block';
+        startCountdown();
+    }
+
+    function extendSession() {
+        fetch('/extend-session', { method: 'POST' })
+            .then(r => {
+                if (r.ok) {
+                    clearInterval(countdownInterval);
+                    countdownTime = 60;
+                    document.getElementById('sessionModal').style.display = 'none';
+                } else {
+                    alert('Failed to extend session.');
+                }
+            })
+            .catch(e => console.error(e));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if current_user.is_authenticated %}
+
+        const sessionLifetime = {{ config['PERMANENT_SESSION_LIFETIME'].total_seconds() }};
+        setTimeout(showSessionModal, (sessionLifetime - 60) * 1000);
+
+        /* Edit / reorder toggle */
+        const editButton  = document.getElementById('edit-button');
+        const editIcon    = document.getElementById('edit-icon');
+        const reorderBtns = document.querySelectorAll('.reorder-buttons');
+        let   editMode    = false;
+
+        editButton.addEventListener('click', function () {
+            editMode = !editMode;
+            reorderBtns.forEach(btn => {
+                btn.style.display = editMode ? 'inline-flex' : 'none';
             });
+            editIcon.src   = editMode
+                ? "{{ url_for('static', filename='images/done.png') }}"
+                : "{{ url_for('static', filename='images/edit.png') }}";
+            editIcon.title = editMode ? 'Done' : 'Edit';
         });
-    </script>
+
+        /* Mobile hamburger */
+        const hamburger = document.getElementById('hamburger');
+        const sidebar   = document.getElementById('sidebar');
+        const overlay   = document.getElementById('sidebar-overlay');
+
+        function openSidebar() {
+            sidebar.classList.add('sidebar-open');
+            hamburger.classList.add('active');
+            overlay.classList.add('active');
+            document.body.classList.add('no-scroll');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('sidebar-open');
+            hamburger.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+        }
+
+        hamburger.addEventListener('click', function () {
+            sidebar.classList.contains('sidebar-open') ? closeSidebar() : openSidebar();
+        });
+
+        overlay.addEventListener('click', closeSidebar);
+
+        {% endif %}
+    });
+</script>
 </body>
 </html>

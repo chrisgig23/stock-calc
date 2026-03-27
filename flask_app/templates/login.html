@@ -2,52 +2,16 @@
 
 {% block title %}WealthWise — Login{% endblock %}
 
-{% block styles %}
-<style>
-    /* Override container for the login page */
-    .container {
-        display: flex;
-        width: 100%;
-        min-height: calc(100vh - 120px); /* Adjust height based on header + nav height */
-        margin-top: 0;
-    }
-
-    /* Override main-content for the login page */
-    .main-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        min-height: 100vh;
-        flex-grow: 1;
-        transition: margin-left 0.3s ease; /* Smooth transition when sidebar toggles */
-        margin-left: 0; /* Remove the sidebar margin */
-    }
-
-    .flashes {
-        list-style: none; /* Remove default list styling */
-        padding: 0;
-        margin-bottom: 10px; /* Reduce the spacing between flashes and login form */
-        color: #DC3545; /* Set color to red for error message */
-        background-color: #F8D7DA; /* Light red background for error */
-        padding: 10px;
-        border-radius: 5px;
-        text-align: center;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow to make it stand out */
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="login-container">
-    <h2>Login</h2>
+    <span class="login-brand">WealthWise™</span>
+    <h2>Sign in to your account</h2>
     <form method="POST" action="{{ url_for('auth.login') }}">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <input type="submit" value="Login">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+        <input type="submit" value="Sign In">
     </form>
 </div>
 {% endblock %}

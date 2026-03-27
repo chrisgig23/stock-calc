@@ -3,16 +3,56 @@
 {% block title %}WealthWise — {{ account.account_name }}{% endblock %}
 
 {% block content %}
-<h2>{{ account.account_name }}</h2>
-<div class="button-container">
-    {% if accounts %}
-        <a href="{{ url_for('portfolio.view_positions', account_id=account.id) }}" class="button">View Current Positions</a>
-        <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="button">Edit Portfolio</a>
-        <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="button">View Current Allocation</a>
-        <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="button">Adjust Allocations</a>
-        <a href="{{ url_for('reports.view_reports', account_id=account.id) }}" class="button">View Reports</a>
-        <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="button">Import Data</a>
-        <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="button highlight">Make a Purchase</a>
-    {% endif %}
+<div class="account-menu-header">
+    <h2>{{ account.account_name }}</h2>
+    <span class="account-subtitle">Select an action for this account</span>
 </div>
+
+{% if accounts %}
+<div class="menu-card-grid">
+
+    <a href="{{ url_for('portfolio.view_positions', account_id=account.id) }}" class="menu-card">
+        <div class="menu-card-icon">📊</div>
+        <div class="menu-card-title">View Positions</div>
+        <div class="menu-card-desc">Current holdings, cost basis, and unrealized P&amp;L</div>
+    </a>
+
+    <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="menu-card">
+        <div class="menu-card-icon">✏️</div>
+        <div class="menu-card-title">Edit Portfolio</div>
+        <div class="menu-card-desc">Add or remove holdings from this account</div>
+    </a>
+
+    <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="menu-card">
+        <div class="menu-card-icon">🍩</div>
+        <div class="menu-card-title">View Allocation</div>
+        <div class="menu-card-desc">Current vs. target allocation breakdown</div>
+    </a>
+
+    <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="menu-card">
+        <div class="menu-card-icon">⚖️</div>
+        <div class="menu-card-title">Adjust Allocations</div>
+        <div class="menu-card-desc">Set target percentages for each holding</div>
+    </a>
+
+    <a href="{{ url_for('reports.view_reports', account_id=account.id) }}" class="menu-card">
+        <div class="menu-card-icon">📈</div>
+        <div class="menu-card-title">Reports</div>
+        <div class="menu-card-desc">Performance history and portfolio analytics</div>
+    </a>
+
+    <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="menu-card">
+        <div class="menu-card-icon">📥</div>
+        <div class="menu-card-title">Import Data</div>
+        <div class="menu-card-desc">Upload positions or transactions from your broker</div>
+    </a>
+
+    <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="menu-card highlight-card">
+        <div class="menu-card-icon">💰</div>
+        <div class="menu-card-title">Make a Purchase</div>
+        <div class="menu-card-desc">Invest cash and rebalance toward your targets</div>
+    </a>
+
+</div>
+{% endif %}
 {% endblock %}
