@@ -372,6 +372,181 @@ body.auth-layout .main-content {
     padding: 24px 16px;
 }
 
+/* ── Home / landing split layout ───────────────────────────
+   Overrides the default centered auth-layout when the body
+   also carries the .home-layout class.
+   ─────────────────────────────────────────────────────────── */
+body.auth-layout.home-layout {
+    background: #0F172A;
+}
+
+body.auth-layout.home-layout .main-wrapper {
+    display: block;
+    align-items: unset;
+    justify-content: unset;
+    min-height: 100vh;
+    padding: 0;
+}
+
+body.auth-layout.home-layout .main-content {
+    max-width: none;
+    width: 100%;
+    padding: 0;
+}
+
+/* Two-panel split */
+.home-split {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ── Left: marketing panel ── */
+.home-marketing {
+    flex: 1;
+    background: linear-gradient(155deg, #0F172A 0%, #1E293B 100%);
+    padding: 64px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative dot-grid overlay */
+.home-marketing::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(99,102,241,0.12) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+}
+
+/* Decorative glowing orb */
+.home-marketing::after {
+    content: '';
+    position: absolute;
+    top: -120px;
+    right: -80px;
+    width: 380px;
+    height: 380px;
+    background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.home-brand {
+    font-size: 22px;
+    font-weight: 800;
+    color: #818CF8;
+    letter-spacing: -0.5px;
+    margin-bottom: 52px;
+    position: relative;
+    z-index: 1;
+}
+
+.home-headline {
+    font-size: 38px;
+    font-weight: 800;
+    color: #F8FAFC;
+    line-height: 1.2;
+    letter-spacing: -0.8px;
+    margin: 0 0 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.home-subheadline {
+    font-size: 16px;
+    color: #94A3B8;
+    line-height: 1.6;
+    margin: 0 0 48px;
+    max-width: 400px;
+    position: relative;
+    z-index: 1;
+}
+
+.home-value-props {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.home-value-prop {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.home-value-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(99,102,241,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #818CF8;
+    font-size: 15px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.home-value-text strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #E2E8F0;
+    margin-bottom: 2px;
+}
+
+.home-value-text span {
+    font-size: 13px;
+    color: #64748B;
+    line-height: 1.45;
+}
+
+/* ── Right: login panel ── */
+.home-login-panel {
+    width: 480px;
+    min-width: 380px;
+    background: var(--color-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 48px;
+}
+
+.home-login-panel .login-container {
+    width: 100%;
+    max-width: 360px;
+    box-shadow: var(--shadow-lg);
+}
+
+/* ── Mobile: stack login on top, marketing below ── */
+@media (max-width: 860px) {
+    .home-split {
+        flex-direction: column-reverse;
+    }
+
+    .home-marketing {
+        padding: 48px 28px;
+        flex: unset;
+    }
+
+    .home-headline {
+        font-size: 28px;
+    }
+
+    .home-login-panel {
+        width: 100%;
+        min-width: unset;
+        padding: 40px 24px;
+    }
+}
+
 /* ============================================================
    HAMBURGER
    ============================================================ */

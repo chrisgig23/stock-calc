@@ -35,14 +35,16 @@ def extend_session():
     session['last_activity'] = datetime.now(pytz.utc).isoformat()
     return jsonify(success=True)
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/home', methods=['GET', 'POST'])
 def login():
-    """Handles user login and authentication."""
+    """Landing/home page with login form."""
+    if current_user.is_authenticated:
+        return redirect(url_for('accounts.view_account'))
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        
+
         if user and check_password_hash(user.password_hash, password):
             if check_password_hash(user.password_hash, 'password1'):
                 return redirect(url_for('auth.reset_password', user_id=user.id))
@@ -51,7 +53,12 @@ def login():
                 return redirect(url_for('accounts.view_account'))
         else:
             flash('Invalid username or password', 'danger')
-    return render_template('login.html')
+    return render_template('home.html')
+
+@auth_bp.route('/login')
+def login_redirect():
+    """Legacy /login URL — redirects to /home."""
+    return redirect(url_for('auth.login'))
 
 @auth_bp.route('/logout')
 def logout():

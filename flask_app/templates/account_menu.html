@@ -12,43 +12,43 @@
 <div class="menu-card-grid">
 
     <a href="{{ url_for('portfolio.view_positions', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="menu-card-icon">📊</div>
         <div class="menu-card-title">View Positions</div>
         <div class="menu-card-desc">Current holdings, cost basis, and unrealized P&amp;L</div>
     </a>
 
     <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+        <div class="menu-card-icon">✏️</div>
         <div class="menu-card-title">Edit Portfolio</div>
         <div class="menu-card-desc">Add or remove holdings from this account</div>
     </a>
 
     <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
+        <div class="menu-card-icon">🍩</div>
         <div class="menu-card-title">View Allocation</div>
         <div class="menu-card-desc">Current vs. target allocation breakdown</div>
     </a>
 
     <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-sliders"></i></div>
+        <div class="menu-card-icon">⚖️</div>
         <div class="menu-card-title">Adjust Allocations</div>
         <div class="menu-card-desc">Set target percentages for each holding</div>
     </a>
 
     <a href="{{ url_for('reports.view_reports', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-chart-column"></i></div>
+        <div class="menu-card-icon">📈</div>
         <div class="menu-card-title">Reports</div>
         <div class="menu-card-desc">Performance history and portfolio analytics</div>
     </a>
 
     <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
+        <div class="menu-card-icon">📥</div>
         <div class="menu-card-title">Import Data</div>
         <div class="menu-card-desc">Upload positions or transactions from your broker</div>
     </a>
 
     <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="menu-card highlight-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-coins"></i></div>
+        <div class="menu-card-icon">💰</div>
         <div class="menu-card-title">Make a Purchase</div>
         <div class="menu-card-desc">Invest cash and rebalance toward your targets</div>
     </a>

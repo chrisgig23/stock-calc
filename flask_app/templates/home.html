@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}WealthWise — Track Your Wealth, Smarter{% endblock %}
+
+{% block extra_body_class %}home-layout{% endblock %}
+
+{% block flashes %}{% endblock %}
+
+{% block styles %}
+<style>
+/* Remove default form card styling inside the login panel */
+.home-login-panel form {
+    background: none;
+    padding: 0;
+    box-shadow: none;
+    border: none;
+    margin: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-split">
+
+    <!-- ── Left: Marketing panel ──────────────────────────── -->
+    <div class="home-marketing">
+        <div class="home-brand">WealthWise™</div>
+
+        <h1 class="home-headline">Track your wealth,<br>smarter.</h1>
+        <p class="home-subheadline">
+            A clean, powerful portfolio tracker built for investors who
+            want clarity — not clutter.
+        </p>
+
+        <div class="home-value-props">
+            <div class="home-value-prop">
+                <div class="home-value-icon">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div class="home-value-text">
+                    <strong>Multiple accounts, one view</strong>
+                    <span>Manage your brokerage, retirement, and paper trading portfolios all in one place.</span>
+                </div>
+            </div>
+
+            <div class="home-value-prop">
+                <div class="home-value-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="home-value-text">
+                    <strong>Real-time performance</strong>
+                    <span>Live market prices, unrealized P&amp;L, and cost basis updated automatically.</span>
+                </div>
+            </div>
+
+            <div class="home-value-prop">
+                <div class="home-value-icon">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div class="home-value-text">
+                    <strong>Stay on target</strong>
+                    <span>Set allocation targets and let WealthWise guide every rebalancing decision.</span>
+                </div>
+            </div>
+
+            <div class="home-value-prop">
+                <div class="home-value-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="home-value-text">
+                    <strong>Private and secure</strong>
+                    <span>Your data stays yours. No ads, no sharing, no noise.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Right: Login panel ─────────────────────────────── -->
+    <div class="home-login-panel">
+        <div class="login-container">
+            <span class="login-brand">WealthWise™</span>
+            <h2>Sign in to your account</h2>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes" style="margin-bottom: 16px;">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+                <input type="submit" value="Sign In">
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

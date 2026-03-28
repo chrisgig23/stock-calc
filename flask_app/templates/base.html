@@ -12,7 +12,7 @@
     {% block styles %}{% endblock %}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170829086367629" crossorigin="anonymous"></script>
 </head>
-<body class="{% if current_user.is_authenticated %}app-layout{% else %}auth-layout{% endif %}">
+<body class="{% if current_user.is_authenticated %}app-layout{% else %}auth-layout{% endif %} {% block extra_body_class %}{% endblock %}">
 
 {% if current_user.is_authenticated %}
 
@@ -106,6 +106,7 @@
 {# ── MAIN WRAPPER — used for both layouts ─────────────── #}
 <div class="main-wrapper">
     <main class="main-content">
+        {% block flashes %}
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <ul class="flashes">
@@ -115,6 +116,7 @@
                 </ul>
             {% endif %}
         {% endwith %}
+        {% endblock %}
         {% block content %}{% endblock %}
     </main>
 </div>
