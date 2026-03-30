@@ -87,6 +87,7 @@ from flask_app.routes.reports import reports_bp
 from flask_app.routes.main import main_bp
 from flask_app.routes.admin import admin_bp
 from flask_app.routes.import_data import import_bp
+from flask_app.routes.schwab import schwab_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(accounts_bp)
@@ -96,3 +97,4 @@ app.register_blueprint(reports_bp)
 app.register_blueprint(main_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(import_bp)
+app.register_blueprint(schwab_bp)

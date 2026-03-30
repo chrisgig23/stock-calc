@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from flask_app import db
 from flask_app.models import User
 from werkzeug.security import generate_password_hash
+from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -17,7 +18,7 @@ def manage_user(user_id):
         flash("User details updated successfully.", "success")
         return redirect(url_for('admin.manage_user', user_id=user.id))
 
-    return render_template('manage_user.html', user=user)
+    return render_template('manage_user.html', user=user, now=datetime.utcnow())
 
 @admin_bp.route('/change_username', methods=['GET', 'POST'])
 @login_required

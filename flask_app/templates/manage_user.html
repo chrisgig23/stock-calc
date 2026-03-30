@@ -1,20 +1,214 @@
 {% extends "base.html" %}
+{% block title %}WealthWise — Settings{% endblock %}
 
-{% block title %}WealthWise — Manage Account{% endblock %}
+{% block styles %}
+<style>
+.settings-header {
+    margin-bottom: 28px;
+}
+.settings-header h2 {
+    margin: 0 0 4px;
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.settings-header p {
+    margin: 0;
+    font-size: 0.88em;
+    color: var(--color-text-secondary);
+}
+
+.settings-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+}
+.settings-card-title {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.settings-card-title .card-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78em;
+    flex-shrink: 0;
+}
+.settings-card-desc {
+    font-size: 0.84em;
+    color: var(--color-text-secondary);
+    margin: 0 0 16px;
+}
+.settings-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 7px;
+    font-size: 0.84em;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+}
+.btn-primary   { background: var(--color-primary); color: #fff; }
+.btn-primary:hover { background: var(--color-primary-dark); color: #fff; }
+.btn-danger    { background: var(--color-danger); color: #fff; }
+.btn-danger:hover { background: var(--color-danger-dark); color: #fff; }
+.btn-secondary { background: var(--color-bg-alt); border: 1px solid var(--color-border); color: var(--color-text); }
+.btn-secondary:hover { background: var(--color-border); }
+
+.schwab-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+.schwab-status.connected    { background: #D1FAE5; color: #065F46; }
+.schwab-status.disconnected { background: #FEE2E2; color: #991B1B; }
+.schwab-status.expiring     { background: #FEF3C7; color: #92400E; }
+
+.token-meta {
+    font-size: 0.78em;
+    color: var(--color-text-secondary);
+    margin-top: 10px;
+}
+
+/* Admin section */
+.admin-form-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.admin-form-row input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.84em;
+    font-family: inherit;
+    min-width: 200px;
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<h2>Manage User Account</h2>
-    <a href="{{ url_for('auth.reset_password', user_id=user.id) }}" class="button">Reset Password</a>
-    <a href="{{ url_for('admin.change_username', user_id=user.id) }}" class="button">Change Username</a>
-    
-    
-    <a href="{{ url_for('accounts.view_account') }}" class="button back-button">Exit</a>
+<div class="settings-header">
+    <h2>Settings</h2>
+    <p>Manage your account, integrations, and preferences.</p>
+</div>
 
-    {% if current_user.username == 'cgiglio' %}
-        <form action="{{ url_for('admin.add_user') }}" method="post" style="margin-top: 20px;">
-            <label for="new_username">New Username:</label>
-            <input type="text" id="new_username" name="new_username" required>
-            <button type="submit" class="button highlight">Add New User</button>
-        </form>
+<!-- ── Account ──────────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-title">
+        <span class="card-icon"><i class="fa-solid fa-user"></i></span>
+        Account
+    </div>
+    <p class="settings-card-desc">Logged in as <strong>{{ current_user.username }}</strong></p>
+    <div class="settings-row">
+        <a href="{{ url_for('auth.reset_password', user_id=user.id) }}" class="btn btn-secondary">
+            <i class="fa-solid fa-lock"></i> Reset Password
+        </a>
+        <a href="{{ url_for('admin.change_username', user_id=user.id) }}" class="btn btn-secondary">
+            <i class="fa-solid fa-pen"></i> Change Username
+        </a>
+    </div>
+</div>
+
+<!-- ── Schwab Integration ────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-title">
+        <span class="card-icon"><i class="fa-solid fa-link"></i></span>
+        Schwab Integration
+    </div>
+
+    {% set token = current_user.schwab_token %}
+    {% if token %}
+        {% set days_old = ((now - token.refresh_token_issued).total_seconds() / 86400) | int %}
+        {% set days_left = 7 - days_old %}
+
+        {% if days_left <= 1 %}
+            <span class="schwab-status expiring">⚠ Token expiring — reconnect soon</span>
+        {% else %}
+            <span class="schwab-status connected">✓ Connected</span>
+        {% endif %}
+
+        <p class="settings-card-desc" style="margin-top:10px;">
+            Your Schwab account is connected. You can now link individual accounts and sync positions and transactions directly from Schwab.
+        </p>
+        <div class="token-meta">
+            Access token refreshed: {{ token.access_token_issued.strftime('%b %d %Y, %I:%M %p') }} UTC
+            &nbsp;·&nbsp;
+            Refresh token: {{ days_left }} day{{ 's' if days_left != 1 }} remaining
+            (reconnect via the button below before it expires to avoid losing access)
+        </div>
+        <div class="settings-row" style="margin-top:14px;">
+            <a href="{{ url_for('schwab.connect') }}" class="btn btn-secondary">
+                <i class="fa-solid fa-rotate"></i> Reconnect
+            </a>
+            <form method="POST" action="{{ url_for('schwab.disconnect') }}"
+                  onsubmit="return confirm('Disconnect Schwab? All account links will be removed.')">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-unlink"></i> Disconnect
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <span class="schwab-status disconnected">✗ Not connected</span>
+        <p class="settings-card-desc" style="margin-top:10px;">
+            Connect your Schwab account to sync positions and transactions automatically — no more manual CSV exports.
+            After connecting, link each WealthWise account to its corresponding Schwab account from the account's page.
+        </p>
+        <a href="{{ url_for('schwab.connect') }}" class="btn btn-primary">
+            <i class="fa-solid fa-link"></i> Connect Schwab Account
+        </a>
     {% endif %}
+</div>
+
+<!-- ── Admin ─────────────────────────────────────────────────────────────── -->
+{% if current_user.username == 'cgiglio' %}
+<div class="settings-card">
+    <div class="settings-card-title">
+        <span class="card-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        Admin
+    </div>
+    <p class="settings-card-desc">Add a new user with a temporary password.</p>
+    <form action="{{ url_for('admin.add_user') }}" method="post">
+        <div class="admin-form-row">
+            <input type="text" id="new_username" name="new_username"
+                   placeholder="New username" required>
+            <button type="submit" class="btn btn-primary">Add User</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<!-- ── Back ──────────────────────────────────────────────────────────────── -->
+<a href="{{ url_for('accounts.view_account') }}" class="btn btn-secondary">
+    ← Back to Accounts
+</a>
 {% endblock %}

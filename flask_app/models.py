@@ -38,8 +38,9 @@ class Account(db.Model):
     id           = db.Column(db.Integer, primary_key=True)
     account_name = db.Column(db.String(50), nullable=False)
     user_id      = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    position     = db.Column(db.Integer, nullable=False, default=0)
-    brokerage    = db.Column(db.String(50), nullable=True)   # e.g. "Schwab", "Fidelity"
+    position             = db.Column(db.Integer, nullable=False, default=0)
+    brokerage            = db.Column(db.String(50), nullable=True)   # e.g. "Schwab", "Fidelity"
+    schwab_account_hash  = db.Column(db.String(128), nullable=True)  # encrypted hash for Schwab API
 
     holdings    = db.relationship('Holding',           backref='account', lazy=True, cascade='all, delete-orphan')
     allocations = db.relationship('Allocation',        backref='account', lazy=True, cascade='all, delete-orphan')
@@ -200,3 +201,32 @@ class PortfolioSnapshot(db.Model):
 
     def __repr__(self):
         return f'<PortfolioSnapshot {self.snapshot_date} account {self.account_id} ${self.total_market_value}>'
+
+
+# ---------------------------------------------------------------------------
+# SchwabToken  — OAuth tokens for Schwab API, one row per user
+# ---------------------------------------------------------------------------
+
+class SchwabToken(db.Model):
+    __tablename__ = 'schwab_tokens'
+
+    id                   = db.Column(db.Integer, primary_key=True)
+    user_id              = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    access_token         = db.Column(db.Text, nullable=False)
+    refresh_token        = db.Column(db.Text, nullable=False)
+    id_token             = db.Column(db.Text, nullable=True)
+    access_token_issued  = db.Column(db.DateTime, nullable=False)
+    refresh_token_issued = db.Column(db.DateTime, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('schwab_token', uselist=False))
+
+    def is_access_token_expired(self):
+        """Access tokens last 30 minutes."""
+        return (datetime.utcnow() - self.access_token_issued).total_seconds() > 1740  # 29 min
+
+    def is_refresh_token_expired(self):
+        """Refresh tokens last 7 days."""
+        return (datetime.utcnow() - self.refresh_token_issued).days >= 7
+
+    def __repr__(self):
+        return f'<SchwabToken user={self.user_id} issued={self.access_token_issued}>'
