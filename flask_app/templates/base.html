@@ -51,9 +51,6 @@
         <div class="sidebar-section">
             <div class="sidebar-section-header">
                 <span class="sidebar-section-label">Accounts</span>
-                <button id="edit-button" class="edit-toggle-button" title="Reorder accounts">
-                    <img src="{{ url_for('static', filename='images/edit.png') }}" title="Edit" class="edit-img" id="edit-icon">
-                </button>
             </div>
             <ul class="sidebar-nav-list">
                 {% for account in accounts %}
@@ -62,21 +59,7 @@
                         <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="sidebar-nav-link">
                             {{ account.account_name }}
                         </a>
-                        <div class="reorder-buttons" style="display:none;">
-                            <button class="chevron-btn move-up-btn"
-                                    data-account-id="{{ account.id }}"
-                                    title="Move Up"
-                                    {% if account.position == 0 %}style="visibility:hidden"{% endif %}>
-                                <i class="fa-solid fa-chevron-up"></i>
-                            </button>
-                            <button class="chevron-btn move-down-btn"
-                                    data-account-id="{{ account.id }}"
-                                    title="Move Down"
-                                    {% if account.position >= max_position %}style="visibility:hidden"{% endif %}>
-                                <i class="fa-solid fa-chevron-down"></i>
-                            </button>
                         </div>
-                    </div>
                 </li>
                 {% endfor %}
             </ul>
@@ -179,34 +162,6 @@
 
         const sessionLifetime = {{ config['PERMANENT_SESSION_LIFETIME'].total_seconds() }};
         setTimeout(showSessionModal, (sessionLifetime - 60) * 1000);
-
-        /* Edit / reorder toggle */
-        const editButton  = document.getElementById('edit-button');
-        const editIcon    = document.getElementById('edit-icon');
-        const reorderBtns = document.querySelectorAll('.reorder-buttons');
-        let   editMode    = false;
-
-        editButton.addEventListener('click', function () {
-            editMode = !editMode;
-            reorderBtns.forEach(btn => {
-                btn.style.display = editMode ? 'inline-flex' : 'none';
-            });
-            editIcon.src   = editMode
-                ? "{{ url_for('static', filename='images/done.png') }}"
-                : "{{ url_for('static', filename='images/edit.png') }}";
-            editIcon.title = editMode ? 'Done' : 'Edit';
-        });
-
-        /* Chevron reorder via AJAX */
-        document.querySelectorAll('.move-up-btn, .move-down-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                const id  = this.dataset.accountId;
-                const dir = this.classList.contains('move-up-btn') ? 'move_up' : 'move_down';
-                fetch('/account/' + id + '/' + dir, { method: 'POST' })
-                    .then(function(r) { return r.json(); })
-                    .then(function(data) { if (data.success) window.location.reload(); });
-            });
-        });
 
         /* Mobile hamburger */
         const hamburger = document.getElementById('hamburger');
