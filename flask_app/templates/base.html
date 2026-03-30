@@ -63,22 +63,18 @@
                             {{ account.account_name }}
                         </a>
                         <div class="reorder-buttons" style="display:none;">
-                            {% if account.position == 0 %}
-                                <img src="{{ url_for('static', filename='images/star.png') }}" title="Default account" class="star-img">
-                            {% else %}
-                                <form class="button-form" method="POST" action="{{ url_for('accounts.move_account_up', account_id=account.id) }}" style="display:inline;">
-                                    <button type="submit" class="arrow-button" title="Move Up">
-                                        <img src="{{ url_for('static', filename='images/arrow-up.png') }}" alt="Move Up" class="arrow-icon">
-                                    </button>
-                                </form>
-                            {% endif %}
-                            {% if account.position < max_position %}
-                                <form class="button-form" method="POST" action="{{ url_for('accounts.move_account_down', account_id=account.id) }}" style="display:inline;">
-                                    <button type="submit" class="arrow-button" title="Move Down">
-                                        <img src="{{ url_for('static', filename='images/arrow-down.png') }}" alt="Move Down" class="arrow-icon">
-                                    </button>
-                                </form>
-                            {% endif %}
+                            <button class="chevron-btn move-up-btn"
+                                    data-account-id="{{ account.id }}"
+                                    title="Move Up"
+                                    {% if account.position == 0 %}style="visibility:hidden"{% endif %}>
+                                <i class="fa-solid fa-chevron-up"></i>
+                            </button>
+                            <button class="chevron-btn move-down-btn"
+                                    data-account-id="{{ account.id }}"
+                                    title="Move Down"
+                                    {% if account.position >= max_position %}style="visibility:hidden"{% endif %}>
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
                         </div>
                     </div>
                 </li>
@@ -89,7 +85,7 @@
         <div class="sidebar-footer">
             <div class="sidebar-footer-actions">
                 <a href="{{ url_for('accounts.add_account') }}" class="sidebar-footer-link sidebar-add-link">+ Add Account</a>
-                <a href="{{ url_for('accounts.remove_account', account_id=current_user.id) }}" class="sidebar-footer-link sidebar-remove-link">Remove Account</a>
+                <a href="{{ url_for('accounts.remove_account') }}" class="sidebar-footer-link sidebar-remove-link">Remove Account</a>
             </div>
             <div class="sidebar-user">
                 <span class="sidebar-username">{{ current_user.username }}</span>
@@ -199,6 +195,17 @@
                 ? "{{ url_for('static', filename='images/done.png') }}"
                 : "{{ url_for('static', filename='images/edit.png') }}";
             editIcon.title = editMode ? 'Done' : 'Edit';
+        });
+
+        /* Chevron reorder via AJAX */
+        document.querySelectorAll('.move-up-btn, .move-down-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const id  = this.dataset.accountId;
+                const dir = this.classList.contains('move-up-btn') ? 'move_up' : 'move_down';
+                fetch('/account/' + id + '/' + dir, { method: 'POST' })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) { if (data.success) window.location.reload(); });
+            });
         });
 
         /* Mobile hamburger */

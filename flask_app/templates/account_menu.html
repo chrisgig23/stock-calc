@@ -2,9 +2,75 @@
 
 {% block title %}WealthWise — {{ account.account_name }}{% endblock %}
 
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const renameBtn  = document.getElementById('rename-btn');
+    const titleEl    = document.getElementById('account-title');
+    const accountId  = {{ account.id }};
+
+    renameBtn.addEventListener('click', function() {
+        const currentName = titleEl.textContent.trim();
+        const input = document.createElement('input');
+        input.type = 'text'; input.value = currentName;
+        input.className = 'account-rename-input'; input.maxLength = 50;
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'btn-rename-action btn-rename-save';
+        saveBtn.title = 'Save'; saveBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn-rename-action btn-rename-cancel';
+        cancelBtn.title = 'Cancel'; cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        titleEl.style.display = 'none'; renameBtn.style.display = 'none';
+        const row = titleEl.parentElement;
+        row.insertBefore(input, titleEl);
+        row.insertBefore(saveBtn, titleEl);
+        row.insertBefore(cancelBtn, titleEl);
+        input.focus(); input.select();
+        function cleanup() {
+            input.remove(); saveBtn.remove(); cancelBtn.remove();
+            titleEl.style.display = ''; renameBtn.style.display = '';
+        }
+        function doSave() {
+            const newName = input.value.trim();
+            if (!newName) { input.focus(); return; }
+            fetch('/account/' + accountId + '/rename', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newName })
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    titleEl.textContent = data.name;
+                    document.title = 'WealthWise — ' + data.name;
+                    document.querySelectorAll('.sidebar-nav-link').forEach(function(link) {
+                        if (link.getAttribute('href') && link.getAttribute('href').includes('/view_account/' + accountId)) {
+                            link.textContent = data.name;
+                        }
+                    });
+                } else { alert(data.error || 'Failed to rename account'); }
+                cleanup();
+            });
+        }
+        saveBtn.addEventListener('click', doSave);
+        cancelBtn.addEventListener('click', cleanup);
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doSave();
+            if (e.key === 'Escape') cleanup();
+        });
+    });
+});
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="account-menu-header">
-    <h2>{{ account.account_name }}</h2>
+    <div class="account-header-row">
+        <h2 id="account-title">{{ account.account_name }}</h2>
+        <button class="account-rename-btn" id="rename-btn" title="Rename account">
+            <i class="fa-solid fa-pencil"></i>
+        </button>
+    </div>
     <span class="account-subtitle">Select an action for this account</span>
 </div>
 

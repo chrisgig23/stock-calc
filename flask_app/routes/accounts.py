@@ -100,32 +100,38 @@ def reorder_accounts():
 @accounts_bp.route('/account/<int:account_id>/move_up', methods=['POST'])
 @login_required
 def move_account_up(account_id):
-    """Moves an account up in the order."""
-    account = Account.query.get_or_404(account_id)
-
+    account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
     if account.position > 0:
-        # Find the account just above the current one
         account_above = Account.query.filter_by(user_id=current_user.id, position=account.position - 1).first()
         if account_above:
-            # Swap positions
             account_above.position, account.position = account.position, account_above.position
-            print(f"Moving {account.account_name} from position {account.position} to position {account_above.position}")
             db.session.commit()
-
-    return redirect(url_for('accounts.view_account'))
+    return jsonify({'success': True})
 
 @accounts_bp.route('/account/<int:account_id>/move_down', methods=['POST'])
 @login_required
 def move_account_down(account_id):
-    """Moves an account down in the order."""
-    account = Account.query.get_or_404(account_id)
-
-    # Find the account just below the current one
+    account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
     account_below = Account.query.filter_by(user_id=current_user.id, position=account.position + 1).first()
     if account_below:
-        # Swap positions
         account_below.position, account.position = account.position, account_below.position
-        print(f"Moving {account.account_name} from position {account.position} to position {account_below.position}")
         db.session.commit()
+    return jsonify({'success': True})
 
-    return redirect(url_for('accounts.view_account'))
+
+@accounts_bp.route('/account/<int:account_id>/rename', methods=['POST'])
+@login_required
+def rename_account(account_id):
+    account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
+    data = request.get_json()
+    new_name = (data.get('name') or '').strip() if data else ''
+    if not new_name:
+        return jsonify({'error': 'Name cannot be empty'}), 400
+    if len(new_name) > 50:
+        return jsonify({'error': 'Name too long (max 50 characters)'}), 400
+    existing = Account.query.filter_by(user_id=current_user.id, account_name=new_name).first()
+    if existing and existing.id != account_id:
+        return jsonify({'error': 'An account with that name already exists'}), 400
+    account.account_name = new_name
+    db.session.commit()
+    return jsonify({'success': True, 'name': new_name})
