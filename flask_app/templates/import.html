@@ -189,19 +189,45 @@
 <hr class="divider">
 
 <!-- ================================================================
-     COMING SOON — Schwab API
+     SCHWAB API — Live sync
      ================================================================ -->
-<div class="import-section" style="background: var(--color-bg); border-style: dashed;">
-    <h3><span class="badge badge-coming">Coming Soon</span></h3>
-    <h3 style="margin-top:8px; color: var(--color-text-secondary);">Connect Your Schwab Account</h3>
-    <p class="subtitle">
-        Skip the manual export entirely. Connect directly via the official Schwab API
-        to automatically sync positions, transactions, real-time quotes, and more —
-        all with one click.
-    </p>
-    <button class="btn-ghost" disabled style="cursor: not-allowed; opacity: 0.6;">
-        Connect Schwab Account (Coming Soon)
-    </button>
+{% set token = current_user.schwab_token %}
+<div class="import-section" style="{% if token %}background:#F0FDF4; border-color:#86EFAC;{% else %}background: var(--color-bg); border-style: dashed;{% endif %}">
+    {% if token %}
+        <h3><span class="badge" style="background:#D1FAE5; color:#065F46;">✓ Schwab API Connected</span></h3>
+        <h3 style="margin-top:8px;">Sync Directly from Schwab</h3>
+        <p class="subtitle">
+            Your Schwab account is connected. Skip the CSV export entirely — sync your
+            current positions and the last 90 days of transactions with one click.
+        </p>
+        {% if account.schwab_account_hash %}
+            <form method="POST" action="{{ url_for('schwab.sync_account', account_id=account.id) }}">
+                <button type="submit" class="btn-primary">
+                    <i class="fa-solid fa-rotate"></i> Sync from Schwab Now
+                </button>
+            </form>
+        {% else %}
+            <p style="font-size:0.87em; color:var(--color-text-secondary); margin-bottom:14px;">
+                This account isn't linked to a Schwab account yet. Go to the
+                <strong>Positions</strong> page and click <strong>Link Schwab Account</strong>
+                to connect it, then come back here to sync.
+            </p>
+            <a href="{{ url_for('portfolio.view_positions', account_id=account.id) }}" class="btn-primary">
+                Go to Positions → Link Account
+            </a>
+        {% endif %}
+    {% else %}
+        <h3><span class="badge badge-coming">Optional</span></h3>
+        <h3 style="margin-top:8px; color: var(--color-text-secondary);">Connect via Schwab API</h3>
+        <p class="subtitle">
+            Skip the manual CSV export entirely. Connect directly via the official Schwab API
+            to automatically sync positions and transactions with one click. Set it up once
+            in Settings and use it for any account.
+        </p>
+        <a href="{{ url_for('admin.manage_user', user_id=current_user.id) }}" class="btn-ghost">
+            <i class="fa-solid fa-link"></i> Connect in Settings
+        </a>
+    {% endif %}
 </div>
 
 {% endblock %}
