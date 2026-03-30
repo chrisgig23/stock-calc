@@ -163,7 +163,7 @@ class Transaction(db.Model):
     account_id  = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
     date        = db.Column(db.Date, nullable=False)
     action_type = db.Column(db.String(25), nullable=False)   # see ACTION_* constants above
-    ticker      = db.Column(db.String(10), nullable=True)    # null for cash-only events
+    ticker      = db.Column(db.String(20), nullable=True)    # null for cash-only events
     description = db.Column(db.String(200), nullable=True)
     quantity    = db.Column(db.Float, nullable=True)         # shares
     price       = db.Column(db.Float, nullable=True)         # per-share price
