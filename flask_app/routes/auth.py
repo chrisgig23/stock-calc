@@ -39,7 +39,7 @@ def extend_session():
 def login():
     """Landing/home page with login form."""
     if current_user.is_authenticated:
-        return redirect(url_for('accounts.view_account'))
+        return redirect(url_for('main.dashboard'))
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -50,7 +50,7 @@ def login():
                 return redirect(url_for('auth.reset_password', user_id=user.id))
             else:
                 login_user(user)
-                return redirect(url_for('accounts.view_account'))
+                return redirect(url_for('main.dashboard'))
         else:
             flash('Invalid username or password', 'danger')
     return render_template('home.html')

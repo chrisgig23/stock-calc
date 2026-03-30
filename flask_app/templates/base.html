@@ -20,10 +20,27 @@
     <aside class="sidebar" id="sidebar">
 
         <div class="sidebar-brand">
-            <span class="brand-wordmark">WealthWise™</span>
-            <span class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
-                {% if market_state %}● Markets Open{% else %}● Markets Closed{% endif %}
-            </span>
+            <div class="sidebar-brand-content">
+                <span class="brand-wordmark">WealthWise™</span>
+                <span class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
+                    {% if market_state %}● Markets Open{% else %}● Markets Closed{% endif %}
+                </span>
+            </div>
+            <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse sidebar" aria-label="Collapse sidebar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-section">
+            <ul class="sidebar-nav-list" style="margin-bottom:4px;">
+                <li>
+                    <a href="{{ url_for('main.dashboard') }}" class="sidebar-nav-link sidebar-dashboard-link">
+                        <i class="fa-solid fa-chart-pie" style="margin-right:8px; opacity:0.75;"></i>Dashboard
+                    </a>
+                </li>
+            </ul>
         </div>
 
         <div class="sidebar-section">
@@ -203,6 +220,41 @@
         });
 
         overlay.addEventListener('click', closeSidebar);
+
+        /* ── Sidebar collapse toggle ──────────────────────── */
+        const collapseBtn = document.getElementById('sidebar-collapse-btn');
+        const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+
+        function applySidebarCollapse(collapsed, animate) {
+            if (!animate) {
+                sidebar.style.transition = 'none';
+                document.querySelector('.main-wrapper').style.transition = 'none';
+            }
+            if (collapsed) {
+                sidebar.classList.add('sidebar-collapsed');
+                document.body.classList.add('sidebar-collapsed');
+            } else {
+                sidebar.classList.remove('sidebar-collapsed');
+                document.body.classList.remove('sidebar-collapsed');
+            }
+            if (!animate) {
+                // Force reflow then restore transitions
+                sidebar.offsetHeight;
+                sidebar.style.transition = '';
+                document.querySelector('.main-wrapper').style.transition = '';
+            }
+            // Let Chart.js re-measure its containers
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 240);
+        }
+
+        // Restore state on load (no animation)
+        applySidebarCollapse(isCollapsed, false);
+
+        collapseBtn.addEventListener('click', function () {
+            const nowCollapsed = !sidebar.classList.contains('sidebar-collapsed');
+            applySidebarCollapse(nowCollapsed, true);
+            localStorage.setItem('sidebarCollapsed', nowCollapsed);
+        });
 
         {% endif %}
     });
