@@ -105,6 +105,12 @@ def connect():
         flash('Schwab API credentials are not configured.', 'danger')
         return redirect(url_for('admin.manage_user', user_id=current_user.id))
 
+    # Stash the user ID in the session BEFORE leaving the site.
+    # This survives the cross-site redirect back from Schwab even when the
+    # browser doesn't send the login cookie on the return trip (SameSite rules).
+    session['schwab_connect_user_id'] = current_user.id
+    session.modified = True
+
     auth_url = (
         f"{AUTH_URL}"
         f"?client_id={APP_KEY}"
@@ -114,23 +120,35 @@ def connect():
 
 
 @schwab_bp.route('/callback')
-@login_required
 def callback():
     """
-    Handle Schwab OAuth callback.
+    Handle Schwab OAuth callback — no @login_required here.
+
     Schwab appends:  ?code=<auth_code>&session=<session_id>
     The code is URL-encoded and ends with %40 (i.e. '@').
     Flask's request.args decodes it, so request.args['code'] already ends with '@'.
+
+    We identify the user via the session key written in /connect, falling back to
+    flask-login's current_user if the session cookie happened to survive intact.
     """
+    # Resolve the user — prefer the stashed ID, fall back to active login
+    user_id = session.pop('schwab_connect_user_id', None)
+    if user_id is None:
+        if current_user.is_authenticated:
+            user_id = current_user.id
+        else:
+            flash('Session expired — please log in and try connecting Schwab again.', 'warning')
+            return redirect(url_for('auth.login'))
+
     error = request.args.get('error')
     if error:
         flash(f'Schwab authorization failed: {error}', 'danger')
-        return redirect(url_for('admin.manage_user', user_id=current_user.id))
+        return redirect(url_for('admin.manage_user', user_id=user_id))
 
     code = request.args.get('code')
     if not code:
         flash('No authorization code received from Schwab.', 'danger')
-        return redirect(url_for('admin.manage_user', user_id=current_user.id))
+        return redirect(url_for('admin.manage_user', user_id=user_id))
 
     # Exchange code for tokens
     resp = http.post(TOKEN_URL, headers=_basic_auth_header(), data={
@@ -141,16 +159,16 @@ def callback():
 
     if not resp.ok:
         flash(f'Token exchange failed ({resp.status_code}). Please try again.', 'danger')
-        return redirect(url_for('admin.manage_user', user_id=current_user.id))
+        return redirect(url_for('admin.manage_user', user_id=user_id))
 
     data = resp.json()
     now  = datetime.utcnow()
 
     # Upsert — one token row per user
-    token = SchwabToken.query.filter_by(user_id=current_user.id).first()
+    token = SchwabToken.query.filter_by(user_id=user_id).first()
     if token is None:
         token = SchwabToken(
-            user_id              = current_user.id,
+            user_id              = user_id,
             access_token         = data['access_token'],
             refresh_token        = data['refresh_token'],
             id_token             = data.get('id_token'),
@@ -167,7 +185,7 @@ def callback():
 
     db.session.commit()
     flash('Schwab account connected successfully!', 'success')
-    return redirect(url_for('admin.manage_user', user_id=current_user.id))
+    return redirect(url_for('admin.manage_user', user_id=user_id))
 
 
 @schwab_bp.route('/disconnect', methods=['POST'])
