@@ -140,6 +140,7 @@
 </div>
 
 <!-- ── Schwab Integration ────────────────────────────────────────────────── -->
+{% if schwab_enabled %}
 <div class="settings-card">
     <div class="settings-card-title">
         <span class="card-icon"><i class="fa-solid fa-link"></i></span>
@@ -188,6 +189,8 @@
         </a>
     {% endif %}
 </div>
+
+{% endif %}{# schwab_enabled #}
 
 <!-- ── Admin ─────────────────────────────────────────────────────────────── -->
 {% if current_user.username == 'cgiglio' %}

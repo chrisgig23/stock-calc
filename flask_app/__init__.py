@@ -43,6 +43,12 @@ def load_user(user_id):
     return User.query.get(int(user_id))  # Ensure user_id is an integer
 
 @app.context_processor
+def inject_schwab_status():
+    """Exposes schwab_enabled to all templates. Flip SCHWAB_ENABLED=true in .env once
+    the Schwab developer portal modification is approved."""
+    return {"schwab_enabled": os.getenv("SCHWAB_ENABLED", "false").lower() == "true"}
+
+@app.context_processor
 def inject_accounts():
     """Ensures 'accounts' and 'max_position' are accessible in all templates globally."""
     if current_user.is_authenticated:
