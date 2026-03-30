@@ -1,0 +1,669 @@
+{% extends "base.html" %}
+{% block title %}WealthWise — Help & Guide{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Page header ─────────────────────────────────────────────── */
+.help-header {
+    margin-bottom: 32px;
+}
+.help-header h2 {
+    margin: 0 0 6px;
+    font-size: 1.5em;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.help-header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.95em;
+    max-width: 640px;
+}
+
+/* ── Nav pills (jump links) ──────────────────────────────────── */
+.help-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+}
+.help-nav a {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.82em;
+    font-weight: 600;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.help-nav a:hover {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+}
+
+/* ── Section titles ──────────────────────────────────────────── */
+.help-section {
+    margin-bottom: 40px;
+    scroll-margin-top: 24px;
+}
+.help-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-border);
+}
+.help-section-title .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+
+/* ── Cards ───────────────────────────────────────────────────── */
+.help-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+.help-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+}
+.help-card h4 {
+    margin: 0 0 8px;
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.help-card p {
+    margin: 0;
+    font-size: 0.85em;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+/* ── Accordion (FAQ / step-by-step) ─────────────────────────── */
+.help-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.accordion-item {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+.accordion-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 18px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--color-text);
+    text-align: left;
+    gap: 12px;
+}
+.accordion-trigger:hover { background: var(--color-bg-alt); }
+.accordion-trigger .chevron {
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    color: var(--color-text-secondary);
+}
+.accordion-item.open .accordion-trigger .chevron {
+    transform: rotate(180deg);
+}
+.accordion-body {
+    display: none;
+    padding: 0 18px 16px;
+    font-size: 0.86em;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    border-top: 1px solid var(--color-border);
+}
+.accordion-item.open .accordion-body { display: block; }
+.accordion-body p { margin: 10px 0 0; }
+.accordion-body p:first-child { margin-top: 10px; }
+.accordion-body ul {
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+}
+.accordion-body li { margin-bottom: 4px; }
+.accordion-body strong { color: var(--color-text); }
+
+/* ── Concept table ───────────────────────────────────────────── */
+.concept-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86em;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+}
+.concept-table th {
+    background: var(--color-bg-alt);
+    color: var(--color-text-secondary);
+    font-weight: 700;
+    font-size: 0.78em;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 10px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+.concept-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    vertical-align: top;
+}
+.concept-table tr:last-child td { border-bottom: none; }
+.concept-table td:first-child { font-weight: 600; color: var(--color-primary); white-space: nowrap; }
+.concept-table td:last-child { color: var(--color-text-secondary); }
+
+/* ── Getting started steps ───────────────────────────────────── */
+.steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.step-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+}
+.step-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.8em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+}
+.step-body h4 {
+    margin: 0 0 4px;
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.step-body p {
+    margin: 0;
+    font-size: 0.84em;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+/* ── Callout box ─────────────────────────────────────────────── */
+.help-callout {
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.86em;
+    color: #3730A3;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+.help-callout strong { color: #312E81; }
+
+@media (max-width: 600px) {
+    .help-cards { grid-template-columns: 1fr; }
+    .help-nav a { font-size: 0.78em; padding: 5px 11px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="help-header">
+    <h2>Help &amp; Guide</h2>
+    <p>Everything you need to understand WealthWise and get the most out of it — whether you're just getting started or looking to dig deeper.</p>
+</div>
+
+<!-- Jump nav -->
+<nav class="help-nav">
+    <a href="#what-is-this">What Is This?</a>
+    <a href="#getting-started">Getting Started</a>
+    <a href="#key-concepts">Key Concepts</a>
+    <a href="#features">Features</a>
+    <a href="#faq">FAQ</a>
+    <a href="#tips">Tips & Best Practices</a>
+</nav>
+
+<!-- ── 1. What Is This? ──────────────────────────────────────── -->
+<section class="help-section" id="what-is-this">
+    <div class="help-section-title">
+        <span class="section-icon"><i class="fa-solid fa-circle-info"></i></span>
+        What Is WealthWise?
+    </div>
+    <div class="help-callout">
+        <strong>In short:</strong> WealthWise is a personal portfolio tracker that helps you understand what you own, what it's worth, and how it's performing — across all of your investment accounts in one place.
+    </div>
+    <div class="help-cards">
+        <div class="help-card">
+            <h4>📊 It's a portfolio tracker</h4>
+            <p>You log your stock and fund holdings, and WealthWise calculates your current value, cost basis, and profit or loss — all in real time using live market prices.</p>
+        </div>
+        <div class="help-card">
+            <h4>🗂️ It's account-aware</h4>
+            <p>You can set up multiple accounts (e.g. Roth IRA, brokerage, paper trading) and track each one separately, or view everything together from the Dashboard.</p>
+        </div>
+        <div class="help-card">
+            <h4>📈 It tracks history</h4>
+            <p>WealthWise saves daily snapshots of your portfolio's total value so you can see how it has grown (or changed) over time on the Portfolio Growth chart.</p>
+        </div>
+        <div class="help-card">
+            <h4>🎯 It supports target allocations</h4>
+            <p>You can set a target percentage for each ticker in an account. WealthWise shows you where you are vs. where you want to be, so you know when to rebalance.</p>
+        </div>
+        <div class="help-card">
+            <h4>🚫 It's not a brokerage</h4>
+            <p>WealthWise doesn't connect to your broker or execute trades. Think of it as your personal ledger — you enter the data, and it does the math.</p>
+        </div>
+        <div class="help-card">
+            <h4>🔒 It's just for you</h4>
+            <p>Your data is private to your account. You can create multiple user profiles if needed, but there's no social or sharing layer.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── 2. Getting Started ────────────────────────────────────── -->
+<section class="help-section" id="getting-started">
+    <div class="help-section-title">
+        <span class="section-icon"><i class="fa-solid fa-rocket"></i></span>
+        Getting Started
+    </div>
+    <div class="steps-list">
+        <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">
+                <h4>Create an account</h4>
+                <p>Click <strong>+ Add Account</strong> in the sidebar. Give it a name that reflects what it represents — your brokerage name, strategy name, or whatever makes sense to you (e.g. "Fidelity Roth IRA", "Long-Term Growth", "Paper Trading").</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body">
+                <h4>Add your holdings</h4>
+                <p>Navigate to the account and open <strong>Edit Portfolio</strong>. Enter each ticker you currently hold, along with the number of shares and your total cost basis (what you paid for them). You can also import positions from a CSV if you're moving from another tool or exporting from your broker.</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body">
+                <h4>Log your transactions (optional but recommended)</h4>
+                <p>For a more accurate picture over time, record your individual buy and sell transactions. This powers the Portfolio Growth chart and lets you track realized gains. You can import transactions in bulk from a Schwab CSV export.</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-body">
+                <h4>Set target allocations (optional)</h4>
+                <p>If you follow a specific investment strategy, go to <strong>Allocation</strong> for that account and set a target percentage for each holding. WealthWise will show you how far off you are and what that gap looks like in dollar terms.</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">5</div>
+            <div class="step-body">
+                <h4>Check the Dashboard</h4>
+                <p>Once you have holdings in at least one account, the Dashboard gives you a cross-account overview — your total portfolio value, an allocation pie chart, growth over time, and your top performers at a glance.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── 3. Key Concepts ───────────────────────────────────────── -->
+<section class="help-section" id="key-concepts">
+    <div class="help-section-title">
+        <span class="section-icon"><i class="fa-solid fa-book-open"></i></span>
+        Key Concepts
+    </div>
+    <p style="font-size:0.87em; color:var(--color-text-secondary); margin:0 0 16px;">These are the terms you'll see throughout WealthWise and what they actually mean.</p>
+    <table class="concept-table">
+        <thead>
+            <tr>
+                <th>Term</th>
+                <th>What it means</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Holding</td>
+                <td>A position you currently own in a specific ticker within an account. Defined by a ticker symbol and number of shares.</td>
+            </tr>
+            <tr>
+                <td>Cost Basis</td>
+                <td>The total amount of money you originally paid for a holding — including all purchases. This is your "break even" reference point.</td>
+            </tr>
+            <tr>
+                <td>Market Value</td>
+                <td>What your holding is worth right now, calculated as: <em>shares × current price</em>. Prices are pulled live from Yahoo Finance when you refresh.</td>
+            </tr>
+            <tr>
+                <td>Unrealized Gain/Loss</td>
+                <td>The difference between your current market value and your cost basis. It's "unrealized" because you haven't sold yet — it's a paper profit or loss.</td>
+            </tr>
+            <tr>
+                <td>Realized Gain/Loss</td>
+                <td>Profit or loss you've actually locked in by selling shares. Recorded via transactions and visible in the Reports section.</td>
+            </tr>
+            <tr>
+                <td>Average Cost</td>
+                <td>Your cost basis divided by the number of shares held. Useful for understanding your effective buy-in price across multiple purchases.</td>
+            </tr>
+            <tr>
+                <td>Target Allocation</td>
+                <td>The percentage of an account's total value you <em>want</em> a specific ticker to represent. Set by you under Allocation — WealthWise doesn't rebalance automatically.</td>
+            </tr>
+            <tr>
+                <td>Portfolio Snapshot</td>
+                <td>A saved record of your account's total market value on a specific date. These snapshots are what power the Portfolio Growth chart over time.</td>
+            </tr>
+            <tr>
+                <td>Transaction</td>
+                <td>A logged event — a buy, sell, dividend, interest payment, fee, or transfer. Transactions are the raw history of activity in an account.</td>
+            </tr>
+            <tr>
+                <td>Account</td>
+                <td>A container for holdings and transactions. Think of it as mirroring a real-world brokerage account, strategy, or fund. You can have as many as you need.</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- ── 4. Features ───────────────────────────────────────────── -->
+<section class="help-section" id="features">
+    <div class="help-section-title">
+        <span class="section-icon"><i class="fa-solid fa-sliders"></i></span>
+        Features
+    </div>
+    <div class="help-accordion">
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Dashboard — Portfolio Overview</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>The Dashboard is your home base. It aggregates data across <em>all</em> your accounts and shows:</p>
+                <ul>
+                    <li><strong>Stat cards</strong> — Total portfolio value, total cost basis, and total unrealized gain/loss</li>
+                    <li><strong>Allocation pie chart</strong> — How your money is spread across tickers, by current market value</li>
+                    <li><strong>Portfolio Growth chart</strong> — Your portfolio's total value over time, built from daily snapshots. Requires at least two historical data points.</li>
+                    <li><strong>Top Performers chart</strong> — Tickers ranked by unrealized % gain, showing your best and worst movers</li>
+                    <li><strong>Per-account cards</strong> — A quick summary of each account's value and gain/loss with a link to dig in</li>
+                </ul>
+                <p>Prices on the Dashboard refresh each time the page loads. For the most current numbers, use the Refresh Market Data button inside an account.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Portfolio View — Positions &amp; Holdings</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>Inside any account, the Positions view shows each holding with its current price, market value, cost basis, average cost per share, unrealized gain/loss, and percentage change. This is the most detailed per-account view of your current state.</p>
+                <p>Use <strong>Edit Portfolio</strong> to add, update, or remove holdings. Use <strong>Refresh Market Data</strong> to pull the latest prices and save a new portfolio snapshot for that day.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Transactions — Trade History</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>Transactions give you a full, timestamped log of everything that has happened in an account — buys, sells, dividends, interest, fees, and transfers. Recording transactions is the most accurate way to track your true cost basis and realized gains over time.</p>
+                <p>You can add transactions manually or import them in bulk. WealthWise supports Schwab CSV exports out of the box — go to <strong>Import → Transactions</strong> inside an account and upload your export file.</p>
+                <p>Note: transactions are a log and don't automatically update your holdings. After importing, review your positions under Edit Portfolio to make sure shares and cost basis are current.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Allocation — Target vs. Actual</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>The Allocation view lets you define how much of an account you want allocated to each ticker, expressed as a percentage. WealthWise then compares your target with your current actual allocation and shows the gap — in both percentage points and dollar terms.</p>
+                <p>This is most useful if you follow a strategy like "60% equities, 30% bonds, 10% cash" or a specific index-fund model portfolio. After market movements drift your allocations, the gap view tells you exactly what needs to be bought or sold to rebalance.</p>
+                <p>Targets must sum to 100%. You'll see a warning if they don't.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Reports — Performance &amp; Gains</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>The Reports section provides a deeper breakdown of account performance — including realized gains and losses from closed positions, income from dividends, and a summary of fees and other activity.</p>
+                <p>Reports are built from your transaction history, so the more complete your transaction log, the more useful this section becomes. If you've only entered holdings without transactions, some report sections will be empty or limited.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Importing Data — Schwab &amp; CSV</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>WealthWise can import from CSV files in two ways:</p>
+                <ul>
+                    <li><strong>Import Positions</strong> — Upload a CSV of your current holdings to populate an account in bulk. Useful when first setting up or migrating from a spreadsheet.</li>
+                    <li><strong>Import Transactions</strong> — Upload a Schwab transaction history export. WealthWise will parse it and add the transactions to your account's log.</li>
+                </ul>
+                <p>To export from Schwab: log into your Schwab account → History → select the date range → Export. Download the CSV and upload it here.</p>
+                <p>Duplicate detection is built in — if you import the same file twice, previously imported transactions won't be added again.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Multiple Accounts — Strategies &amp; Segmentation</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>You can create as many accounts as you need. Some common ways people use multiple accounts:</p>
+                <ul>
+                    <li>Mirror each real brokerage account separately (Fidelity, Schwab, Robinhood, etc.)</li>
+                    <li>Segment by strategy (Long-term buy-and-hold vs. active trading vs. speculative)</li>
+                    <li>Track a paper trading account to test ideas without real money</li>
+                    <li>Separate tax-advantaged accounts (Roth IRA, 401k) from taxable accounts</li>
+                </ul>
+                <p>The Dashboard always shows the combined picture across all accounts. Each account's detail view shows just that account. You can reorder accounts in the sidebar using the edit (pencil) button.</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ── 5. FAQ ─────────────────────────────────────────────────── -->
+<section class="help-section" id="faq">
+    <div class="help-section-title">
+        <span class="section-icon"><i class="fa-solid fa-circle-question"></i></span>
+        Frequently Asked Questions
+    </div>
+    <div class="help-accordion">
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Where do prices come from? Are they live?</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>Prices are fetched from Yahoo Finance via the <strong>yfinance</strong> library. During market hours, these reflect the latest available price (typically delayed 15 minutes per Yahoo's data license). Outside market hours, they show the most recent closing price.</p>
+                <p>Prices are refreshed each time you load a page or click <strong>Refresh Market Data</strong>. WealthWise does not push live price updates in the background.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Why is my portfolio growth chart empty?</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>The growth chart needs at least two saved snapshots to draw a line. Snapshots are created when you click <strong>Refresh Market Data</strong> inside an account.</p>
+                <p>If you've never done that, try clicking it now — and then again tomorrow. After a few days of refreshing, you'll start to see your portfolio's trend take shape.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>What's the difference between a Holding and a Transaction?</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p><strong>Holdings</strong> represent your <em>current state</em> — what you own right now. A holding says "I own 50 shares of AAPL with a cost basis of $4,200."</p>
+                <p><strong>Transactions</strong> represent your <em>history</em> — every buy, sell, dividend, or fee that has ever occurred. Think of holdings as the result and transactions as the story of how you got there.</p>
+                <p>You can use WealthWise with just holdings (simpler), just transactions (more complete), or both. Using both gives you the richest picture.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>I sold some shares. How do I update my account?</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>Two steps:</p>
+                <ul>
+                    <li><strong>Log the transaction:</strong> Add a Sell transaction under Make a Purchase / Transaction entry so the history is preserved.</li>
+                    <li><strong>Update the holding:</strong> Go to Edit Portfolio and reduce the shares for that ticker (or remove it entirely if you sold everything). Update the cost basis to reflect what you still hold.</li>
+                </ul>
+                <p>WealthWise doesn't automatically reduce shares when you log a sell — you manage holdings and transactions as separate things. This gives you more control but does require both steps.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Can I track ETFs, mutual funds, or bonds — not just stocks?</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>Yes — anything with a ticker symbol that Yahoo Finance recognises. ETFs like VOO, QQQ, and BND work great. Mutual funds with tickers (e.g. FXAIX) work too, though NAV pricing may be end-of-day rather than intraday. Bonds and other instruments vary by availability in Yahoo Finance's data.</p>
+                <p>If a ticker doesn't resolve to a price, the market value for that holding will show as $0. In that case, you may need to track it manually by editing the cost basis and noting the value separately.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>My cost basis looks wrong. How do I fix it?</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>Go to <strong>Edit Portfolio</strong> for the account and update the cost basis field for that holding. The cost basis field is the total dollar amount you paid — not the per-share price. So if you bought 10 shares at $50 each, the cost basis is $500.</p>
+                <p>If you're unsure of your true cost basis, your brokerage's tax documents or transaction history are the most reliable source.</p>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <button class="accordion-trigger">
+                <span>Is this connected to my brokerage? Will it auto-sync?</span>
+                <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div class="accordion-body">
+                <p>No — WealthWise is intentionally disconnected from brokerages. There is no auto-sync. You enter your own data, either manually or via CSV import.</p>
+                <p>This means your account credentials never touch WealthWise, and you're always in control of what's recorded. The trade-off is that you'll need to manually update things after trades. For many users, a quick weekly or monthly update is all it takes.</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ── 6. Tips ────────────────────────────────────────────────── -->
+<section class="help-section" id="tips">
+    <div class="help-section-title">
+        <span class="section-icon"><i class="fa-solid fa-lightbulb"></i></span>
+        Tips &amp; Best Practices
+    </div>
+    <div class="help-cards">
+        <div class="help-card">
+            <h4>🔄 Refresh at least weekly</h4>
+            <p>Click <strong>Refresh Market Data</strong> once a week (or more) to build up your portfolio growth history. The more snapshots you have, the more useful the growth chart becomes.</p>
+        </div>
+        <div class="help-card">
+            <h4>🎯 Keep cost basis accurate</h4>
+            <p>Your unrealized gain/loss is only as good as your cost basis data. After any purchase, update your holding's cost basis to include the new shares.</p>
+        </div>
+        <div class="help-card">
+            <h4>🗂️ One account per real account</h4>
+            <p>For the cleanest reporting, mirror your real brokerage accounts 1:1. It makes the Reports section much easier to reconcile with your actual statements.</p>
+        </div>
+        <div class="help-card">
+            <h4>📥 Import after big moves</h4>
+            <p>After an active trading period, do a Schwab CSV export and import transactions in bulk rather than entering each one manually. It saves a lot of time.</p>
+        </div>
+        <div class="help-card">
+            <h4>🧮 Use allocations for strategy</h4>
+            <p>Even if you don't rebalance frequently, setting target allocations and checking the gap view occasionally is a good discipline. It helps you spot when drift has moved you away from your strategy.</p>
+        </div>
+        <div class="help-card">
+            <h4>📱 Collapse the sidebar</h4>
+            <p>On the Dashboard, click the <strong>‹</strong> button at the top of the sidebar to collapse it and give your charts more room. Your preference is saved so it persists across page loads.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.accordion-trigger').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var item = btn.closest('.accordion-item');
+        var wasOpen = item.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.accordion-item.open').forEach(function(el) {
+            el.classList.remove('open');
+        });
+        // Toggle current
+        if (!wasOpen) item.classList.add('open');
+    });
+});
+
+// Open the first item in each accordion group by default
+document.querySelectorAll('.help-accordion').forEach(function(accordion) {
+    var first = accordion.querySelector('.accordion-item');
+    if (first) first.classList.add('open');
+});
+</script>
+{% endblock %}

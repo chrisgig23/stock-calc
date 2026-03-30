@@ -17,8 +17,7 @@ stock_calc_backup*
 sync_to_dev.sh
 
 # Byte-compiled / optimized / DLL files
-flask_app/__pycache__/
-__pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 

@@ -282,6 +282,19 @@ body.sidebar-collapsed .main-wrapper {
     color: var(--sidebar-text-active);
 }
 
+/* Standalone nav links (Dashboard, Help) — match account-item indent */
+.sidebar-nav-list > li > .sidebar-nav-link {
+    display: block;
+    padding: 8px 10px 8px 16px;
+    margin: 1px 8px;
+    border-radius: 6px;
+    flex: unset;
+}
+
+.sidebar-nav-list > li > .sidebar-nav-link:hover {
+    background-color: var(--sidebar-hover);
+}
+
 /* Sidebar footer */
 .sidebar-footer {
     flex-shrink: 0;

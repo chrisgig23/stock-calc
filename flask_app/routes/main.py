@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, render_template
+from flask import Blueprint, redirect, url_for, render_template, request
 from flask_login import current_user, login_required
 from flask_app.models import Account, PortfolioSnapshot
 from collections import defaultdict
@@ -122,7 +122,7 @@ def dashboard():
         })
 
     return render_template(
-        'dashboard.html',
+        "dashboard.html",
         account_cards       = account_cards,
         pie_labels          = json.dumps(pie_labels),
         pie_values          = json.dumps(pie_values),
@@ -136,3 +136,10 @@ def dashboard():
         total_unrealized    = total_unrealized,
         total_unrealized_pct = total_unrealized_pct,
     )
+
+
+@main_bp.route('/help')
+@login_required
+def help_page():
+    """Help & Guide page — overview of the app, concepts, and how-tos."""
+    return render_template("help.html")
