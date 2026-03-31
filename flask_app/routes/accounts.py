@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
 from flask_login import login_required, current_user
 from flask_app import db
-from flask_app.models import Account
+from flask_app.models import Account, Holding, Transaction, Allocation
 
 accounts_bp = Blueprint('accounts', __name__)
 
@@ -23,7 +23,41 @@ def view_account(account_id):
         flash('No accounts available. Please create a new account.', 'info')
         return redirect(url_for('accounts.add_account'))
 
-    return render_template('account_menu.html', account=account) 
+    # Data for tabbed account page
+    holdings = Holding.query.filter_by(account_id=account.id).all()
+    recent_txns = (Transaction.query
+                   .filter_by(account_id=account.id)
+                   .order_by(Transaction.date.desc(), Transaction.id.desc())
+                   .limit(10).all())
+
+    included = [h for h in holdings if h.isincluded]
+    total_mv = sum(h.market_value for h in included)
+    alloc_rows = []
+    for h in included:
+        current_pct = round(h.market_value / total_mv * 100, 2) if total_mv > 0 else 0
+        target_row  = Allocation.query.filter_by(account_id=account.id, name=h.ticker).first()
+        alloc_rows.append({
+            'ticker':      h.ticker,
+            'current_pct': current_pct,
+            'target_pct':  round(target_row.target, 2) if target_row else 0,
+        })
+
+    total_cost     = sum(h.cost_basis for h in holdings if h.cost_basis is not None)
+    total_value    = sum(h.market_value for h in holdings)
+    total_unrealized = round(total_value - total_cost, 2) if total_cost else None
+    unrealized_pct   = round(total_unrealized / total_cost * 100, 2) if total_cost else None
+
+    return render_template(
+        'account_menu.html',
+        account=account,
+        holdings=holdings,
+        recent_txns=recent_txns,
+        alloc_rows=alloc_rows,
+        total_value=total_value,
+        total_cost=total_cost,
+        total_unrealized=total_unrealized,
+        unrealized_pct=unrealized_pct,
+    ) 
 
 
 @accounts_bp.route('/add_account', methods=['GET', 'POST'])

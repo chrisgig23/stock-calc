@@ -1,11 +1,226 @@
 {% extends "base.html" %}
-
 {% block title %}WealthWise — Reports · {{ account.account_name }}{% endblock %}
 
+{% block styles %}
+<style>
+.reports-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.reports-header h2 { margin: 0; font-size: 1.35rem; }
+.reports-back { font-size: 0.875rem; color: var(--color-primary); text-decoration: none; }
+.reports-back:hover { text-decoration: underline; }
+
+/* Summary stat cards */
+.reports-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+}
+.report-stat-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+}
+.report-stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+}
+.report-stat-value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.2;
+}
+.report-stat-value.positive { color: var(--color-success, #16a34a); }
+.report-stat-value.negative { color: var(--color-danger,  #dc2626); }
+
+/* Chart section */
+.chart-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+}
+.chart-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 16px;
+}
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+.no-data-msg {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--color-text-muted);
+}
+.no-data-msg i { font-size: 2.5rem; opacity: 0.3; display: block; margin-bottom: 12px; }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>{{ account.account_name }} - Reports</h2>
+<div class="reports-header">
+    <div>
+        <a class="reports-back" href="{{ url_for('accounts.view_account', account_id=account.id) }}">← {{ account.account_name }}</a>
+        <h2>Reports</h2>
+    </div>
+</div>
 
-<p>Coming soon!</p>
+{% if snapshots %}
 
-<a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
+{# ── Summary stats ─────────────────────────────────────────────────── #}
+<div class="reports-stats">
+    <div class="report-stat-card">
+        <div class="report-stat-label">Current Value</div>
+        <div class="report-stat-value">${{ "{:,.0f}".format(current_value) }}</div>
+    </div>
+    <div class="report-stat-card">
+        <div class="report-stat-label">Total Cost Basis</div>
+        <div class="report-stat-value">${{ "{:,.0f}".format(current_cost) }}</div>
+    </div>
+    {% if total_gain is not none %}
+    <div class="report-stat-card">
+        <div class="report-stat-label">Total Gain / Loss</div>
+        <div class="report-stat-value {% if total_gain >= 0 %}positive{% else %}negative{% endif %}">
+            {% if total_gain >= 0 %}+{% endif %}${{ "{:,.0f}".format(total_gain | abs) }}
+        </div>
+    </div>
+    {% endif %}
+    {% if total_gain_pct is not none %}
+    <div class="report-stat-card">
+        <div class="report-stat-label">Total Return</div>
+        <div class="report-stat-value {% if total_gain_pct >= 0 %}positive{% else %}negative{% endif %}">
+            {% if total_gain_pct >= 0 %}+{% endif %}{{ "%.1f" | format(total_gain_pct) }}%
+        </div>
+    </div>
+    {% endif %}
+    {% if start_value %}
+    <div class="report-stat-card">
+        <div class="report-stat-label">Tracking Since</div>
+        <div class="report-stat-value" style="font-size:1.05rem">{{ snapshots[0].snapshot_date.strftime('%b %Y') }}</div>
+    </div>
+    {% endif %}
+</div>
+
+{# ── Performance chart ──────────────────────────────────────────────── #}
+<div class="chart-card">
+    <div class="chart-card-title">Portfolio Value Over Time</div>
+    <div class="chart-container">
+        <canvas id="performanceChart"></canvas>
+    </div>
+</div>
+
+{% else %}
+<div class="no-data-msg">
+    <i class="fa-solid fa-chart-line"></i>
+    <div>No performance data yet.</div>
+    <div style="margin-top:8px; font-size:0.85rem;">
+        Sync from Schwab or import a positions CSV to start tracking your portfolio's growth.
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if snapshots %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function() {
+    var labels     = {{ chart_labels | safe }};
+    var marketVals = {{ chart_market | safe }};
+    var costVals   = {{ chart_cost   | safe }};
+
+    var isDark = document.documentElement.classList.contains('dark') ||
+                 window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var gridColor  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    var textColor  = isDark ? '#94a3b8' : '#64748b';
+
+    new Chart(document.getElementById('performanceChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Market Value',
+                    data: marketVals,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59,130,246,0.08)',
+                    borderWidth: 2.5,
+                    pointRadius: 3,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.35,
+                },
+                {
+                    label: 'Cost Basis',
+                    data: costVals,
+                    borderColor: '#94a3b8',
+                    backgroundColor: 'transparent',
+                    borderWidth: 1.8,
+                    borderDash: [5, 4],
+                    pointRadius: 2,
+                    pointHoverRadius: 5,
+                    fill: false,
+                    tension: 0.35,
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { color: textColor, boxWidth: 14, font: { size: 12 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            var v = ctx.parsed.y;
+                            if (v === null) return null;
+                            return ctx.dataset.label + ': $' + v.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { color: gridColor },
+                    ticks: { color: textColor, font: { size: 11 } }
+                },
+                y: {
+                    grid: { color: gridColor },
+                    ticks: {
+                        color: textColor,
+                        font: { size: 11 },
+                        callback: function(v) {
+                            if (v >= 1000000) return '$' + (v/1000000).toFixed(1) + 'M';
+                            if (v >= 1000)    return '$' + (v/1000).toFixed(0) + 'K';
+                            return '$' + v;
+                        }
+                    }
+                }
+            }
+        }
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

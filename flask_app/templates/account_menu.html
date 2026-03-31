@@ -1,27 +1,342 @@
 {% extends "base.html" %}
-
 {% block title %}WealthWise — {{ account.account_name }}{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Page header ─────────────────────────────────────────────────────── */
+.acct-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.acct-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.acct-title-row h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.account-rename-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 4px 6px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    line-height: 1;
+}
+.account-rename-btn:hover { background: var(--color-hover); color: var(--color-primary); }
+.account-rename-input {
+    font-size: 1.4rem;
+    font-weight: 700;
+    border: 2px solid var(--color-primary);
+    border-radius: 6px;
+    padding: 2px 8px;
+    color: var(--color-text);
+    background: var(--color-surface);
+    min-width: 200px;
+}
+.btn-rename-action {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+.btn-rename-save  { border-color: var(--color-success); color: var(--color-success); }
+.btn-rename-cancel:hover { background: var(--color-hover); }
+
+/* ── Summary stat cards ─────────────────────────────────────────────── */
+.acct-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.acct-stat {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+.acct-stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    margin-bottom: 4px;
+}
+.acct-stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.acct-stat-value.positive { color: var(--color-success, #16a34a); }
+.acct-stat-value.negative { color: var(--color-danger,  #dc2626); }
+
+/* ── Tab bar ────────────────────────────────────────────────────────── */
+.acct-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--color-border);
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+.acct-tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    padding: 10px 18px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+}
+.acct-tab-btn:hover  { color: var(--color-text); }
+.acct-tab-btn.active { color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 600; }
+
+.acct-tab-panel { display: none; }
+.acct-tab-panel.active { display: block; }
+
+/* ── Positions tab ──────────────────────────────────────────────────── */
+.positions-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+.positions-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.positions-table th {
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+.positions-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+    color: var(--color-text);
+}
+.positions-table tr:last-child td { border-bottom: none; }
+.positions-table tr:hover td { background: var(--color-hover); }
+.pos-ticker { font-weight: 700; font-family: monospace; font-size: 0.9rem; }
+.gain-pos   { color: var(--color-success, #16a34a); font-weight: 600; }
+.gain-neg   { color: var(--color-danger,  #dc2626); font-weight: 600; }
+
+/* ── Transactions tab ───────────────────────────────────────────────── */
+.txn-mini-wrap {
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    overflow: hidden;
+}
+.txn-mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.txn-mini-table th {
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+.txn-mini-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+    vertical-align: middle;
+}
+.txn-mini-table tr:last-child td { border-bottom: none; }
+.txn-mini-table tr:hover td { background: var(--color-hover); }
+.txn-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+.badge-buy            { background: rgba(16,185,129,0.12); color: #059669; }
+.badge-sell           { background: rgba(239,68,68,0.12);  color: #dc2626; }
+.badge-dividend       { background: rgba(59,130,246,0.12); color: #2563eb; }
+.badge-reinvest_dividend, .badge-reinvest_shares {
+                        background: rgba(99,102,241,0.12); color: #4f46e5; }
+.badge-transfer_in    { background: rgba(20,184,166,0.12); color: #0f766e; }
+.badge-transfer_out   { background: rgba(249,115,22,0.12); color: #c2410c; }
+.badge-fee            { background: rgba(239,68,68,0.10);  color: #b91c1c; }
+.badge-other          { background: rgba(148,163,184,0.12);color: #64748b; }
+.txn-amount-pos { color: var(--color-success, #16a34a); font-weight: 600; }
+.txn-amount-neg { color: var(--color-danger,  #dc2626); font-weight: 600; }
+.view-all-link { display:block; text-align:center; padding:10px; font-size:0.85rem; color:var(--color-primary); text-decoration:none; border-top:1px solid var(--color-border); }
+.view-all-link:hover { background:var(--color-hover); }
+
+/* ── Allocation tab ─────────────────────────────────────────────────── */
+.alloc-mini-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+@media (max-width: 640px) { .alloc-mini-wrap { grid-template-columns: 1fr; } }
+.alloc-chart-box { max-width: 260px; margin: 0 auto; }
+.alloc-table-wrap {
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    overflow: hidden;
+}
+.alloc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.alloc-table th {
+    padding: 8px 14px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+}
+.alloc-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+.alloc-table tr:last-child td { border-bottom: none; }
+.delta-pos { color: var(--color-success, #16a34a); }
+.delta-neg { color: var(--color-danger,  #dc2626); }
+
+/* ── Actions tab ────────────────────────────────────────────────────── */
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+}
+.action-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 18px 16px;
+    text-decoration: none;
+    color: var(--color-text);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.action-card:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 16px rgba(99,102,241,0.12);
+    transform: translateY(-1px);
+}
+.action-card.action-primary {
+    border-color: rgba(16,185,129,0.4);
+    background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
+}
+.action-card.action-primary:hover {
+    border-color: var(--color-success);
+    box-shadow: 0 4px 16px rgba(16,185,129,0.18);
+}
+.action-icon {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    background: rgba(99,102,241,0.1);
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+.action-card.action-primary .action-icon {
+    background: #D1FAE5;
+    color: var(--color-success);
+}
+.action-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 3px; }
+.action-desc  { font-size: 0.78rem; color: var(--color-text-muted); line-height: 1.4; }
+
+.empty-tab { text-align:center; padding:40px 20px; color:var(--color-text-muted); }
+.empty-tab i { font-size:2rem; opacity:0.3; display:block; margin-bottom:10px; }
+</style>
+{% endblock %}
 
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const renameBtn  = document.getElementById('rename-btn');
-    const titleEl    = document.getElementById('account-title');
-    const accountId  = {{ account.id }};
+    /* ── Tab switching ─────────────────────────────────────────── */
+    var tabBtns   = document.querySelectorAll('.acct-tab-btn');
+    var tabPanels = document.querySelectorAll('.acct-tab-panel');
+
+    function showTab(id) {
+        tabBtns.forEach(function(b) {
+            b.classList.toggle('active', b.dataset.tab === id);
+        });
+        tabPanels.forEach(function(p) {
+            p.classList.toggle('active', p.id === id);
+        });
+        try { localStorage.setItem('acctTab_{{ account.id }}', id); } catch(e) {}
+    }
+
+    tabBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() { showTab(btn.dataset.tab); });
+    });
+
+    // Restore last tab or default to 'positions'
+    var last = '';
+    try { last = localStorage.getItem('acctTab_{{ account.id }}') || ''; } catch(e) {}
+    showTab(last || 'positions');
+
+    /* ── Account rename ────────────────────────────────────────── */
+    var renameBtn = document.getElementById('rename-btn');
+    var titleEl   = document.getElementById('account-title');
+    var accountId = {{ account.id }};
 
     renameBtn.addEventListener('click', function() {
-        const currentName = titleEl.textContent.trim();
-        const input = document.createElement('input');
+        var currentName = titleEl.textContent.trim();
+        var input = document.createElement('input');
         input.type = 'text'; input.value = currentName;
         input.className = 'account-rename-input'; input.maxLength = 50;
-        const saveBtn = document.createElement('button');
+        var saveBtn = document.createElement('button');
         saveBtn.className = 'btn-rename-action btn-rename-save';
         saveBtn.title = 'Save'; saveBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
-        const cancelBtn = document.createElement('button');
+        var cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn-rename-action btn-rename-cancel';
         cancelBtn.title = 'Cancel'; cancelBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
         titleEl.style.display = 'none'; renameBtn.style.display = 'none';
-        const row = titleEl.parentElement;
+        var row = titleEl.parentElement;
         row.insertBefore(input, titleEl);
         row.insertBefore(saveBtn, titleEl);
         row.insertBefore(cancelBtn, titleEl);
@@ -31,22 +346,19 @@ document.addEventListener('DOMContentLoaded', function() {
             titleEl.style.display = ''; renameBtn.style.display = '';
         }
         function doSave() {
-            const newName = input.value.trim();
+            var newName = input.value.trim();
             if (!newName) { input.focus(); return; }
             fetch('/account/' + accountId + '/rename', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name: newName })
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
+            }).then(function(r) { return r.json(); }).then(function(data) {
                 if (data.success) {
                     titleEl.textContent = data.name;
                     document.title = 'WealthWise — ' + data.name;
                     document.querySelectorAll('.sidebar-nav-link').forEach(function(link) {
-                        if (link.getAttribute('href') && link.getAttribute('href').includes('/view_account/' + accountId)) {
+                        if (link.href && link.href.includes('/view_account/' + accountId))
                             link.textContent = data.name;
-                        }
                     });
                 } else { alert(data.error || 'Failed to rename account'); }
                 cleanup();
@@ -59,66 +371,305 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.key === 'Escape') cleanup();
         });
     });
+
+    /* ── Allocation mini chart ─────────────────────────────────── */
+    {% if alloc_rows %}
+    var allocCanvas = document.getElementById('allocMiniChart');
+    if (allocCanvas && typeof Chart !== 'undefined') {
+        var labels = [{% for a in alloc_rows %}'{{ a.ticker }}',{% endfor %}];
+        var values = [{% for a in alloc_rows %}{{ a.current_pct }},{% endfor %}];
+        var palette = ['#6366f1','#3b82f6','#06b6d4','#10b981','#f59e0b','#f43f5e','#8b5cf6','#84cc16'];
+        new Chart(allocCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{ data: values, backgroundColor: palette, borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } },
+                    tooltip: { callbacks: { label: function(c) { return c.label + ': ' + c.parsed.toFixed(1) + '%'; } } }
+                }
+            }
+        });
+    }
+    {% endif %}
 });
 </script>
 {% endblock %}
 
 {% block content %}
-<div class="account-menu-header">
-    <div class="account-header-row">
+
+{# ── Page header ──────────────────────────────────────────────────────── #}
+<div class="acct-page-header">
+    <div class="acct-title-row">
         <h2 id="account-title">{{ account.account_name }}</h2>
         <button class="account-rename-btn" id="rename-btn" title="Rename account">
             <i class="fa-solid fa-pencil"></i>
         </button>
     </div>
-    <span class="account-subtitle">Select an action for this account</span>
 </div>
 
-{% if accounts %}
-<div class="menu-card-grid">
-
-    <a href="{{ url_for('portfolio.view_positions', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-chart-line"></i></div>
-        <div class="menu-card-title">View Positions</div>
-        <div class="menu-card-desc">Current holdings, cost basis, and unrealized P&amp;L</div>
-    </a>
-
-    <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-pen-to-square"></i></div>
-        <div class="menu-card-title">Edit Portfolio</div>
-        <div class="menu-card-desc">Add or remove holdings from this account</div>
-    </a>
-
-    <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-chart-pie"></i></div>
-        <div class="menu-card-title">View Allocation</div>
-        <div class="menu-card-desc">Current vs. target allocation breakdown</div>
-    </a>
-
-    <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-sliders"></i></div>
-        <div class="menu-card-title">Adjust Allocations</div>
-        <div class="menu-card-desc">Set target percentages for each holding</div>
-    </a>
-
-    <a href="{{ url_for('reports.view_reports', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-chart-column"></i></div>
-        <div class="menu-card-title">Reports</div>
-        <div class="menu-card-desc">Performance history and portfolio analytics</div>
-    </a>
-
-    <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="menu-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
-        <div class="menu-card-title">Import Data</div>
-        <div class="menu-card-desc">Upload positions or transactions from your broker</div>
-    </a>
-
-    <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="menu-card highlight-card">
-        <div class="menu-card-icon"><i class="fa-solid fa-coins"></i></div>
-        <div class="menu-card-title">Make a Purchase</div>
-        <div class="menu-card-desc">Invest cash and rebalance toward your targets</div>
-    </a>
-
+{# ── Summary stat cards ───────────────────────────────────────────────── #}
+<div class="acct-stats">
+    <div class="acct-stat">
+        <div class="acct-stat-label">Market Value</div>
+        <div class="acct-stat-value">${{ "{:,.0f}".format(total_value) }}</div>
+    </div>
+    <div class="acct-stat">
+        <div class="acct-stat-label">Cost Basis</div>
+        <div class="acct-stat-value">${{ "{:,.0f}".format(total_cost) }}</div>
+    </div>
+    {% if total_unrealized is not none %}
+    <div class="acct-stat">
+        <div class="acct-stat-label">Unrealized G/L</div>
+        <div class="acct-stat-value {% if total_unrealized >= 0 %}positive{% else %}negative{% endif %}">
+            {% if total_unrealized >= 0 %}+{% endif %}${{ "{:,.0f}".format(total_unrealized | abs) }}
+        </div>
+    </div>
+    {% endif %}
+    {% if unrealized_pct is not none %}
+    <div class="acct-stat">
+        <div class="acct-stat-label">Total Return</div>
+        <div class="acct-stat-value {% if unrealized_pct >= 0 %}positive{% else %}negative{% endif %}">
+            {% if unrealized_pct >= 0 %}+{% endif %}{{ "%.1f" | format(unrealized_pct) }}%
+        </div>
+    </div>
+    {% endif %}
+    <div class="acct-stat">
+        <div class="acct-stat-label">Holdings</div>
+        <div class="acct-stat-value">{{ holdings | length }}</div>
+    </div>
 </div>
-{% endif %}
+
+{# ── Tab bar ──────────────────────────────────────────────────────────── #}
+<div class="acct-tabs">
+    <button class="acct-tab-btn" data-tab="positions">Positions</button>
+    <button class="acct-tab-btn" data-tab="transactions">Recent Activity</button>
+    <button class="acct-tab-btn" data-tab="allocation">Allocation</button>
+    <button class="acct-tab-btn" data-tab="actions">Actions</button>
+</div>
+
+{# ── Positions tab ────────────────────────────────────────────────────── #}
+<div id="positions" class="acct-tab-panel">
+    {% if holdings %}
+    <div class="positions-table-wrap">
+        <table class="positions-table">
+            <thead>
+                <tr>
+                    <th>Ticker</th>
+                    <th style="text-align:right">Shares</th>
+                    <th style="text-align:right">Price</th>
+                    <th style="text-align:right">Market Value</th>
+                    <th style="text-align:right">Cost Basis</th>
+                    <th style="text-align:right">Unrealized G/L</th>
+                    <th style="text-align:right">Return</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for h in holdings %}
+                <tr>
+                    <td><span class="pos-ticker">{{ h.ticker }}</span></td>
+                    <td style="text-align:right">{{ "%.4g" | format(h.quantity) }}</td>
+                    <td style="text-align:right">
+                        {% if h.current_price %} ${{ "%.2f" | format(h.current_price) }} {% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right">${{ "{:,.2f}".format(h.market_value) }}</td>
+                    <td style="text-align:right">
+                        {% if h.cost_basis %}${{ "{:,.2f}".format(h.cost_basis) }}{% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right">
+                        {% if h.unrealized_gain is not none %}
+                        <span class="{% if h.unrealized_gain >= 0 %}gain-pos{% else %}gain-neg{% endif %}">
+                            {% if h.unrealized_gain >= 0 %}+{% endif %}${{ "{:,.2f}".format(h.unrealized_gain | abs) }}
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right">
+                        {% if h.unrealized_gain_pct is not none %}
+                        <span class="{% if h.unrealized_gain_pct >= 0 %}gain-pos{% else %}gain-neg{% endif %}">
+                            {% if h.unrealized_gain_pct >= 0 %}+{% endif %}{{ "%.1f" | format(h.unrealized_gain_pct) }}%
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="margin-top:10px; text-align:right;">
+        <a href="{{ url_for('portfolio.view_positions', account_id=account.id) }}" style="font-size:0.85rem; color:var(--color-primary);">
+            View full positions page →
+        </a>
+    </div>
+    {% else %}
+    <div class="empty-tab">
+        <i class="fa-solid fa-chart-line"></i>
+        <div>No holdings yet.</div>
+        <div style="margin-top:8px; font-size:0.82rem;">
+            <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" style="color:var(--color-primary);">Import from Schwab</a>
+            or add holdings manually.
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{# ── Transactions tab ─────────────────────────────────────────────────── #}
+<div id="transactions" class="acct-tab-panel">
+    {% if recent_txns %}
+    <div class="txn-mini-wrap">
+        <table class="txn-mini-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Ticker</th>
+                    <th style="text-align:right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for txn in recent_txns %}
+            <tr>
+                <td style="white-space:nowrap">{{ txn.date.strftime('%b %d, %Y') }}</td>
+                <td><span class="txn-badge badge-{{ txn.action_type }}">{{ txn.action_type.replace('_', ' ') }}</span></td>
+                <td>{% if txn.ticker %}<strong>{{ txn.ticker }}</strong>{% else %}—{% endif %}</td>
+                <td style="text-align:right">
+                    {% if txn.amount > 0 %}
+                    <span class="txn-amount-pos">+${{ "{:,.2f}".format(txn.amount) }}</span>
+                    {% elif txn.amount < 0 %}
+                    <span class="txn-amount-neg">-${{ "{:,.2f}".format(txn.amount | abs) }}</span>
+                    {% else %}<span style="color:var(--color-text-muted)">$0.00</span>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('portfolio.view_transactions', account_id=account.id) }}" class="view-all-link">
+            View all transactions →
+        </a>
+    </div>
+    {% else %}
+    <div class="empty-tab">
+        <i class="fa-solid fa-receipt"></i>
+        <div>No transactions recorded yet.</div>
+    </div>
+    {% endif %}
+</div>
+
+{# ── Allocation tab ───────────────────────────────────────────────────── #}
+<div id="allocation" class="acct-tab-panel">
+    {% if alloc_rows %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <div class="alloc-mini-wrap">
+        <div class="alloc-chart-box">
+            <canvas id="allocMiniChart"></canvas>
+        </div>
+        <div class="alloc-table-wrap">
+            <table class="alloc-table">
+                <thead>
+                    <tr>
+                        <th>Ticker</th>
+                        <th style="text-align:right">Current</th>
+                        <th style="text-align:right">Target</th>
+                        <th style="text-align:right">Δ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for a in alloc_rows %}
+                <tr>
+                    <td><strong>{{ a.ticker }}</strong></td>
+                    <td style="text-align:right">{{ "%.1f" | format(a.current_pct) }}%</td>
+                    <td style="text-align:right">{{ "%.1f" | format(a.target_pct) }}%</td>
+                    <td style="text-align:right">
+                        {% set delta = a.current_pct - a.target_pct %}
+                        <span class="{% if delta > 0 %}delta-pos{% elif delta < 0 %}delta-neg{% endif %}">
+                            {% if delta > 0 %}+{% endif %}{{ "%.1f" | format(delta) }}%
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div style="margin-top:10px; text-align:right;">
+        <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" style="font-size:0.85rem; color:var(--color-primary);">
+            Adjust target allocations →
+        </a>
+    </div>
+    {% else %}
+    <div class="empty-tab">
+        <i class="fa-solid fa-chart-pie"></i>
+        <div>No allocations set yet.</div>
+        <div style="margin-top:8px; font-size:0.82rem;">
+            <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" style="color:var(--color-primary);">Set target allocations</a> to enable purchase suggestions.
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{# ── Actions tab ──────────────────────────────────────────────────────── #}
+<div id="actions" class="acct-tab-panel">
+    <div class="actions-grid">
+
+        <a href="{{ url_for('portfolio.view_positions', account_id=account.id) }}" class="action-card">
+            <div class="action-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div>
+                <div class="action-title">View Positions</div>
+                <div class="action-desc">Full positions page with refresh and sync controls</div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="action-card action-primary">
+            <div class="action-icon"><i class="fa-solid fa-coins"></i></div>
+            <div>
+                <div class="action-title">Make a Purchase</div>
+                <div class="action-desc">Invest cash and rebalance toward your targets</div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="action-card">
+            <div class="action-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+            <div>
+                <div class="action-title">Edit Portfolio</div>
+                <div class="action-desc">Manually add, update, or remove holdings</div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="action-card">
+            <div class="action-icon"><i class="fa-solid fa-sliders"></i></div>
+            <div>
+                <div class="action-title">Adjust Allocations</div>
+                <div class="action-desc">Set target percentages for each holding</div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('portfolio.view_transactions', account_id=account.id) }}" class="action-card">
+            <div class="action-icon"><i class="fa-solid fa-receipt"></i></div>
+            <div>
+                <div class="action-title">Transaction History</div>
+                <div class="action-desc">Full log of buys, sells, dividends, and transfers</div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('reports.view_reports', account_id=account.id) }}" class="action-card">
+            <div class="action-icon"><i class="fa-solid fa-chart-column"></i></div>
+            <div>
+                <div class="action-title">Reports</div>
+                <div class="action-desc">Portfolio growth chart and performance analytics</div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="action-card">
+            <div class="action-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
+            <div>
+                <div class="action-title">Import Data</div>
+                <div class="action-desc">Upload positions or transactions from your broker</div>
+            </div>
+        </a>
+
+    </div>
+</div>
+
 {% endblock %}

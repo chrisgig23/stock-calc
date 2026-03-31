@@ -327,6 +327,58 @@ def _get_suggested_purchases(account, included_holdings, cash_value):
 
 
 # ---------------------------------------------------------------------------
+# Transaction History  (F2)
+# ---------------------------------------------------------------------------
+
+@portfolio_bp.route('/view_transactions/<int:account_id>')
+@login_required
+def view_transactions(account_id):
+    """Paginated, filterable transaction history for a single account."""
+    account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
+
+    # Filter params from query string
+    filter_type   = request.args.get('type', '')
+    filter_ticker = request.args.get('ticker', '').strip().upper()
+    page          = request.args.get('page', 1, type=int)
+    per_page      = 25
+
+    query = Transaction.query.filter_by(account_id=account_id)
+
+    if filter_type:
+        query = query.filter(Transaction.action_type == filter_type)
+    if filter_ticker:
+        query = query.filter(Transaction.ticker == filter_ticker)
+
+    query = query.order_by(Transaction.date.desc(), Transaction.id.desc())
+    pagination   = query.paginate(page=page, per_page=per_page, error_out=False)
+    transactions = pagination.items
+
+    # Distinct tickers and types for filter dropdowns
+    all_tickers = (db.session.query(Transaction.ticker)
+                   .filter(Transaction.account_id == account_id,
+                           Transaction.ticker.isnot(None))
+                   .distinct()
+                   .order_by(Transaction.ticker)
+                   .all())
+    all_types = (db.session.query(Transaction.action_type)
+                 .filter(Transaction.account_id == account_id)
+                 .distinct()
+                 .order_by(Transaction.action_type)
+                 .all())
+
+    return render_template(
+        'view_transactions.html',
+        account=account,
+        transactions=transactions,
+        pagination=pagination,
+        filter_type=filter_type,
+        filter_ticker=filter_ticker,
+        all_tickers=[t[0] for t in all_tickers],
+        all_types=[t[0] for t in all_types],
+    )
+
+
+# ---------------------------------------------------------------------------
 # Ticker validation endpoint
 # ---------------------------------------------------------------------------
 

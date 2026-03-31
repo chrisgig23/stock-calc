@@ -57,32 +57,61 @@ def inject_accounts():
         return {"accounts": user_accounts, "max_position": max_position}
     return {"accounts": [], "max_position": 0}
 
+def _fmt_market_delta(delta, prefix):
+    """Format a timedelta into a human-friendly string like 'Opens in 1h 30m'."""
+    total = int(delta.total_seconds())
+    if total <= 0:
+        return ''
+    h = total // 3600
+    m = (total % 3600) // 60
+    if h >= 48:
+        return f'{prefix} in {h // 24}d'
+    elif h > 0:
+        return f'{prefix} in {h}h {m}m' if m else f'{prefix} in {h}h'
+    else:
+        return f'{prefix} in {m}m'
+
+
 @app.context_processor
 def inject_market_state():
-    """Injects market open/closed state into all templates.
-    Uses NYSE calendar; falls back to a simple weekday+time check if the
-    calendar library has no data for today."""
+    """Injects market_state (bool) and market_next_event (str) into all templates.
+    Uses NYSE calendar with a 7-day lookahead to compute next open/close time."""
     try:
-        ny_tz = pytz.timezone('America/New_York')
+        ny_tz  = pytz.timezone('America/New_York')
         now_ny = datetime.now(ny_tz)
-        today = now_ny.strftime('%Y-%m-%d')
-        schedule = mcal.get_calendar('NYSE').schedule(start_date=today, end_date=today)
+        today  = now_ny.strftime('%Y-%m-%d')
+        ahead  = (now_ny + timedelta(days=7)).strftime('%Y-%m-%d')
+
+        schedule = mcal.get_calendar('NYSE').schedule(start_date=today, end_date=ahead)
+
+        market_state      = False
+        market_next_event = ''
 
         if not schedule.empty:
-            market_open  = schedule.iloc[0]['market_open'].tz_convert('America/New_York')
-            market_close = schedule.iloc[0]['market_close'].tz_convert('America/New_York')
-            market_state = market_open <= now_ny <= market_close
+            for _, row in schedule.iterrows():
+                open_et  = row['market_open'].tz_convert(ny_tz)
+                close_et = row['market_close'].tz_convert(ny_tz)
+
+                if open_et <= now_ny <= close_et:
+                    market_state      = True
+                    market_next_event = _fmt_market_delta(close_et - now_ny, 'Closes')
+                    break
+                elif now_ny < open_et:
+                    market_next_event = _fmt_market_delta(open_et - now_ny, 'Opens')
+                    break
+                # Past session for this day — check next row
         else:
-            # Fallback: Mon–Fri, 9:30 AM – 4:00 PM ET (no holiday awareness)
+            # Fallback: Mon–Fri, 9:30 AM – 4:00 PM ET
             from datetime import time as dt_time
             market_state = (
                 now_ny.weekday() < 5 and
                 dt_time(9, 30) <= now_ny.time() <= dt_time(16, 0)
             )
     except Exception:
-        market_state = False
+        market_state      = False
+        market_next_event = ''
 
-    return dict(market_state=market_state)
+    return dict(market_state=market_state, market_next_event=market_next_event)
 
 # Import and register Blueprints
 from flask_app.routes.auth import auth_bp

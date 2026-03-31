@@ -23,7 +23,7 @@
             <div class="sidebar-brand-content">
                 <span class="brand-wordmark">WealthWise™</span>
                 <span class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
-                    {% if market_state %}● Markets Open{% else %}● Markets Closed{% endif %}
+                    {% if market_state %}● Markets Open{% else %}● Markets Closed{% endif %}{% if market_next_event %}<span class="market-next">· {{ market_next_event }}</span>{% endif %}
                 </span>
             </div>
             <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse sidebar" aria-label="Collapse sidebar">

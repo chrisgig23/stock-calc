@@ -189,6 +189,12 @@ body.sidebar-collapsed .main-wrapper {
     color: #64748B;
 }
 
+.market-next {
+    opacity: 0.7;
+    font-size: 0.85em;
+    margin-left: 2px;
+}
+
 /* Accounts section */
 .sidebar-section {
     flex: 1;
