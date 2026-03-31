@@ -319,9 +319,7 @@
 </style>
 {% endblock %}
 
-{% block content %}
-
-{# ── Flash messages ────────────────────────────────────────────────────── #}
+{% block flashes %}
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
 <ul class="flash-list">
@@ -337,6 +335,9 @@
 </ul>
 {% endif %}
 {% endwith %}
+{% endblock %}
+
+{% block content %}
 
 {# ── Header ───────────────────────────────────────────────────────────────── #}
 <div class="admin-header">
