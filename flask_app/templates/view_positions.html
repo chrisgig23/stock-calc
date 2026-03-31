@@ -167,7 +167,6 @@
                         opt.value = acct.hashValue;
 
                         var label = '••••' + acct.accountNumber.slice(-4);
-                        if (acct.accountType) label += ' — ' + acct.accountType;
 
                         var alreadyLinked = linkedHashes.indexOf(acct.hashValue) !== -1;
                         if (alreadyLinked) {
