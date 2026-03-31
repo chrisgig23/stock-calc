@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+{% block title %}WealthWise — Admin Panel{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Layout ──────────────────────────────────────────────────────────── */
+.admin-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+.admin-header-text h2 {
+    margin: 0 0 4px;
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.admin-header-text h2 .admin-badge {
+    font-size: 0.6em;
+    font-weight: 700;
+    background: #EDE9FE;
+    color: #5B21B6;
+    border-radius: 6px;
+    padding: 2px 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+.admin-header-text p {
+    margin: 0;
+    font-size: 0.88em;
+    color: var(--color-text-secondary);
+}
+
+/* ── Stat cards ──────────────────────────────────────────────────────── */
+.stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+}
+.stat-card-label {
+    font-size: 0.78em;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+}
+.stat-card-value {
+    font-size: 2em;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1;
+}
+
+/* ── Panel card ──────────────────────────────────────────────────────── */
+.panel-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.panel-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.panel-card-title {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+.panel-card-title .card-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78em;
+    flex-shrink: 0;
+}
+
+/* ── Add user inline form ────────────────────────────────────────────── */
+.add-user-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.add-user-form input[type="text"] {
+    padding: 7px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.84em;
+    font-family: inherit;
+    min-width: 180px;
+    background: var(--color-bg-alt, #f9fafb);
+    color: var(--color-text);
+}
+.add-user-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: #fff;
+}
+
+/* ── Users table ─────────────────────────────────────────────────────── */
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88em;
+}
+.users-table thead th {
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 0.78em;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-bg-alt, #f9fafb);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+.users-table thead th:last-child { text-align: right; }
+.users-table tbody tr {
+    border-bottom: 1px solid var(--color-border);
+    transition: background 0.1s;
+}
+.users-table tbody tr:last-child { border-bottom: none; }
+.users-table tbody tr:hover { background: #fafafa; }
+.users-table td {
+    padding: 13px 16px;
+    vertical-align: middle;
+    color: var(--color-text);
+}
+.users-table td:last-child { text-align: right; }
+
+/* ── Username cell ───────────────────────────────────────────────────── */
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    font-weight: 700;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+.user-name {
+    font-weight: 600;
+}
+.user-id {
+    font-size: 0.8em;
+    color: var(--color-text-secondary);
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.77em;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-admin   { background: #EDE9FE; color: #5B21B6; }
+.badge-user    { background: #F3F4F6; color: #6B7280; }
+.badge-you     { background: #D1FAE5; color: #065F46; }
+
+/* ── Action buttons ──────────────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 0.82em;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.btn-primary   { background: var(--color-primary); color: #fff; }
+.btn-primary:hover { background: var(--color-primary-dark); }
+.btn-secondary { background: var(--color-bg-alt, #f3f4f6); border: 1px solid var(--color-border); color: var(--color-text); }
+.btn-secondary:hover { background: var(--color-border); }
+.btn-warning   { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+.btn-warning:hover { background: #FDE68A; }
+.btn-danger    { background: var(--color-danger); color: #fff; }
+.btn-danger:hover { background: var(--color-danger-dark, #b91c1c); }
+.btn-ghost     { background: transparent; color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+.btn-ghost:hover { background: var(--color-bg-alt, #f3f4f6); color: var(--color-text); }
+.btn[disabled], .btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.action-group {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* ── Flash messages ──────────────────────────────────────────────────── */
+.flash-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+}
+.flash-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 13px 16px;
+    border-radius: 10px;
+    font-size: 0.88em;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+}
+.flash-item.success { background: #D1FAE5; color: #065F46; border-color: #A7F3D0; }
+.flash-item.info    { background: #DBEAFE; color: #1E40AF; border-color: #BFDBFE; }
+.flash-item.warning { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.flash-item.danger  { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+.flash-item.error   { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+.flash-item code {
+    background: rgba(0,0,0,0.08);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 1em;
+}
+.flash-item strong { font-weight: 700; }
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--color-text-secondary);
+    font-size: 0.9em;
+}
+
+/* ── Delete modal ────────────────────────────────────────────────────── */
+.confirm-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.confirm-modal-overlay.active { display: flex; }
+.confirm-modal {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 30px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.confirm-modal h3 {
+    margin: 0 0 10px;
+    font-size: 1.05em;
+    color: var(--color-text);
+}
+.confirm-modal p {
+    margin: 0 0 22px;
+    font-size: 0.88em;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+.confirm-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── Flash messages ────────────────────────────────────────────────────── #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class="flash-list">
+    {% for category, message in messages %}
+    <li class="flash-item {{ category }}">
+        {% if category == 'success' %}<i class="fa-solid fa-circle-check"></i>
+        {% elif category == 'info' %}<i class="fa-solid fa-circle-info"></i>
+        {% elif category == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>
+        {% else %}<i class="fa-solid fa-circle-xmark"></i>{% endif %}
+        <span>{{ message | safe }}</span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+{# ── Header ───────────────────────────────────────────────────────────────── #}
+<div class="admin-header">
+    <div class="admin-header-text">
+        <h2>
+            <i class="fa-solid fa-shield-halved" style="color: var(--color-primary);"></i>
+            Admin Panel
+            <span class="admin-badge">Admin Only</span>
+        </h2>
+        <p>Manage users, access levels, and account data.</p>
+    </div>
+</div>
+
+{# ── Stat cards ───────────────────────────────────────────────────────────── #}
+<div class="stat-row">
+    <div class="stat-card">
+        <div class="stat-card-label"><i class="fa-solid fa-users" style="margin-right:5px;"></i>Total Users</div>
+        <div class="stat-card-value">{{ users | length }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label"><i class="fa-solid fa-briefcase" style="margin-right:5px;"></i>Total Accounts</div>
+        <div class="stat-card-value">{{ total_accounts }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label"><i class="fa-solid fa-shield-halved" style="margin-right:5px;"></i>Admins</div>
+        <div class="stat-card-value">{{ admin_count }}</div>
+    </div>
+</div>
+
+{# ── User management table ────────────────────────────────────────────────── #}
+<div class="panel-card">
+    <div class="panel-card-header">
+        <h3 class="panel-card-title">
+            <span class="card-icon"><i class="fa-solid fa-users"></i></span>
+            Users
+        </h3>
+        {# Add user inline form #}
+        <form action="{{ url_for('admin.admin_add_user') }}" method="POST" class="add-user-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="new_username" placeholder="New username" required minlength="3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-user-plus"></i> Add User
+            </button>
+        </form>
+    </div>
+
+    {% if users %}
+    <table class="users-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Accounts</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                {# User column #}
+                <td>
+                    <div class="user-cell">
+                        <div class="user-avatar" style="background: hsl({{ (user.id * 47) % 360 }}, 55%, 55%);">
+                            {{ user.username[0] }}
+                        </div>
+                        <div>
+                            <div class="user-name">{{ user.username }}</div>
+                            <div class="user-id">ID #{{ user.id }}</div>
+                        </div>
+                    </div>
+                </td>
+
+                {# Role badge #}
+                <td>
+                    {% if user.id == current_user.id %}
+                        <span class="badge badge-you"><i class="fa-solid fa-circle-check"></i> You</span>
+                    {% endif %}
+                    {% if user.is_admin or user.username == 'cgiglio' %}
+                        <span class="badge badge-admin"><i class="fa-solid fa-shield-halved"></i> Admin</span>
+                    {% else %}
+                        <span class="badge badge-user"><i class="fa-solid fa-user"></i> User</span>
+                    {% endif %}
+                </td>
+
+                {# Account count #}
+                <td>{{ user.accounts | length }}</td>
+
+                {# Actions #}
+                <td>
+                    <div class="action-group">
+
+                        {# Reset password #}
+                        <form method="POST" action="{{ url_for('admin.admin_reset_password', user_id=user.id) }}"
+                              onsubmit="return confirm('Reset password for {{ user.username }}? A new temporary password will be shown once.')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-secondary" title="Reset password">
+                                <i class="fa-solid fa-key"></i> Reset PW
+                            </button>
+                        </form>
+
+                        {# Toggle admin — disabled for self and for the root admin #}
+                        {% if user.id != current_user.id and user.username != 'cgiglio' %}
+                        <form method="POST" action="{{ url_for('admin.admin_toggle_admin', user_id=user.id) }}"
+                              onsubmit="return confirm('{% if user.is_admin %}Revoke{% else %}Grant{% endif %} admin access for {{ user.username }}?')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit"
+                                    class="btn {% if user.is_admin %}btn-warning{% else %}btn-ghost{% endif %}"
+                                    title="{% if user.is_admin %}Revoke admin{% else %}Grant admin{% endif %}">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                {% if user.is_admin %}Revoke Admin{% else %}Grant Admin{% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        {# Delete — disabled for self #}
+                        {% if user.id != current_user.id %}
+                        <button type="button" class="btn btn-danger"
+                                onclick="openDeleteModal({{ user.id }}, '{{ user.username }}', {{ user.accounts | length }})"
+                                title="Delete user">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        {% else %}
+                        <button class="btn btn-danger disabled" disabled title="Can't delete yourself">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                        {% endif %}
+
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-users" style="font-size:2em; margin-bottom:10px; display:block; opacity:0.3;"></i>
+        No users found.
+    </div>
+    {% endif %}
+</div>
+
+{# ── Delete confirmation modal ────────────────────────────────────────────── #}
+<div class="confirm-modal-overlay" id="deleteModal">
+    <div class="confirm-modal">
+        <h3><i class="fa-solid fa-triangle-exclamation" style="color:#DC2626; margin-right:6px;"></i>Delete User</h3>
+        <p id="deleteModalBody">
+            This will permanently delete this user and all their portfolio data. This cannot be undone.
+        </p>
+        <div class="confirm-modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+            <form method="POST" id="deleteModalForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-trash"></i> Delete Permanently
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openDeleteModal(userId, username, accountCount) {
+    const modal = document.getElementById('deleteModal');
+    const body  = document.getElementById('deleteModalBody');
+    const form  = document.getElementById('deleteModalForm');
+
+    const acctText = accountCount === 1 ? '1 account' : accountCount + ' accounts';
+    body.textContent = `Permanently delete "${username}"? This will remove their profile and ${acctText} — this cannot be undone.`;
+    form.action = `/admin/user/${userId}/delete`;
+    modal.classList.add('active');
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('active');
+}
+
+// Close on overlay click
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+
+// Close on Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDeleteModal();
+});
+</script>
+{% endblock %}

@@ -75,6 +75,11 @@
                 <span class="sidebar-username">{{ current_user.username }}</span>
                 <div class="sidebar-user-links">
                     <a href="{{ url_for('admin.manage_user', user_id=current_user.id) }}" class="sidebar-footer-link">Settings</a>
+                    {% if current_user.is_admin or current_user.username == 'cgiglio' %}
+                    <a href="{{ url_for('admin.admin_dashboard') }}" class="sidebar-footer-link" style="color: #7C3AED;">
+                        <i class="fa-solid fa-shield-halved" style="font-size:0.8em;"></i> Admin
+                    </a>
+                    {% endif %}
                     <a href="{{ url_for('auth.logout') }}" class="sidebar-footer-link">Logout</a>
                 </div>
             </div>

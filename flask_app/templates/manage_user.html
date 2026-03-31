@@ -193,22 +193,17 @@
 
 {% endif %}{# schwab_enabled #}
 
-<!-- ── Admin ─────────────────────────────────────────────────────────────── -->
-{% if current_user.username == 'cgiglio' %}
+<!-- ── Admin shortcut ─────────────────────────────────────────────────────── -->
+{% if current_user.is_admin or current_user.username == 'cgiglio' %}
 <div class="settings-card">
     <div class="settings-card-title">
         <span class="card-icon"><i class="fa-solid fa-shield-halved"></i></span>
-        Admin
+        Admin Panel
     </div>
-    <p class="settings-card-desc">Add a new user with a temporary password.</p>
-    <form action="{{ url_for('admin.add_user') }}" method="post">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="admin-form-row">
-            <input type="text" id="new_username" name="new_username"
-                   placeholder="New username" required>
-            <button type="submit" class="btn btn-primary">Add User</button>
-        </div>
-    </form>
+    <p class="settings-card-desc">Manage users, access levels, and account data.</p>
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-primary">
+        <i class="fa-solid fa-arrow-right"></i> Open Admin Panel
+    </a>
 </div>
 {% endif %}
 
