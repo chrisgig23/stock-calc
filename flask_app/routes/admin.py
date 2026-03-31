@@ -73,6 +73,7 @@ def admin_add_user():
         username=new_username,
         password_hash=generate_password_hash(temp_pw),
         is_admin=False,
+        must_change_password=True,
     )
     db.session.add(new_user)
     db.session.commit()
@@ -96,6 +97,7 @@ def admin_reset_password(user_id):
     user = User.query.get_or_404(user_id)
     temp_pw = _generate_temp_password()
     user.set_password(temp_pw)
+    user.must_change_password = True
     db.session.commit()
 
     flash(

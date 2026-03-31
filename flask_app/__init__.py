@@ -89,11 +89,22 @@ def set_security_headers(response):
 
 # Import models
 from flask_app.models import User, Account, Holding
+from flask import request, redirect, url_for
 
 # User loader for Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))  # Ensure user_id is an integer
+
+# ── Force password change gate ───────────────────────────────────────────────
+_ALLOWED_WHILE_MUST_CHANGE = {'auth.reset_password', 'auth.logout', 'static'}
+
+@app.before_request
+def enforce_password_change():
+    """If the user has a must_change_password flag, block all routes except reset."""
+    if current_user.is_authenticated and getattr(current_user, 'must_change_password', False):
+        if request.endpoint not in _ALLOWED_WHILE_MUST_CHANGE:
+            return redirect(url_for('auth.reset_password', user_id=current_user.id))
 
 @app.context_processor
 def inject_schwab_status():

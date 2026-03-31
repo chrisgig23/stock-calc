@@ -13,10 +13,11 @@ from flask_app.utils.encryption import EncryptedText
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
-    id            = db.Column(db.Integer, primary_key=True)
-    username      = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
-    is_admin      = db.Column(db.Boolean, nullable=False, default=False)
+    id                   = db.Column(db.Integer, primary_key=True)
+    username             = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash        = db.Column(db.String(256), nullable=False)
+    is_admin             = db.Column(db.Boolean, nullable=False, default=False)
+    must_change_password = db.Column(db.Boolean, nullable=False, default=False)
 
     accounts = db.relationship('Account', backref='owner', lazy=True)
 

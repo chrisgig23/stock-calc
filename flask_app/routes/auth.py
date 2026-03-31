@@ -47,11 +47,11 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and check_password_hash(user.password_hash, password):
-            if check_password_hash(user.password_hash, 'password1'):
+            login_user(user)
+            if user.must_change_password:
+                flash('Your password was reset by an admin. Please set a new password before continuing.', 'warning')
                 return redirect(url_for('auth.reset_password', user_id=user.id))
-            else:
-                login_user(user)
-                return redirect(url_for('main.dashboard'))
+            return redirect(url_for('main.dashboard'))
         else:
             flash('Invalid username or password', 'danger')
     return render_template('home.html')
@@ -81,9 +81,10 @@ def reset_password(user_id):
         confirm_password = request.form['confirm_password']
         if new_password == confirm_password:
             user.password_hash = generate_password_hash(new_password)
+            user.must_change_password = False
             db.session.commit()
             logout_user()
-            flash('Password reset successfully. Please log in.', 'success')
+            flash('Password updated successfully. Please log in with your new password.', 'success')
             return redirect(url_for('auth.login'))
         else:
             flash('Passwords do not match.', 'danger')
