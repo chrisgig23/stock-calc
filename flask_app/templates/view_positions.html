@@ -158,13 +158,34 @@
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     if (data.error) throw new Error(data.error);
+                    var accounts     = data.accounts     || data;   // backwards-compat if plain array
+                    var linkedHashes = data.linked_hashes || [];
                     var sel = document.getElementById('schwab-account-select');
-                    data.forEach(function(acct) {
-                        var opt = document.createElement('option');
+
+                    accounts.forEach(function(acct) {
+                        var opt   = document.createElement('option');
                         opt.value = acct.hashValue;
-                        opt.textContent = '••••' + acct.accountNumber.slice(-4);
+
+                        var label = '••••' + acct.accountNumber.slice(-4);
+                        if (acct.accountType) label += ' — ' + acct.accountType;
+
+                        var alreadyLinked = linkedHashes.indexOf(acct.hashValue) !== -1;
+                        if (alreadyLinked) {
+                            label += ' (already linked)';
+                            opt.disabled = true;
+                            opt.style.color = '#aaa';
+                        }
+
+                        opt.textContent = label;
                         sel.appendChild(opt);
                     });
+
+                    // If the first option is disabled, try to pre-select a valid one
+                    var opts = sel.options;
+                    for (var i = 0; i < opts.length; i++) {
+                        if (!opts[i].disabled) { sel.selectedIndex = i; break; }
+                    }
+
                     document.getElementById('schwab-accounts-loading').style.display = 'none';
                     document.getElementById('schwab-link-form').style.display = 'block';
                     loaded = true;

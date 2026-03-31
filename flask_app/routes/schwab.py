@@ -213,6 +213,12 @@ def list_schwab_accounts():
     """
     JSON endpoint: returns the list of Schwab accounts linked to this user's
     OAuth token. Used by the link-account modal.
+
+    Returns:
+    {
+      "accounts": [{"accountNumber": "...", "hashValue": "...", "accountType": "Roth IRA"}, ...],
+      "linked_hashes": ["hash1", ...]   # hashes already linked to a WealthWise account
+    }
     """
     token = _get_token_or_redirect()
     if token is None:
@@ -228,7 +234,46 @@ def list_schwab_accounts():
 
     # [{"accountNumber": "...", "hashValue": "..."}, ...]
     accounts = resp.json()
-    return jsonify(accounts)
+
+    # Best-effort: enrich with account type from /accounts endpoint
+    _SCHWAB_TYPE_LABELS = {
+        'ROTH_IRA':        'Roth IRA',
+        'TRADITIONAL_IRA': 'Traditional IRA',
+        'ROLLOVER_IRA':    'Rollover IRA',
+        'SEP_IRA':         'SEP IRA',
+        'SIMPLE_IRA':      'SIMPLE IRA',
+        'MARGIN':          'Margin',
+        'CASH':            'Cash',
+        'IRA':             'IRA',
+    }
+    try:
+        accts_resp = http.get(f'{API_BASE}/accounts',
+                              headers=_bearer_header(token), timeout=10)
+        if accts_resp.ok:
+            type_map = {}
+            for a in accts_resp.json():
+                sec = a.get('securitiesAccount', {})
+                num = sec.get('accountNumber', '')
+                raw_type = sec.get('type', '')
+                if num:
+                    type_map[num] = _SCHWAB_TYPE_LABELS.get(
+                        raw_type.upper(),
+                        raw_type.replace('_', ' ').title() if raw_type else ''
+                    )
+            for acct in accounts:
+                acct['accountType'] = type_map.get(acct.get('accountNumber', ''), '')
+    except Exception:
+        for acct in accounts:
+            acct.setdefault('accountType', '')
+
+    # Hashes already linked to one of this user's WealthWise accounts
+    linked_hashes = [
+        a.schwab_account_hash
+        for a in Account.query.filter_by(user_id=current_user.id).all()
+        if a.schwab_account_hash
+    ]
+
+    return jsonify({'accounts': accounts, 'linked_hashes': linked_hashes})
 
 
 @schwab_bp.route('/link/<int:account_id>', methods=['POST'])
