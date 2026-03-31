@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}WealthWise — Set Up Email Login{% endblock %}
+
+{% block styles %}
+<style>
+.onboard-wrap {
+    max-width: 520px;
+    margin: 48px auto;
+    padding: 0 16px;
+}
+.onboard-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 40px 40px 36px;
+    box-shadow: var(--shadow-sm);
+}
+.onboard-icon {
+    width: 52px;
+    height: 52px;
+    background: #EDE9FE;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #7C3AED;
+    margin-bottom: 20px;
+}
+.onboard-card h2 {
+    margin: 0 0 10px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.onboard-card .onboard-desc {
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.65;
+    margin: 0 0 28px;
+}
+.onboard-card .onboard-desc strong {
+    color: var(--color-text);
+}
+.onboard-divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 0 0 24px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 7px;
+}
+.form-group input[type="email"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 11px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--color-text);
+    background: var(--color-bg);
+    transition: border-color 0.15s;
+}
+.form-group input[type="email"]:focus {
+    outline: none;
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+}
+.btn-primary-full {
+    width: 100%;
+    padding: 12px;
+    background: #7C3AED;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-primary-full:hover { background: #6d28d9; }
+
+.info-box {
+    margin-top: 20px;
+    background: #f5f3ff;
+    border: 1px solid #ddd6fe;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 0.82rem;
+    color: #5b21b6;
+    line-height: 1.55;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+.info-box i { flex-shrink: 0; margin-top: 2px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="onboard-wrap">
+    <div class="onboard-card">
+
+        <div class="onboard-icon">
+            <i class="fa-solid fa-envelope"></i>
+        </div>
+
+        <h2>Add your email address</h2>
+        <p class="onboard-desc">
+            We're switching to <strong>email-based login</strong> for a simpler and more secure experience.
+            Enter your email below and we'll send you a quick verification code.
+            Once verified, you can sign in with your email address instead of your username —
+            <strong>you can discard your username after this step.</strong>
+        </p>
+
+        <hr class="onboard-divider">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="flash-list" style="margin-bottom:18px;">
+            {% for category, message in messages %}
+            <li class="flash-item {{ category }}">
+                <i class="fa-solid {% if category == 'danger' %}fa-circle-exclamation{% elif category == 'success' %}fa-circle-check{% elif category == 'info' %}fa-circle-info{% else %}fa-triangle-exclamation{% endif %}"></i>
+                <span>{{ message }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label for="email">Your email address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="you@example.com"
+                    required
+                    autocomplete="email"
+                    autofocus
+                >
+            </div>
+            <button type="submit" class="btn-primary-full">
+                <i class="fa-solid fa-paper-plane" style="margin-right:7px;"></i>Send verification code
+            </button>
+        </form>
+
+        <div class="info-box">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Your email is only used for login and important account alerts. We never sell or share it.</span>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

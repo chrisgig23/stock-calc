@@ -96,15 +96,38 @@ from flask import request, redirect, url_for
 def load_user(user_id):
     return User.query.get(int(user_id))  # Ensure user_id is an integer
 
-# ── Force password change gate ───────────────────────────────────────────────
+# ── Security gates (applied in priority order) ────────────────────────────────
+# Gate 1: forced password change
 _ALLOWED_WHILE_MUST_CHANGE = {'auth.reset_password', 'auth.logout', 'static'}
 
+# Gate 2: email not yet verified — send to email capture / OTP flow
+_ALLOWED_WITHOUT_EMAIL = {
+    'auth.email_capture',
+    'auth.email_verify',
+    'auth.resend_code',
+    'auth.logout',
+    'static',
+}
+
 @app.before_request
-def enforce_password_change():
-    """If the user has a must_change_password flag, block all routes except reset."""
-    if current_user.is_authenticated and getattr(current_user, 'must_change_password', False):
+def enforce_security_gates():
+    """
+    Block authenticated users from reaching the app until mandatory steps are done.
+    Priority: must_change_password → email_verified
+    """
+    if not current_user.is_authenticated:
+        return  # not logged in — nothing to enforce
+
+    # Gate 1: admin-reset password must be changed first
+    if getattr(current_user, 'must_change_password', False):
         if request.endpoint not in _ALLOWED_WHILE_MUST_CHANGE:
             return redirect(url_for('auth.reset_password', user_id=current_user.id))
+        return  # stop here — don't cascade to gate 2
+
+    # Gate 2: must have a verified email before using the app
+    if not getattr(current_user, 'email_verified', True):
+        if request.endpoint not in _ALLOWED_WITHOUT_EMAIL:
+            return redirect(url_for('auth.email_capture'))
 
 @app.context_processor
 def inject_schwab_status():

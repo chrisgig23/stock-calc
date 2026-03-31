@@ -4,6 +4,7 @@ from flask_login import UserMixin
 import yfinance as yf
 from datetime import datetime
 from flask_app.utils.encryption import EncryptedText
+import secrets
 
 
 # ---------------------------------------------------------------------------
@@ -13,11 +14,17 @@ from flask_app.utils.encryption import EncryptedText
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
-    id                   = db.Column(db.Integer, primary_key=True)
-    username             = db.Column(db.String(150), unique=True, nullable=False)
-    password_hash        = db.Column(db.String(256), nullable=False)
-    is_admin             = db.Column(db.Boolean, nullable=False, default=False)
-    must_change_password = db.Column(db.Boolean, nullable=False, default=False)
+    id                       = db.Column(db.Integer, primary_key=True)
+    username                 = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash            = db.Column(db.String(256), nullable=False)
+    is_admin                 = db.Column(db.Boolean, nullable=False, default=False)
+    must_change_password     = db.Column(db.Boolean, nullable=False, default=False)
+
+    # ── Email (migration away from username login) ──────────────────────
+    email                    = db.Column(db.String(255), unique=True, nullable=True)
+    email_verified           = db.Column(db.Boolean, nullable=False, default=False)
+    email_verification_code  = db.Column(db.String(6), nullable=True)   # 6-digit OTP
+    email_code_expires       = db.Column(db.DateTime, nullable=True)
 
     accounts = db.relationship('Account', backref='owner', lazy=True)
 
@@ -29,6 +36,25 @@ class User(UserMixin, db.Model):
 
     def get_accounts(self):
         return Account.query.filter_by(user_id=self.id).order_by(Account.position.asc()).all()
+
+    def generate_email_code(self):
+        """Generate a fresh 6-digit verification code, valid for 15 minutes."""
+        from datetime import timedelta
+        self.email_verification_code = f"{secrets.randbelow(1_000_000):06d}"
+        self.email_code_expires = datetime.utcnow() + timedelta(minutes=15)
+        return self.email_verification_code
+
+    def verify_email_code(self, code: str) -> bool:
+        """Return True if the code matches and hasn't expired."""
+        if not self.email_verification_code or not self.email_code_expires:
+            return False
+        if datetime.utcnow() > self.email_code_expires:
+            return False
+        return secrets.compare_digest(self.email_verification_code, code.strip())
+
+    def clear_email_code(self):
+        self.email_verification_code = None
+        self.email_code_expires = None
 
 
 # ---------------------------------------------------------------------------

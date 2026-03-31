@@ -111,8 +111,8 @@
 
             <form method="POST" action="{{ url_for('auth.login') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required autocomplete="username">
+                <label for="login_id">Username or Email</label>
+                <input type="text" id="login_id" name="login_id" required autocomplete="username">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required autocomplete="current-password">
                 <input type="submit" value="Sign In">

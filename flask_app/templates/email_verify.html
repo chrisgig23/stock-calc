@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}WealthWise — Verify Your Email{% endblock %}
+
+{% block styles %}
+<style>
+.onboard-wrap {
+    max-width: 520px;
+    margin: 48px auto;
+    padding: 0 16px;
+}
+.onboard-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 40px 40px 36px;
+    box-shadow: var(--shadow-sm);
+}
+.onboard-icon {
+    width: 52px;
+    height: 52px;
+    background: #EDE9FE;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: #7C3AED;
+    margin-bottom: 20px;
+}
+.onboard-card h2 {
+    margin: 0 0 10px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.onboard-card .onboard-desc {
+    color: var(--color-text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.65;
+    margin: 0 0 28px;
+}
+.onboard-divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 0 0 24px;
+}
+
+/* ── OTP digit inputs ─────────────────────────────────────── */
+.otp-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 0 0 24px;
+}
+.otp-digit {
+    width: 54px;
+    height: 64px;
+    text-align: center;
+    font-size: 1.7rem;
+    font-weight: 700;
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    caret-color: #7C3AED;
+    -moz-appearance: textfield;
+}
+.otp-digit::-webkit-inner-spin-button,
+.otp-digit::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.otp-digit:focus {
+    outline: none;
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
+}
+
+.btn-primary-full {
+    width: 100%;
+    padding: 12px;
+    background: #7C3AED;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.btn-primary-full:hover { background: #6d28d9; }
+
+.resend-row {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+.resend-row form { display: inline; }
+.resend-row button {
+    background: none;
+    border: none;
+    color: #7C3AED;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0;
+    text-decoration: underline;
+}
+.resend-row button:hover { color: #5b21b6; }
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+}
+.back-link a { color: var(--color-text-secondary); }
+.back-link a:hover { color: var(--color-text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="onboard-wrap">
+    <div class="onboard-card">
+
+        <div class="onboard-icon">
+            <i class="fa-solid fa-envelope-circle-check"></i>
+        </div>
+
+        <h2>Check your email</h2>
+        <p class="onboard-desc">
+            We sent a 6-digit code to <strong>{{ masked_email }}</strong>.
+            Enter it below to verify your email address. The code expires in 15 minutes.
+        </p>
+
+        <hr class="onboard-divider">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="flash-list" style="margin-bottom:18px;">
+            {% for category, message in messages %}
+            <li class="flash-item {{ category }}">
+                <i class="fa-solid {% if category == 'danger' %}fa-circle-exclamation{% elif category == 'success' %}fa-circle-check{% elif category == 'info' %}fa-circle-info{% else %}fa-triangle-exclamation{% endif %}"></i>
+                <span>{{ message }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST" id="otp-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="otp-group" aria-label="Verification code">
+                <input class="otp-digit" type="number" name="d1" min="0" max="9" maxlength="1" inputmode="numeric" autocomplete="one-time-code" required autofocus>
+                <input class="otp-digit" type="number" name="d2" min="0" max="9" maxlength="1" inputmode="numeric" required>
+                <input class="otp-digit" type="number" name="d3" min="0" max="9" maxlength="1" inputmode="numeric" required>
+                <input class="otp-digit" type="number" name="d4" min="0" max="9" maxlength="1" inputmode="numeric" required>
+                <input class="otp-digit" type="number" name="d5" min="0" max="9" maxlength="1" inputmode="numeric" required>
+                <input class="otp-digit" type="number" name="d6" min="0" max="9" maxlength="1" inputmode="numeric" required>
+            </div>
+
+            <button type="submit" class="btn-primary-full">
+                <i class="fa-solid fa-circle-check" style="margin-right:7px;"></i>Verify email
+            </button>
+        </form>
+
+        <div class="resend-row">
+            Didn't receive it? &nbsp;
+            <form method="POST" action="{{ url_for('auth.resend_code') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit">Resend code</button>
+            </form>
+        </div>
+
+        <div class="back-link">
+            <a href="{{ url_for('auth.email_capture') }}">← Use a different email address</a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// Auto-advance between OTP digit boxes and handle paste
+(function () {
+    const digits = Array.from(document.querySelectorAll('.otp-digit'));
+
+    digits.forEach((el, i) => {
+        el.addEventListener('input', () => {
+            const val = el.value.replace(/\D/g, '').slice(-1);
+            el.value = val;
+            if (val && i < digits.length - 1) digits[i + 1].focus();
+        });
+
+        el.addEventListener('keydown', e => {
+            if (e.key === 'Backspace' && !el.value && i > 0) {
+                digits[i - 1].focus();
+            }
+        });
+    });
+
+    // Handle paste of full 6-digit code
+    digits[0].addEventListener('paste', e => {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+        pasted.split('').forEach((ch, idx) => {
+            if (digits[idx]) digits[idx].value = ch;
+        });
+        const last = Math.min(pasted.length, digits.length - 1);
+        digits[last].focus();
+    });
+})();
+</script>
+{% endblock %}
