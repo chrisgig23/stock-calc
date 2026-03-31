@@ -173,6 +173,7 @@
             </a>
             <form method="POST" action="{{ url_for('schwab.disconnect') }}"
                   onsubmit="return confirm('Disconnect Schwab? All account links will be removed.')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger">
                     <i class="fa-solid fa-unlink"></i> Disconnect
                 </button>
@@ -201,6 +202,7 @@
     </div>
     <p class="settings-card-desc">Add a new user with a temporary password.</p>
     <form action="{{ url_for('admin.add_user') }}" method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="admin-form-row">
             <input type="text" id="new_username" name="new_username"
                    placeholder="New username" required>

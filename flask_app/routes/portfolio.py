@@ -70,10 +70,17 @@ def edit_portfolio(account_id):
                 Holding.query.filter_by(account_id=account_id, ticker=ticker).delete()
                 continue
 
-            quantity   = float(quantities[i]) if quantities[i] else 0
+            try:
+                quantity = max(0.0, min(float(quantities[i]), 1_000_000)) if quantities[i] else 0
+            except (ValueError, TypeError):
+                quantity = 0
+
             isincluded = request.form.get(f'isincluded_{ticker}', 'off') == 'on'
             cb_raw     = cost_bases[i].replace('$', '').replace(',', '').strip() if i < len(cost_bases) and cost_bases[i] else None
-            cost_basis = float(cb_raw) if cb_raw else None
+            try:
+                cost_basis = max(0.0, min(float(cb_raw), 1_000_000_000)) if cb_raw else None
+            except (ValueError, TypeError):
+                cost_basis = None
 
             holding = Holding.query.filter_by(account_id=account_id, ticker=ticker).first()
             if holding:
@@ -98,9 +105,15 @@ def edit_portfolio(account_id):
                 holdings = Holding.query.filter_by(account_id=account_id).all()
                 return render_template('edit_portfolio.html', account=account, holdings=holdings)
 
-            qty    = float(new_quantities[i]) if i < len(new_quantities) and new_quantities[i] else 0
+            try:
+                qty = max(0.0, min(float(new_quantities[i]), 1_000_000)) if i < len(new_quantities) and new_quantities[i] else 0
+            except (ValueError, TypeError):
+                qty = 0
             cb_raw = new_cost_bases[i].replace('$', '').replace(',', '').strip() if i < len(new_cost_bases) and new_cost_bases[i] else None
-            cb     = float(cb_raw) if cb_raw else None
+            try:
+                cb = max(0.0, min(float(cb_raw), 1_000_000_000)) if cb_raw else None
+            except (ValueError, TypeError):
+                cb = None
 
             existing = Holding.query.filter_by(account_id=account_id, ticker=ticker).first()
             if existing:

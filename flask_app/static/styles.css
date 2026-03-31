@@ -363,6 +363,20 @@ body.sidebar-collapsed .main-wrapper {
     gap: 14px;
 }
 
+.sidebar-security-note {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    font-size: 0.7rem;
+    color: rgba(148, 163, 184, 0.6);
+    letter-spacing: 0.02em;
+}
+.sidebar-security-note i {
+    font-size: 0.65rem;
+    color: rgba(16, 185, 129, 0.5);
+}
+
 /* Reorder buttons — chevron style */
 .reorder-buttons {
     display: none;

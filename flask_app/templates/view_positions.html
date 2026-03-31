@@ -102,6 +102,7 @@
     {% if schwab_enabled and current_user.schwab_token %}
         {% if account.schwab_account_hash %}
             <form method="POST" action="{{ url_for('schwab.sync_account', account_id=account.id) }}" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn-ghost" style="cursor:pointer;">
                     <i class="fa-solid fa-rotate"></i> Sync from Schwab
                 </button>
@@ -130,6 +131,7 @@
         </div>
         <form method="POST" action="{{ url_for('schwab.link_account', account_id=account.id) }}"
               id="schwab-link-form" style="display:none;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <select name="schwab_account_hash" id="schwab-account-select"
                     style="width:100%; padding:8px 10px; border:1px solid var(--color-border);
                            border-radius:7px; font-size:0.86em; font-family:inherit; margin-bottom:14px;">

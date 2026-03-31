@@ -5,6 +5,7 @@
 {% block content %}
 <h2>Add a New Account</h2>
 <form method="post" action="{{ url_for('accounts.add_account') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="new_account">Account Name:</label>
     <input type="text" id="new_account" name="new_account" required>
     <input type="submit" value="Add Account">

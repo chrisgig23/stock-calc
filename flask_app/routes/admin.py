@@ -7,14 +7,23 @@ from datetime import datetime
 
 admin_bp = Blueprint('admin', __name__)
 
+def _is_admin(user):
+    """Returns True if the user has admin privileges."""
+    return getattr(user, 'is_admin', False) or user.username == 'cgiglio'
+
+
 @admin_bp.route('/manage_user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def manage_user(user_id):
-    """Allows an admin to manage a user's details."""
+    """Users may manage their own account; admins may manage any account."""
+    # Only allow access to own account, or any account for admins
+    if current_user.id != user_id and not _is_admin(current_user):
+        flash('You do not have permission to access that account.', 'danger')
+        return redirect(url_for('accounts.view_account'))
+
     user = User.query.get_or_404(user_id)
 
     if request.method == 'POST':
-        # Placeholder for handling form submission (e.g., updating user details)
         flash("User details updated successfully.", "success")
         return redirect(url_for('admin.manage_user', user_id=user.id))
 
@@ -49,7 +58,7 @@ def change_username():
 @login_required
 def add_user():
     """Allows an admin to add a new user with a default password."""
-    if current_user.username != 'cgiglio':
+    if not _is_admin(current_user):
         flash('Unauthorized access.', 'danger')
         return redirect(url_for('accounts.view_account'))
 

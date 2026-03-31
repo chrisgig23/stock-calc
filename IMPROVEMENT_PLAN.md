@@ -136,7 +136,7 @@
 
 ## 🗄️ Database Schema Redesign (completed 2026-03-26)
 
-The original `Stock` / `Purchase` / `Position` schema was replaced with a production-grade financial data model. The database was wiped and rebuilt from scratch.
+The original `Stock` / `Purchase` / `Position` schema was replaced with a prod-grade financial data model. The database was wiped and rebuilt from scratch.
 
 **Old models (dropped):** `Stock`, `Purchase`, `Position`
 
@@ -274,13 +274,13 @@ Work through these one at a time. Each is a discrete, shippable unit.
 
 ## 🗒️ Session Notes
 
-- **Production URL:** `www.wealthtrackapp.com` (PythonAnywhere, runs `production` git branch)
+- **Production URL:** `www.wealthtrackapp.com` (PythonAnywhere, runs `prod` git branch)
 - **Local dev:** `http://127.0.0.1:5001` (runs inside sandbox — not accessible from user's browser)
 - **Production DB:** PostgreSQL on PythonAnywhere
 - **Dev DB:** SQLite at `/tmp/stock_calc_dev.db` (resets on VM restart)
 - **Login:** `cgiglio` / `StockCalc2026!`
 - **Superuser note:** The "Add New User" form on `/manage_user` is intentional and visible only to the `cgiglio` account — not a bug.
-- **Yahoo Finance fix:** Already applied to `models.py` on production — `current_price` returns `0.0` on rate-limit errors rather than crashing.
+- **Yahoo Finance fix:** Already applied to `models.py` on prod — `current_price` returns `0.0` on rate-limit errors rather than crashing.
 - **DNS:** `www.wealthtrackapp.com` CNAME → `webapp-2769154.pythonanywhere.com` (Squarespace, propagated 2026-03-26). Bare domain `wealthtrackapp.com` forwards → `https://www.wealthtrackapp.com`.
 - **PythonAnywhere API token:** `3116453ae30a968dfc5eb596939f9b742d4bf2a8`
 
@@ -291,19 +291,18 @@ Work through these one at a time. Each is a discrete, shippable unit.
 ### Branch Structure
 | Branch | Purpose |
 |---|---|
-| `production` | Live site — only receives merges from `dev` when a feature is complete and tested |
+| `prod` | Live site — only receives merges from `dev` when a feature is complete and tested |
 | `dev` | Active development — all day-to-day work happens here |
-| `main` | Legacy default branch — kept for reference; treat `production` as source of truth |
 
 ### PythonAnywhere Setup
 - Repo location: `/home/chrisgig23/stock-calc/`
-- Always checked out on: `production`
-- To deploy an update: merge `dev` → `production` on PythonAnywhere, then `touch` the WSGI file
+- Always checked out on: `prod`
+- To deploy an update: merge `dev` → `prod` on PythonAnywhere, then `touch` the WSGI file
 
 ### Deploying (step-by-step)
 ```bash
 cd /home/chrisgig23/stock-calc
-git checkout production
+git checkout prod
 git merge dev
 touch /var/www/www_wealthtrackapp_com_wsgi.py
 ```
@@ -312,7 +311,7 @@ touch /var/www/www_wealthtrackapp_com_wsgi.py
 1. Make sure local is on `dev` branch: `git checkout dev`
 2. Pull latest: `git pull origin dev`
 3. Make changes, commit, push: `git push origin dev`
-4. When ready to go live: merge `dev` → `production` on PythonAnywhere (steps above)
+4. When ready to go live: merge `dev` → `prod` on PythonAnywhere (steps above)
 
 ### ⚠️ GitHub Token
 The stored `ghp_` token has expired. Generate a new one at:
@@ -321,7 +320,7 @@ Scopes needed: `Contents` (read/write) on the `stock-calc` repo.
 Once you have it, run on PythonAnywhere:
 ```bash
 cd /home/chrisgig23/stock-calc
-git push origin dev production main
+git push origin dev prod main
 ```
 (git will prompt for username = `chrisgig23`, password = new token)
 
@@ -334,4 +333,4 @@ git branch -d reports
 git branch -d schwab_connect
 git branch -d encryption
 ```
-Keep: `main`, `dev`, `production`, the two `backup_` branches.
+Keep: `main`, `dev`, `prod`, the two `backup_` branches.

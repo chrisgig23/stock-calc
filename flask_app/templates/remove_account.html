@@ -5,6 +5,7 @@
 {% block content %}
 <h2>Remove Existing Account</h2>
 <form method="post" action="{{ url_for('accounts.remove_account') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label for="account">Select Account to Remove:</label>
     <select name="account_id" id="account">
         {% for account in accounts %}

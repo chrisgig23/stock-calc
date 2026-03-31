@@ -147,6 +147,7 @@
     <h3>How much would you like to invest?</h3>
     <p>Enter the cash you want to deploy across your portfolio targets.</p>
     <form method="post" action="{{ url_for('portfolio.make_purchase', account_id=account.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="cash_value">Amount to Invest ($)</label>
         <input type="number" id="cash_value" name="cash_value"
                step="0.01" min="0.01" required placeholder="e.g. 1000.00">
@@ -166,6 +167,7 @@
 </div>
 
 <form method="post" action="{{ url_for('portfolio.make_purchase', account_id=account.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input type="hidden" name="cash_value" value="{{ cash_value }}">
 
     <table class="purchase-table">

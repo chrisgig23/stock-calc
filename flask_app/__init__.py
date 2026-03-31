@@ -2,24 +2,54 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 import os
 import pytz
 import pandas_market_calendars as mcal
 from datetime import datetime, timedelta
+import warnings
 
 load_dotenv()  # Load environment variables
 
+_flask_env = os.getenv('FLASK_ENV', 'production')
+_is_prod   = _flask_env != 'development'
+
+# Warn on startup if encryption key is missing
+if not os.getenv('ENCRYPTION_KEY'):
+    warnings.warn(
+        "ENCRYPTION_KEY is not set — Schwab OAuth tokens will be stored unencrypted. "
+        "Generate one with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"",
+        RuntimeWarning, stacklevel=1,
+    )
+
+
 class Config:
-    _flask_env = os.getenv('FLASK_ENV', 'production')
+    # ── Database ────────────────────────────────────────────────────────
     SQLALCHEMY_DATABASE_URI = (
         'sqlite:////tmp/stock_calc_dev.db'
         if _flask_env == 'development'
         else os.getenv('DATABASE_URL')
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = (os.getenv('SECRET_KEY') or 'dev-key-for-local-testing').encode('utf-8', 'replace')
-    PERMANENT_SESSION_LIFETIME = timedelta(minutes=30)
+
+    # ── Secret key ──────────────────────────────────────────────────────
+    SECRET_KEY = (os.getenv('SECRET_KEY') or 'dev-key-for-local-testing-only').encode('utf-8', 'replace')
+
+    # ── Session security ────────────────────────────────────────────────
+    PERMANENT_SESSION_LIFETIME  = timedelta(minutes=30)
+    SESSION_COOKIE_HTTPONLY     = True                  # not accessible via JS
+    SESSION_COOKIE_SAMESITE     = 'Lax'                 # CSRF mitigation
+    SESSION_COOKIE_SECURE       = _is_prod              # HTTPS-only in production
+    SESSION_COOKIE_NAME         = '__Host-session' if _is_prod else 'session'
+
+    # ── Upload safety ───────────────────────────────────────────────────
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB max upload size
+
+    # ── CSRF ────────────────────────────────────────────────────────────
+    WTF_CSRF_TIME_LIMIT = 3600  # 1 hour token validity
 
 # Initialize the app and apply the configuration
 app = Flask(__name__)
@@ -33,6 +63,29 @@ migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'  # Redirects to login if not authenticated
+
+# ── CSRF protection (Flask-WTF) ──────────────────────────────────────────────
+csrf = CSRFProtect(app)
+
+# ── Rate limiter ─────────────────────────────────────────────────────────────
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,
+    default_limits=[],          # No global limit — apply per-route
+    storage_uri='memory://',    # In-memory; swap for Redis in high-traffic prod
+)
+
+# ── Security response headers ────────────────────────────────────────────────
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Frame-Options']           = 'DENY'
+    response.headers['X-Content-Type-Options']    = 'nosniff'
+    response.headers['X-XSS-Protection']          = '1; mode=block'
+    response.headers['Referrer-Policy']           = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy']        = 'geolocation=(), camera=(), microphone=()'
+    if _is_prod:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
 
 # Import models
 from flask_app.models import User, Account, Holding

@@ -5,6 +5,7 @@
     <h2>Change Username</h2>
 
     <form method="POST" action="{{ url_for('admin.change_username') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="new_username">New Username:</label>
         <input type="text" id="new_username" name="new_username" required>
 

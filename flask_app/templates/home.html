@@ -16,6 +16,24 @@
     border: none;
     margin: 0;
 }
+.login-security-note {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 18px;
+    padding: 10px 14px;
+    background: rgba(16, 185, 129, 0.07);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    font-size: 0.78rem;
+    color: #064e3b;
+    line-height: 1.4;
+}
+.login-security-note i {
+    color: #059669;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
 </style>
 {% endblock %}
 
@@ -92,12 +110,19 @@
             {% endwith %}
 
             <form method="POST" action="{{ url_for('auth.login') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required autocomplete="username">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required autocomplete="current-password">
                 <input type="submit" value="Sign In">
             </form>
+
+            <div class="login-security-note">
+                <i class="fa-solid fa-lock"></i>
+                Your data is encrypted at rest and transmitted over HTTPS.
+                We never sell or share your financial information.
+            </div>
         </div>
     </div>
 

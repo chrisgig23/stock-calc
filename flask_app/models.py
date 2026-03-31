@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 import yfinance as yf
 from datetime import datetime
+from flask_app.utils.encryption import EncryptedText
 
 
 # ---------------------------------------------------------------------------
@@ -15,6 +16,7 @@ class User(UserMixin, db.Model):
     id            = db.Column(db.Integer, primary_key=True)
     username      = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
+    is_admin      = db.Column(db.Boolean, nullable=False, default=False)
 
     accounts = db.relationship('Account', backref='owner', lazy=True)
 
@@ -212,9 +214,9 @@ class SchwabToken(db.Model):
 
     id                   = db.Column(db.Integer, primary_key=True)
     user_id              = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
-    access_token         = db.Column(db.Text, nullable=False)
-    refresh_token        = db.Column(db.Text, nullable=False)
-    id_token             = db.Column(db.Text, nullable=True)
+    access_token         = db.Column(EncryptedText, nullable=False)
+    refresh_token        = db.Column(EncryptedText, nullable=False)
+    id_token             = db.Column(EncryptedText, nullable=True)
     access_token_issued  = db.Column(db.DateTime, nullable=False)
     refresh_token_issued = db.Column(db.DateTime, nullable=False)
 

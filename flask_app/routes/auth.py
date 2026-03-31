@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
 from flask_login import login_user, login_required, logout_user, current_user
-from flask_app import db
+from flask_app import db, limiter
 from flask_app.models import User
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
@@ -36,6 +36,7 @@ def extend_session():
     return jsonify(success=True)
 
 @auth_bp.route('/home', methods=['GET', 'POST'])
+@limiter.limit("10 per minute", methods=['POST'])
 def login():
     """Landing/home page with login form."""
     if current_user.is_authenticated:

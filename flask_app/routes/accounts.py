@@ -127,9 +127,9 @@ def reorder_accounts():
                 account.display_order = index
         db.session.commit()
         return jsonify({'success': True})
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'An unexpected error occurred. Please try again.'}), 500
 
 @accounts_bp.route('/account/<int:account_id>/move_up', methods=['POST'])
 @login_required

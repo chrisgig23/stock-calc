@@ -103,6 +103,7 @@ form { max-width: none; }
 </div>
 
 <form method="post" action="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" onsubmit="return validateAllocations()">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <table class="alloc-form-table">
         <thead>
             <tr>

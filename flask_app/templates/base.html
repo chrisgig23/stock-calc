@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     {% block styles %}{% endblock %}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170829086367629" crossorigin="anonymous"></script>
 </head>
@@ -77,6 +78,10 @@
                     <a href="{{ url_for('auth.logout') }}" class="sidebar-footer-link">Logout</a>
                 </div>
             </div>
+            <div class="sidebar-security-note">
+                <i class="fa-solid fa-shield-halved"></i>
+                Encrypted &amp; secure
+            </div>
         </div>
 
     </aside>
@@ -123,6 +128,21 @@
 </div>
 
 <script>
+    /* ── CSRF helper: inject X-CSRFToken into every fetch() POST ── */
+    (function() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        if (!meta) return;
+        var token = meta.getAttribute('content');
+        var _fetch = window.fetch;
+        window.fetch = function(url, opts) {
+            opts = opts || {};
+            if (opts.method && opts.method.toUpperCase() !== 'GET') {
+                opts.headers = Object.assign({ 'X-CSRFToken': token }, opts.headers || {});
+            }
+            return _fetch(url, opts);
+        };
+    })();
+
     let countdownTime = 60;
     let countdownInterval;
 
