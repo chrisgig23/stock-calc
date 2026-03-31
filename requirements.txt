@@ -8,11 +8,11 @@ click==8.1.7
 cryptography==43.0.0
 exchange_calendars==4.5.5
 Flask==3.0.3
-Flask-Limiter==3.8.0
+Flask-Limiter==4.1.1
 Flask-Login==0.6.3
 Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
-Flask-WTF==1.2.1
+Flask-WTF==1.2.2
 frozendict==2.4.4
 html5lib==1.1
 idna==3.7
