@@ -171,12 +171,24 @@ body.sidebar-collapsed .main-wrapper {
 .market-badge {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 11.5px;
+    gap: 8px;
+    width: 100%;
+    justify-content: space-between;
+    font-size: 11px;
     font-weight: 500;
-    padding: 3px 9px;
+    padding: 5px 10px;
     border-radius: 20px;
     letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+
+.market-status-label,
+.market-next {
+    white-space: nowrap;
+}
+
+.market-status-label {
+    flex-shrink: 0;
 }
 
 .market-badge.market-open {
@@ -192,7 +204,8 @@ body.sidebar-collapsed .main-wrapper {
 .market-next {
     opacity: 0.7;
     font-size: 0.85em;
-    margin-left: 2px;
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 /* Accounts section */
