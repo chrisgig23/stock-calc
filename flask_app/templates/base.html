@@ -72,7 +72,7 @@
                 <a href="{{ url_for('accounts.remove_account') }}" class="sidebar-footer-link sidebar-remove-link">Remove Account</a>
             </div>
             <div class="sidebar-user">
-                <span class="sidebar-username">{{ current_user.username }}</span>
+                <span class="sidebar-username">{{ current_user.email or current_user.username }}</span>
                 <div class="sidebar-user-links">
                     <a href="{{ url_for('admin.manage_user', user_id=current_user.id) }}" class="sidebar-footer-link">Settings</a>
                     {% if current_user.is_admin or current_user.username == 'cgiglio' %}

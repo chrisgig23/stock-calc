@@ -172,6 +172,50 @@ def manage_user(user_id):
     return render_template('manage_user.html', user=user, now=datetime.utcnow())
 
 
+@admin_bp.route('/manage_user/<int:user_id>/email', methods=['POST'])
+@login_required
+def update_email(user_id):
+    """Allow a user to update their own login email and re-run verification."""
+    if current_user.id != user_id and not _is_admin(current_user):
+        flash('You do not have permission to update that account.', 'danger')
+        return redirect(url_for('accounts.view_account'))
+
+    user = User.query.get_or_404(user_id)
+    new_email = request.form.get('email', '').strip().lower()
+
+    if not new_email or '@' not in new_email:
+        flash('Please enter a valid email address.', 'danger')
+        return redirect(url_for('admin.manage_user', user_id=user.id))
+
+    existing = User.query.filter(
+        User.email == new_email,
+        User.email_verified == True,  # noqa: E712
+        User.id != user.id
+    ).first()
+    if existing:
+        flash('That email address is already associated with another account.', 'danger')
+        return redirect(url_for('admin.manage_user', user_id=user.id))
+
+    if user.email == new_email and user.email_verified:
+        flash('That email address is already your verified login email.', 'info')
+        return redirect(url_for('admin.manage_user', user_id=user.id))
+
+    user.email = new_email
+    user.email_verified = False
+    code = user.generate_email_code()
+    db.session.commit()
+
+    from flask_app.email_utils import send_verification_email
+    sent = send_verification_email(new_email, code, user.username)
+
+    if sent:
+        flash(f'A 6-digit verification code was sent to {new_email}.', 'info')
+    else:
+        flash('Email could not be sent. Please try again or contact support.', 'warning')
+
+    return redirect(url_for('auth.email_verify'))
+
+
 @admin_bp.route('/change_username', methods=['GET', 'POST'])
 @login_required
 def change_username():
