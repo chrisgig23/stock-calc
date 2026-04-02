@@ -295,7 +295,7 @@
         </div>
         <div class="help-card">
             <h4>🚫 It's not a brokerage</h4>
-            <p>WealthWise doesn't connect to your broker or execute trades. Think of it as your personal ledger — you enter the data, and it does the math.</p>
+            <p>WealthWise doesn't execute trades. Schwab users can sync data automatically; for other brokerages, you enter data manually or via CSV. Think of it as your personal ledger — it does the math.</p>
         </div>
         <div class="help-card">
             <h4>🔒 It's just for you</h4>
@@ -426,7 +426,7 @@
                 <ul>
                     <li><strong>Stat cards</strong> — Total portfolio value, total cost basis, and total unrealized gain/loss</li>
                     <li><strong>Allocation pie chart</strong> — How your money is spread across tickers, by current market value</li>
-                    <li><strong>Portfolio Growth chart</strong> — Your portfolio's total value over time, built from daily snapshots. Requires at least two historical data points.</li>
+                    <li><strong>Portfolio Growth chart</strong> — Your portfolio's total value over time, built from daily snapshots. Requires at least one saved historical data point.</li>
                     <li><strong>Top Performers chart</strong> — Tickers ranked by unrealized % gain, showing your best and worst movers</li>
                     <li><strong>Per-account cards</strong> — A quick summary of each account's value and gain/loss with a link to dig in</li>
                 </ul>
@@ -486,7 +486,9 @@
                 <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <div class="accordion-body">
-                <p>WealthWise can import from CSV files in two ways:</p>
+                <p>WealthWise supports both direct Schwab API sync and manual CSV import.</p>
+                <p><strong>Schwab Direct Sync (recommended)</strong> — Connect your Schwab account once in Settings and sync positions and transactions automatically with one click. No CSV downloads needed. Go to <strong>Settings → Connect Schwab Account</strong> to set it up.</p>
+                <p><strong>CSV Import</strong> — If you prefer manual control or use a brokerage other than Schwab, you can import from CSV in two ways:</p>
                 <ul>
                     <li><strong>Import Positions</strong> — Upload a CSV of your current holdings to populate an account in bulk. Useful when first setting up or migrating from a spreadsheet.</li>
                     <li><strong>Import Transactions</strong> — Upload a Schwab transaction history export. WealthWise will parse it and add the transactions to your account's log.</li>
@@ -541,8 +543,9 @@
                 <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <div class="accordion-body">
-                <p>The growth chart needs at least two saved snapshots to draw a line. Snapshots are created when you click <strong>Refresh Market Data</strong> inside an account.</p>
-                <p>If you've never done that, try clicking it now — and then again tomorrow. After a few days of refreshing, you'll start to see your portfolio's trend take shape.</p>
+                <p>The growth chart needs at least one saved historical snapshot. Today's current value is always added automatically, so you only need one past data point to see a line.</p>
+                <p>The fastest way to populate the chart is to click <strong>Build Growth Chart</strong> on the Dashboard — this backfills your history automatically from your imported transaction data, so you'll see the full picture right away.</p>
+                <p>Going forward, snapshots are saved each time you click <strong>Refresh Market Data</strong> inside an account. Doing this regularly (weekly or after market movements) keeps your growth chart up to date.</p>
             </div>
         </div>
 
@@ -601,8 +604,8 @@
                 <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <div class="accordion-body">
-                <p>No — WealthWise is intentionally disconnected from brokerages. There is no auto-sync. You enter your own data, either manually or via CSV import.</p>
-                <p>This means your account credentials never touch WealthWise, and you're always in control of what's recorded. The trade-off is that you'll need to manually update things after trades. For many users, a quick weekly or monthly update is all it takes.</p>
+                <p><strong>Schwab users:</strong> Yes — WealthWise supports a direct Schwab connection via OAuth. Once connected in Settings, you can sync your positions and transactions with one click. No CSV downloads needed.</p>
+                <p><strong>Other brokerages:</strong> Not yet. For Fidelity, Robinhood, and others, you'll enter data manually or import via CSV. WealthWise never stores your brokerage login credentials — you're always in control of what gets recorded.</p>
             </div>
         </div>
 
@@ -617,8 +620,8 @@
     </div>
     <div class="help-cards">
         <div class="help-card">
-            <h4>🔄 Refresh at least weekly</h4>
-            <p>Click <strong>Refresh Market Data</strong> once a week (or more) to build up your portfolio growth history. The more snapshots you have, the more useful the growth chart becomes.</p>
+            <h4>🔄 Build and maintain your growth chart</h4>
+            <p>Click <strong>Build Growth Chart</strong> on the Dashboard once to backfill history from your transactions. After that, click <strong>Refresh Market Data</strong> weekly to keep adding new snapshots going forward.</p>
         </div>
         <div class="help-card">
             <h4>🎯 Keep cost basis accurate</h4>
