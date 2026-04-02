@@ -233,8 +233,22 @@
                     <div style="font-size:2.2em; margin-bottom:10px;">📈</div>
                     No historical data yet.<br>
                     <span style="font-size:0.9em; color:var(--color-text-secondary);">
-                        Snapshots are recorded daily &mdash; check back tomorrow!
+                        Generate history from your imported transactions:
                     </span>
+                    <form method="POST" action="{{ url_for('market.snapshot_backfill') }}" style="margin-top:12px;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" style="
+                            background: var(--color-primary);
+                            color: #fff;
+                            border: none;
+                            border-radius: 7px;
+                            padding: 8px 18px;
+                            font-size: 0.84em;
+                            font-weight: 600;
+                            cursor: pointer;
+                            font-family: inherit;
+                        ">Build Growth Chart</button>
+                    </form>
                 </div>
             </div>
             {% endif %}

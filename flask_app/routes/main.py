@@ -85,7 +85,7 @@ def dashboard():
 
     growth_labels = sorted(growth_by_date.keys())
     growth_values  = [round(growth_by_date[d], 2) for d in growth_labels]
-    has_growth_data = len(growth_labels) > 1  # need at least 2 points for a meaningful line
+    has_growth_data = len(growth_labels) >= 1  # need at least 1 past point plus today
 
     # ── Chart 3 — Top Performers (% gain per ticker) ───────────────────────
     performers = []
