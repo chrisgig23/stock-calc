@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
@@ -220,3 +220,17 @@ app.register_blueprint(main_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(import_bp)
 app.register_blueprint(schwab_bp)
+
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(e):
+    """Show a friendly message when a stale page submits an expired CSRF token."""
+    try:
+        if current_user.is_authenticated:
+            flash('That page expired while it was open. Please try again from a fresh page.', 'warning')
+            return redirect(url_for('main.dashboard'))
+    except Exception:
+        pass
+
+    flash('Your session expired while that page was open. Please sign in again and try once more.', 'warning')
+    return redirect(url_for('auth.login'))
