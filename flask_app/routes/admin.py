@@ -216,6 +216,42 @@ def update_email(user_id):
     return redirect(url_for('auth.email_verify'))
 
 
+@admin_bp.route('/manage_user/<int:user_id>/dca-reminder', methods=['POST'])
+@login_required
+def save_dca_reminder(user_id):
+    """Save the user's DCA reminder preference and day-of-month."""
+    if current_user.id != user_id and not _is_admin(current_user):
+        flash('You do not have permission to update that account.', 'danger')
+        return redirect(url_for('accounts.view_account'))
+
+    user = User.query.get_or_404(user_id)
+
+    if not (user.email and user.email_verified):
+        flash('A verified email address is required for DCA reminders.', 'danger')
+        return redirect(url_for('admin.manage_user', user_id=user_id))
+
+    enabled = 'dca_enabled' in request.form
+    day_raw = request.form.get('dca_day', '1')
+    try:
+        day = int(day_raw)
+        if not 1 <= day <= 28:
+            raise ValueError
+    except ValueError:
+        flash('Please choose a valid day between 1 and 28.', 'danger')
+        return redirect(url_for('admin.manage_user', user_id=user_id))
+
+    user.dca_reminder_enabled = enabled
+    user.dca_reminder_day = day if enabled else user.dca_reminder_day
+    db.session.commit()
+
+    if enabled:
+        flash(f'DCA reminder set — you\'ll receive an email on the {day}{"st" if day == 1 else "nd" if day == 2 else "rd" if day == 3 else "th"} of each month at 9:30 AM ET.', 'success')
+    else:
+        flash('DCA reminder turned off.', 'info')
+
+    return redirect(url_for('admin.manage_user', user_id=user_id))
+
+
 @admin_bp.route('/change_username', methods=['GET', 'POST'])
 @login_required
 def change_username():

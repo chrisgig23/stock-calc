@@ -162,6 +162,47 @@
     line-height: 1.5;
 }
 
+/* DCA reminder toggle */
+.dca-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.dca-toggle-row label {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
+}
+.dca-day-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 0.87em;
+    color: var(--color-text-secondary);
+}
+.dca-day-row select {
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.9em;
+    font-family: inherit;
+    background: #fff;
+    color: var(--color-text);
+    cursor: pointer;
+}
+.dca-no-email-note {
+    font-size: 0.83em;
+    color: var(--color-text-secondary);
+    background: #FEF3C7;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+}
+
 /* Admin section */
 .admin-form-row {
     display: flex;
@@ -294,6 +335,53 @@
 
 {% endif %}{# schwab_enabled #}
 
+<!-- ── DCA Reminder ───────────────────────────────────────────────────────── -->
+<div class="settings-card">
+    <div class="settings-card-title">
+        <span class="card-icon"><i class="fa-solid fa-bell"></i></span>
+        Monthly DCA Reminder
+    </div>
+    <p class="settings-card-desc">Get an email reminder on a chosen day each month to make your dollar cost averaging purchase.</p>
+
+    {% if not (user.email and user.email_verified) %}
+    <div class="dca-no-email-note">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        A verified email address is required to use this feature. Add and verify your email above first.
+    </div>
+    {% else %}
+    <form method="POST" action="{{ url_for('admin.save_dca_reminder', user_id=user.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="dca-toggle-row">
+            <input
+                type="checkbox"
+                id="dca_enabled"
+                name="dca_enabled"
+                {% if user.dca_reminder_enabled %}checked{% endif %}
+                onchange="toggleDcaDay(this.checked)"
+            >
+            <label for="dca_enabled">Send me a monthly DCA reminder email</label>
+        </div>
+
+        <div class="dca-day-row" id="dca-day-row" style="{% if not user.dca_reminder_enabled %}opacity:0.4;pointer-events:none;{% endif %}">
+            <span>Send it on the</span>
+            <select name="dca_day" id="dca_day">
+                {% for d in range(1, 29) %}
+                <option value="{{ d }}" {% if user.dca_reminder_day == d %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+            <span>of each month at 9:30 AM ET (market open)</span>
+        </div>
+
+        <div style="margin-top:16px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-floppy-disk"></i> Save Reminder Settings
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
 <!-- ── Admin shortcut ─────────────────────────────────────────────────────── -->
 {% if current_user.is_admin or current_user.username == 'cgiglio' %}
 <div class="settings-card">
@@ -312,4 +400,16 @@
 <a href="{{ url_for('accounts.view_account') }}" class="btn btn-secondary">
     ← Back to Accounts
 </a>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleDcaDay(enabled) {
+    var row = document.getElementById('dca-day-row');
+    if (row) {
+        row.style.opacity = enabled ? '1' : '0.4';
+        row.style.pointerEvents = enabled ? 'auto' : 'none';
+    }
+}
+</script>
 {% endblock %}

@@ -26,6 +26,10 @@ class User(UserMixin, db.Model):
     email_verification_code  = db.Column(db.String(6), nullable=True)   # 6-digit OTP
     email_code_expires       = db.Column(db.DateTime, nullable=True)
 
+    # ── DCA reminder ─────────────────────────────────────────────────────
+    dca_reminder_enabled     = db.Column(db.Boolean, nullable=False, default=False)
+    dca_reminder_day         = db.Column(db.Integer, nullable=True)  # 1–28, day of month
+
     accounts = db.relationship('Account', backref='owner', lazy=True)
 
     def set_password(self, password):
