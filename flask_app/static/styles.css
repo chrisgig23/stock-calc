@@ -181,9 +181,9 @@ body.sidebar-collapsed .main-wrapper {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 10.5px;
+    font-size: 10px;
     font-weight: 500;
-    padding: 4px 9px;
+    padding: 4px 8px;
     border-radius: 20px;
     letter-spacing: 0;
     white-space: nowrap;
@@ -192,7 +192,7 @@ body.sidebar-collapsed .main-wrapper {
 }
 
 .market-status-label {
-    flex-shrink: 0;
+    min-width: 0;
     white-space: nowrap;
 }
 
@@ -210,6 +210,7 @@ body.sidebar-collapsed .main-wrapper {
     opacity: 0.75;
     white-space: nowrap;
     flex-shrink: 0;
+    margin-left: auto;
 }
 
 /* Accounts section */

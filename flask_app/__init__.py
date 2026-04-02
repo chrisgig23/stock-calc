@@ -10,6 +10,8 @@ import os
 import pytz
 import pandas_market_calendars as mcal
 from datetime import datetime, timedelta
+from datetime import date as dt_date
+import re
 import warnings
 
 load_dotenv()  # Load environment variables
@@ -159,19 +161,67 @@ def _fmt_market_delta(delta, prefix):
         return f'{prefix} in {m}m'
 
 
+def _normalize_holiday_name(name):
+    """Clean up NYSE holiday rule names for user-facing display."""
+    if not name:
+        return ''
+
+    name = re.sub(r'\s+(?:Starting at \d{4}|\d{4}\+|\d{4} to \d{4}|Before .+)$', '', str(name)).strip()
+    replacements = {
+        'New Years Day': "New Year's Day",
+        'Washingtons Birthday': "Washington's Birthday",
+        'July 4th': 'Independence Day',
+        'Veteran Day': 'Veterans Day',
+    }
+    return replacements.get(name, name)
+
+
+def _get_holiday_name(calendar, target_date):
+    """Return a friendly NYSE holiday name for a date, if one exists."""
+    if not isinstance(target_date, dt_date):
+        return ''
+
+    try:
+        holiday_series = calendar.regular_holidays.holidays(
+            start=target_date.isoformat(),
+            end=target_date.isoformat(),
+            return_name=True,
+        )
+        if len(holiday_series):
+            return _normalize_holiday_name(holiday_series.iloc[0])
+    except Exception:
+        pass
+    return ''
+
+
+def _get_closure_reason(calendar, start_date, next_open_date):
+    """Find the first named market holiday before the next open session."""
+    if not isinstance(start_date, dt_date) or not isinstance(next_open_date, dt_date):
+        return ''
+
+    cursor = start_date
+    while cursor < next_open_date:
+        holiday_name = _get_holiday_name(calendar, cursor)
+        if holiday_name:
+            return holiday_name
+        cursor += timedelta(days=1)
+    return ''
+
+
 @app.context_processor
 def inject_market_state():
-    """Injects market_state (bool) and market_next_event (str) into all templates.
-    Uses NYSE calendar with a 7-day lookahead to compute next open/close time."""
+    """Inject market open/closed state plus a friendly countdown message."""
     try:
+        nyse = mcal.get_calendar('NYSE')
         ny_tz  = pytz.timezone('America/New_York')
         now_ny = datetime.now(ny_tz)
         today  = now_ny.strftime('%Y-%m-%d')
         ahead  = (now_ny + timedelta(days=7)).strftime('%Y-%m-%d')
 
-        schedule = mcal.get_calendar('NYSE').schedule(start_date=today, end_date=ahead)
+        schedule = nyse.schedule(start_date=today, end_date=ahead)
 
         market_state      = False
+        market_status_text = 'Markets Closed'
         market_next_event = ''
 
         if not schedule.empty:
@@ -181,9 +231,16 @@ def inject_market_state():
 
                 if open_et <= now_ny <= close_et:
                     market_state      = True
+                    market_status_text = 'Markets Open'
                     market_next_event = _fmt_market_delta(close_et - now_ny, 'Closes')
                     break
                 elif now_ny < open_et:
+                    closure_reason = _get_closure_reason(nyse, now_ny.date(), open_et.date())
+                    market_status_text = (
+                        f'Markets Closed for {closure_reason}'
+                        if closure_reason else
+                        'Markets Closed'
+                    )
                     market_next_event = _fmt_market_delta(open_et - now_ny, 'Opens')
                     break
                 # Past session for this day — check next row
@@ -196,9 +253,14 @@ def inject_market_state():
             )
     except Exception:
         market_state      = False
+        market_status_text = 'Markets Closed'
         market_next_event = ''
 
-    return dict(market_state=market_state, market_next_event=market_next_event)
+    return dict(
+        market_state=market_state,
+        market_status_text=market_status_text,
+        market_next_event=market_next_event,
+    )
 
 # Import and register Blueprints
 from flask_app.routes.auth import auth_bp

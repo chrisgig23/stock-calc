@@ -27,7 +27,7 @@
                     <span class="brand-wordmark">WealthWise™</span>
                 </div>
                 <span class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
-                    <span class="market-status-label">{% if market_state %}● Markets Open{% else %}● Markets Closed{% endif %}</span>
+                    <span class="market-status-label">{{ market_status_text }}</span>
                     {% if market_next_event %}<span class="market-next">· {{ market_next_event }}</span>{% endif %}
                 </span>
             </div>
