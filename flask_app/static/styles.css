@@ -159,36 +159,41 @@ body.sidebar-collapsed .main-wrapper {
     margin-left: var(--sidebar-collapsed-width);
 }
 
+.sidebar-brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.sidebar-brand-icon {
+    height: 28px;
+    width: auto;
+    flex-shrink: 0;
+}
 .brand-wordmark {
-    display: block;
     font-size: 17px;
     font-weight: 700;
     color: #F8FAFC;
     letter-spacing: -0.4px;
-    margin-bottom: 8px;
 }
 
 .market-badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    width: 100%;
-    justify-content: space-between;
+    gap: 5px;
     font-size: 11px;
     font-weight: 500;
-    padding: 5px 10px;
+    padding: 4px 10px;
     border-radius: 20px;
     letter-spacing: 0.01em;
     white-space: nowrap;
-}
-
-.market-status-label,
-.market-next {
-    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .market-status-label {
     flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .market-badge.market-open {
@@ -197,15 +202,15 @@ body.sidebar-collapsed .main-wrapper {
 }
 
 .market-badge.market-closed {
-    background-color: rgba(148, 163, 184, 0.08);
-    color: #64748B;
+    background-color: rgba(148, 163, 184, 0.12);
+    color: #94A3B8;
 }
 
 .market-next {
-    opacity: 0.7;
-    font-size: 0.85em;
-    margin-left: auto;
-    flex-shrink: 0;
+    opacity: 0.75;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Accounts section */
@@ -587,13 +592,22 @@ body.auth-layout.home-layout .main-content {
 }
 
 .home-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 52px;
+    position: relative;
+    z-index: 1;
+}
+.home-brand-icon {
+    height: 36px;
+    width: auto;
+}
+.home-brand span {
     font-size: 22px;
     font-weight: 800;
     color: #818CF8;
     letter-spacing: -0.5px;
-    margin-bottom: 52px;
-    position: relative;
-    z-index: 1;
 }
 
 .home-headline {
@@ -1230,12 +1244,10 @@ th {
     color: var(--color-text);
 }
 
-.login-brand {
-    font-size: 19px;
-    font-weight: 700;
-    color: #818CF8;
-    letter-spacing: -0.3px;
+.login-brand-logo {
     display: block;
+    height: 40px;
+    width: auto;
     margin-bottom: 28px;
 }
 

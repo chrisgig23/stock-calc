@@ -22,7 +22,10 @@
 
         <div class="sidebar-brand">
             <div class="sidebar-brand-content">
-                <span class="brand-wordmark">WealthWise™</span>
+                <div class="sidebar-brand-logo">
+                    <img src="{{ url_for('static', filename='images/wealthwise_icon.png') }}" alt="" class="sidebar-brand-icon" aria-hidden="true">
+                    <span class="brand-wordmark">WealthWise™</span>
+                </div>
                 <span class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
                     <span class="market-status-label">{% if market_state %}● Markets Open{% else %}● Markets Closed{% endif %}</span>
                     {% if market_next_event %}<span class="market-next">· {{ market_next_event }}</span>{% endif %}

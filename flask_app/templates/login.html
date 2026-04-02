@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="login-container">
-    <span class="login-brand">WealthWise™</span>
+    <img src="{{ url_for('static', filename='images/wealthwise_logo.png') }}" alt="WealthWise" class="login-brand-logo">
     <h2>Sign in to your account</h2>
     <form method="POST" action="{{ url_for('auth.login') }}">
         <label for="username">Username</label>
