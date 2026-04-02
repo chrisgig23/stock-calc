@@ -26,10 +26,10 @@
                     <img src="{{ url_for('static', filename='images/wealthwise_icon.png') }}" alt="" class="sidebar-brand-icon" aria-hidden="true">
                     <span class="brand-wordmark">WealthWise™</span>
                 </div>
-                <span class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
+                <div class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
                     <span class="market-status-label">{{ market_status_text }}</span>
-                    {% if market_next_event %}<span class="market-next">· {{ market_next_event }}</span>{% endif %}
-                </span>
+                    {% if market_next_event %}<span class="market-next">{{ market_next_event }}</span>{% endif %}
+                </div>
             </div>
             <button class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Collapse sidebar" aria-label="Collapse sidebar">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
