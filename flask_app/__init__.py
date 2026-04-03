@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, flash, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
@@ -91,7 +91,6 @@ def set_security_headers(response):
 
 # Import models
 from flask_app.models import User, Account, Holding
-from flask import request, redirect, url_for
 
 # User loader for Flask-Login
 @login_manager.user_loader
@@ -136,6 +135,24 @@ def inject_schwab_status():
     """Exposes schwab_enabled to all templates. Flip SCHWAB_ENABLED=true in .env once
     the Schwab developer portal modification is approved."""
     return {"schwab_enabled": os.getenv("SCHWAB_ENABLED", "false").lower() == "true"}
+
+
+def asset_url(filename):
+    """Return a cache-busted static asset URL based on the file's mtime."""
+    static_root = app.static_folder or os.path.join(app.root_path, 'static')
+    file_path = os.path.join(static_root, filename.replace('/', os.sep))
+
+    try:
+        version = int(os.path.getmtime(file_path))
+    except OSError:
+        return url_for('static', filename=filename)
+
+    return url_for('static', filename=filename, v=version)
+
+
+@app.context_processor
+def inject_asset_url():
+    return {"asset_url": asset_url}
 
 @app.context_processor
 def inject_accounts():

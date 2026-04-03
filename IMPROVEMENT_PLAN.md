@@ -281,6 +281,7 @@ Work through these one at a time. Each is a discrete, shippable unit.
 - **Login:** `cgiglio` / `StockCalc2026!`
 - **Superuser note:** The "Add New User" form on `/manage_user` is intentional and visible only to the `cgiglio` account — not a bug.
 - **Yahoo Finance fix:** Already applied to `models.py` on prod — `current_price` returns `0.0` on rate-limit errors rather than crashing.
+- **Static asset cache-busting:** Implemented via `asset_url()` helper in `flask_app/__init__.py`, which appends each static file's modified timestamp to CSS/logo/favicon URLs so browsers pick up deploy updates without a hard refresh.
 - **DNS:** `www.wealthtrackapp.com` CNAME → `webapp-2769154.pythonanywhere.com` (Squarespace, propagated 2026-03-26). Bare domain `wealthtrackapp.com` forwards → `https://www.wealthtrackapp.com`.
 - **PythonAnywhere API token:** `3116453ae30a968dfc5eb596939f9b742d4bf2a8`
 
@@ -298,6 +299,7 @@ Work through these one at a time. Each is a discrete, shippable unit.
 - Repo location: `/home/chrisgig23/stock-calc/`
 - Always checked out on: `prod`
 - To deploy an update: merge `dev` → `prod` on PythonAnywhere, then `touch` the WSGI file
+- Static asset note: CSS/logo/favicon changes automatically cache-bust after deploy because templates use versioned asset URLs.
 
 ### Deploying (step-by-step)
 ```bash
