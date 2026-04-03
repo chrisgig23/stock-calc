@@ -341,7 +341,9 @@
         <span class="card-icon"><i class="fa-solid fa-bell"></i></span>
         Monthly DCA Reminder
     </div>
-    <p class="settings-card-desc">Get an email reminder on a chosen day each month to make your dollar cost averaging purchase.</p>
+    <p class="settings-card-desc">
+        Get a monthly email reminder for your dollar cost averaging purchase. If your chosen date falls on a weekend or market holiday, we’ll send it on the next trading day at market open.
+    </p>
 
     {% if not (user.email and user.email_verified) %}
     <div class="dca-no-email-note">
@@ -370,7 +372,7 @@
                 <option value="{{ d }}" {% if user.dca_reminder_day == d %}selected{% endif %}>{{ d }}</option>
                 {% endfor %}
             </select>
-            <span>of each month at 9:30 AM ET (market open)</span>
+            <span>of each month at market open</span>
         </div>
 
         <div style="margin-top:16px;">

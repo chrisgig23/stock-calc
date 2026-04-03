@@ -245,7 +245,10 @@ def save_dca_reminder(user_id):
     db.session.commit()
 
     if enabled:
-        flash(f'DCA reminder set — you\'ll receive an email on the {day}{"st" if day == 1 else "nd" if day == 2 else "rd" if day == 3 else "th"} of each month at 9:30 AM ET.', 'success')
+        flash(
+            f'DCA reminder set — we\'ll email you on the {day}{"st" if day == 1 else "nd" if day == 2 else "rd" if day == 3 else "th"} of each month at market open, or on the next trading day if the market is closed.',
+            'success'
+        )
     else:
         flash('DCA reminder turned off.', 'info')
 
