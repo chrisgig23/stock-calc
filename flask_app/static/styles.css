@@ -92,7 +92,7 @@ body.app-layout {
 
 /* Brand / logo area */
 .sidebar-brand {
-    padding: 16px 14px 14px;
+    padding: 18px 16px 16px;
     border-bottom: 1px solid var(--sidebar-border);
     flex-shrink: 0;
     display: flex;
@@ -162,29 +162,29 @@ body.sidebar-collapsed .main-wrapper {
 .sidebar-brand-logo {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 .sidebar-brand-icon {
-    height: 28px;
+    height: 30px;
     width: auto;
     flex-shrink: 0;
 }
 .brand-wordmark {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
     color: #F8FAFC;
-    letter-spacing: -0.4px;
+    letter-spacing: -0.45px;
 }
 
 .market-badge {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1px;
+    gap: 2px;
     font-size: 10px;
     font-weight: 500;
-    padding: 6px 10px;
+    padding: 7px 11px;
     border-radius: 18px;
     letter-spacing: 0;
     max-width: 100%;
@@ -291,6 +291,15 @@ body.sidebar-collapsed .main-wrapper {
     background-color: #1E293B;
 }
 
+.account-item-active {
+    background: rgba(99, 102, 241, 0.14);
+    box-shadow: inset 0 0 0 1px rgba(129, 140, 248, 0.22);
+}
+
+.account-item-active:hover {
+    background: rgba(99, 102, 241, 0.18);
+}
+
 .sidebar-nav-link {
     color: var(--sidebar-text);
     text-decoration: none;
@@ -307,6 +316,11 @@ body.sidebar-collapsed .main-wrapper {
 
 .sidebar-nav-link:hover {
     color: var(--sidebar-text-active);
+}
+
+.sidebar-nav-link-active {
+    color: var(--sidebar-text-active);
+    font-weight: 600;
 }
 
 /* Standalone nav links (Dashboard, Help) — match account-item indent */
@@ -326,25 +340,27 @@ body.sidebar-collapsed .main-wrapper {
 .sidebar-footer {
     flex-shrink: 0;
     border-top: 1px solid var(--sidebar-border);
-    padding: 14px 16px 20px;
+    padding: 16px 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
 }
 
 .sidebar-footer-actions {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
 }
 
 .sidebar-footer-link {
     font-size: 13px;
     color: var(--sidebar-text);
     text-decoration: none;
-    padding: 5px 0;
-    transition: color 0.14s;
-    display: block;
+    padding: 6px 0;
+    transition: color 0.14s, background 0.14s, border-color 0.14s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
 }
 
 .sidebar-footer-link:hover {
@@ -366,10 +382,47 @@ body.sidebar-collapsed .main-wrapper {
 
 .sidebar-user {
     border-top: 1px solid var(--sidebar-border);
-    padding-top: 14px;
+    padding-top: 16px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 12px;
+}
+
+.sidebar-user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(99, 102, 241, 0.18);
+    color: #C7D2FE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+
+.sidebar-user-meta {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.sidebar-user-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748B;
 }
 
 .sidebar-username {
@@ -377,11 +430,41 @@ body.sidebar-collapsed .main-wrapper {
     font-size: 13px;
     font-weight: 600;
     color: #F1F5F9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sidebar-user-links {
     display: flex;
-    gap: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sidebar-profile-link {
+    padding: 7px 10px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    line-height: 1;
+}
+
+.sidebar-profile-link:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.1);
+}
+
+.sidebar-profile-link i {
+    font-size: 0.8rem;
+    opacity: 0.85;
+}
+
+.sidebar-admin-link {
+    color: #A78BFA;
+}
+
+.sidebar-admin-link:hover {
+    color: #C4B5FD;
 }
 
 .sidebar-security-note {

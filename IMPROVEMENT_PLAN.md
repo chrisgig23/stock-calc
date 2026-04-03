@@ -32,8 +32,8 @@
   - `.back-button` and `.refresh-button` restyled to match `.btn-ghost` (consistent across all pages without touching every template).
   - Raw `<button>` in change_username.html given `.btn-primary` class.
 
-- [ ] **D6 — Modernize the header bar**
-  - Replace plain "Logged in as: cgiglio | Logout | Manage my account" text with a clean right-aligned profile area (username + dropdown or icon links). Remove the extra line of wasted space in the header.
+- [x] **D6 — Modernize the header bar** ✅
+  - Refreshed the authenticated app shell: tightened top brand/header spacing, polished the market status pill, and replaced the plain footer identity text with a proper profile card + action buttons for Settings, Logout, and Admin.
 
 - [ ] **D7 — Market status bar: add color and next-open time**
   - "Markets are closed" in a flat teal bar is functional but minimal. Make the bar green when open, red/gray when closed, and show the next open or close time.
@@ -67,8 +67,8 @@
 - [ ] **D3 — Replace the per-account "6 buttons" menu page with a proper account detail layout**
   - Once inside an account, replace the static list of 6 blue buttons with a tabbed or sidebar-nav layout so content is visible without an extra click. The main content area should never be just buttons on an empty background.
 
-- [ ] **D4 — Highlight the active account in navigation**
-  - When viewing a specific account, the account name should be visually active/selected in whatever nav structure replaces the current sidebar.
+- [x] **D4 — Highlight the active account in navigation** ✅
+  - Sidebar account links now show a persistent active state when viewing any page scoped to that account, including the account overview, positions, allocation, purchase, import, and report flows.
 
 ---
 
@@ -226,8 +226,8 @@ Work through these one at a time. Each is a discrete, shippable unit.
 6. `DASH1` — Build Portfolio Overview Dashboard with 3 charts (allocation pie, growth line, top performers bar)
 7. `DASH2` — Add per-account summary cards below the overview
 8. `D3` — Replace per-account "6 buttons" menu with tabbed/inline account detail layout
-9. `D4` — Active account highlight in navigation
-10. `D6` — Modernize the header bar
+9. ~~`D4`~~ ✅ Active account highlight in navigation
+10. ~~`D6`~~ ✅ Modernize the header bar
 
 ### Phase 3.5 — Schema Redesign + Data Import (completed 2026-03-26)
 - ~~Schema redesign~~ ✅ `Holding` / `Transaction` / `PortfolioSnapshot` replace old models

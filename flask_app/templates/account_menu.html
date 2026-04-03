@@ -299,6 +299,44 @@ document.addEventListener('DOMContentLoaded', function() {
     /* ── Tab switching ─────────────────────────────────────────── */
     var tabBtns   = document.querySelectorAll('.acct-tab-btn');
     var tabPanels = document.querySelectorAll('.acct-tab-panel');
+    var allocChart = null;
+
+    function renderAllocationChart() {
+        {% if alloc_rows %}
+        var allocCanvas = document.getElementById('allocMiniChart');
+        if (!allocCanvas) return;
+
+        if (typeof Chart === 'undefined') {
+            window.setTimeout(renderAllocationChart, 150);
+            return;
+        }
+
+        if (allocChart) {
+            allocChart.resize();
+            allocChart.update();
+            return;
+        }
+
+        var labels = [{% for a in alloc_rows %}'{{ a.ticker }}',{% endfor %}];
+        var values = [{% for a in alloc_rows %}{{ a.current_pct }},{% endfor %}];
+        var palette = ['#6366f1','#3b82f6','#06b6d4','#10b981','#f59e0b','#f43f5e','#8b5cf6','#84cc16'];
+
+        allocChart = new Chart(allocCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{ data: values, backgroundColor: palette, borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } },
+                    tooltip: { callbacks: { label: function(c) { return c.label + ': ' + c.parsed.toFixed(1) + '%'; } } }
+                }
+            }
+        });
+        {% endif %}
+    }
 
     function showTab(id) {
         tabBtns.forEach(function(b) {
@@ -307,6 +345,9 @@ document.addEventListener('DOMContentLoaded', function() {
         tabPanels.forEach(function(p) {
             p.classList.toggle('active', p.id === id);
         });
+        if (id === 'allocation') {
+            renderAllocationChart();
+        }
         try { localStorage.setItem('acctTab_{{ account.id }}', id); } catch(e) {}
     }
 
@@ -372,29 +413,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    /* ── Allocation mini chart ─────────────────────────────────── */
-    {% if alloc_rows %}
-    var allocCanvas = document.getElementById('allocMiniChart');
-    if (allocCanvas && typeof Chart !== 'undefined') {
-        var labels = [{% for a in alloc_rows %}'{{ a.ticker }}',{% endfor %}];
-        var values = [{% for a in alloc_rows %}{{ a.current_pct }},{% endfor %}];
-        var palette = ['#6366f1','#3b82f6','#06b6d4','#10b981','#f59e0b','#f43f5e','#8b5cf6','#84cc16'];
-        new Chart(allocCanvas, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{ data: values, backgroundColor: palette, borderWidth: 2, borderColor: '#fff' }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } },
-                    tooltip: { callbacks: { label: function(c) { return c.label + ': ' + c.parsed.toFixed(1) + '%'; } } }
-                }
-            }
-        });
-    }
-    {% endif %}
 });
 </script>
 {% endblock %}

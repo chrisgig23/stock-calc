@@ -139,12 +139,23 @@ def inject_schwab_status():
 
 @app.context_processor
 def inject_accounts():
-    """Ensures 'accounts' and 'max_position' are accessible in all templates globally."""
+    """Expose sidebar account data and the currently active account."""
     if current_user.is_authenticated:
         user_accounts = Account.query.filter_by(user_id=current_user.id).order_by(Account.position).all()
         max_position = db.session.query(db.func.max(Account.position)).filter_by(user_id=current_user.id).scalar() or 0
-        return {"accounts": user_accounts, "max_position": max_position}
-    return {"accounts": [], "max_position": 0}
+        active_account_id = None
+
+        if request.view_args and request.view_args.get('account_id') is not None:
+            active_account_id = request.view_args.get('account_id')
+        elif request.endpoint == 'accounts.view_account' and user_accounts:
+            active_account_id = user_accounts[0].id
+
+        return {
+            "accounts": user_accounts,
+            "max_position": max_position,
+            "active_account_id": active_account_id,
+        }
+    return {"accounts": [], "max_position": 0, "active_account_id": None}
 
 def _fmt_market_delta(delta, prefix):
     """Format a timedelta into a human-friendly string like 'Opens in 1h 30m'."""
