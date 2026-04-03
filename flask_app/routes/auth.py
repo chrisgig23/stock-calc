@@ -1,12 +1,47 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify, current_app
 from flask_login import login_user, login_required, logout_user, current_user
 from flask_app import db, limiter
 from flask_app.models import User
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 import pytz
+from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 auth_bp = Blueprint('auth', __name__)
+
+
+def _get_reset_serializer():
+    secret_key = current_app.config['SECRET_KEY']
+    if isinstance(secret_key, bytes):
+        secret_key = secret_key.decode('utf-8', 'replace')
+    return URLSafeTimedSerializer(secret_key)
+
+
+def _make_password_reset_token(user):
+    """Create a time-limited reset token invalidated by future password changes."""
+    serializer = _get_reset_serializer()
+    return serializer.dumps(
+        {'uid': user.id, 'pwd': user.password_hash[-16:]},
+        salt='password-reset',
+    )
+
+
+def _load_password_reset_user(token, max_age=3600):
+    """Return the matching user for a valid reset token, else None."""
+    serializer = _get_reset_serializer()
+    try:
+        data = serializer.loads(token, salt='password-reset', max_age=max_age)
+    except (BadSignature, SignatureExpired):
+        return None
+
+    user = User.query.get(data.get('uid'))
+    if not user:
+        return None
+
+    if data.get('pwd') != user.password_hash[-16:]:
+        return None
+
+    return user
 
 # ---------------------------------------------------------------------------
 # Session management
@@ -88,21 +123,59 @@ def logout():
     logout_user()
     return redirect(url_for('auth.login'))
 
+
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+@limiter.limit("5 per 15 minutes", methods=['POST'])
+def forgot_password():
+    """Start a self-service password reset via verified email."""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+
+        if email and '@' in email:
+            user = User.query.filter(
+                User.email == email,
+                User.email_verified == True  # noqa: E712
+            ).first()
+            if user:
+                token = _make_password_reset_token(user)
+                reset_url = url_for('auth.reset_password_token', token=token, _external=True)
+
+                from flask_app.email_utils import send_password_reset_email
+                send_password_reset_email(user.email, user.username, reset_url)
+
+        flash(
+            "If we found a verified account with that email address, we've sent a password reset link.",
+            'info'
+        )
+        return redirect(url_for('auth.login'))
+
+    return render_template('forgot_password.html')
+
 # ---------------------------------------------------------------------------
 # Password reset
 # ---------------------------------------------------------------------------
 
 @auth_bp.route('/reset_password/<int:user_id>', methods=['GET', 'POST'])
+@login_required
 def reset_password(user_id):
     user = User.query.get(user_id)
     if not user:
         flash('User does not exist.', 'danger')
         return redirect(url_for('auth.login'))
 
+    if current_user.id != user.id:
+        flash('Use the admin reset flow to reset another user password.', 'warning')
+        return redirect(url_for('admin.manage_user', user_id=user.id))
+
     if request.method == 'POST':
         new_password = request.form['new_password']
         confirm_password = request.form['confirm_password']
-        if new_password == confirm_password:
+        if len(new_password) < 8:
+            flash('Please choose a password with at least 8 characters.', 'danger')
+        elif new_password == confirm_password:
             user.password_hash = generate_password_hash(new_password)
             user.must_change_password = False
             db.session.commit()
@@ -112,7 +185,47 @@ def reset_password(user_id):
         else:
             flash('Passwords do not match.', 'danger')
 
-    return render_template('reset_password.html', user=user)
+    return render_template(
+        'reset_password.html',
+        user=user,
+        cancel_url=url_for('admin.manage_user', user_id=user.id),
+        reset_context='signed_in',
+    )
+
+
+@auth_bp.route('/reset-password/token/<token>', methods=['GET', 'POST'])
+def reset_password_token(token):
+    """Reset a password using an emailed time-limited link."""
+    user = _load_password_reset_user(token)
+    if not user:
+        flash('That reset link is invalid or has expired. Please request a new one.', 'warning')
+        return redirect(url_for('auth.forgot_password'))
+
+    if request.method == 'POST':
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        if not new_password or len(new_password) < 8:
+            flash('Please choose a password with at least 8 characters.', 'danger')
+        elif new_password != confirm_password:
+            flash('Passwords do not match.', 'danger')
+        else:
+            user.password_hash = generate_password_hash(new_password)
+            user.must_change_password = False
+            db.session.commit()
+
+            if current_user.is_authenticated:
+                logout_user()
+            session.clear()
+            flash('Password updated successfully. Please sign in with your new password.', 'success')
+            return redirect(url_for('auth.login'))
+
+    return render_template(
+        'reset_password.html',
+        user=user,
+        cancel_url=url_for('auth.login'),
+        reset_context='email_link',
+    )
 
 # ---------------------------------------------------------------------------
 # Email capture — ask the user for their email address

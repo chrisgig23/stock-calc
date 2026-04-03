@@ -8,20 +8,29 @@ Requires:
 """
 
 import os
-import resend
+try:
+    import resend
+except ModuleNotFoundError:
+    resend = None
 
 FROM_ADDRESS = "WealthWise <noreply@wealthtrackapp.com>"
 
 
 def _get_client():
+    if resend is None:
+        print("[email] resend package is not installed; email sending is disabled.")
+        return False
+
     resend.api_key = os.getenv("RESEND_API_KEY", "")
+    return True
 
 
 def send_verification_email(to_email: str, code: str, username: str) -> bool:
     """Send a 6-digit email verification code to the user."""
-    _get_client()
+    if not _get_client():
+        return False
     try:
-        params: resend.Emails.SendParams = {
+        params = {
             "from": FROM_ADDRESS,
             "to": [to_email],
             "subject": "Verify your email — WealthWise",
@@ -80,9 +89,10 @@ def send_verification_email(to_email: str, code: str, username: str) -> bool:
 
 def send_dca_reminder_email(to_email: str, username: str) -> bool:
     """Send the monthly DCA purchase reminder email."""
-    _get_client()
+    if not _get_client():
+        return False
     try:
-        params: resend.Emails.SendParams = {
+        params = {
             "from": FROM_ADDRESS,
             "to": [to_email],
             "subject": "💰 Your monthly DCA reminder — WealthWise",
@@ -152,9 +162,10 @@ def send_dca_reminder_email(to_email: str, username: str) -> bool:
 
 def send_password_reset_notification(to_email: str, username: str, temp_password: str) -> bool:
     """Notify a user that their password was reset by an admin."""
-    _get_client()
+    if not _get_client():
+        return False
     try:
-        params: resend.Emails.SendParams = {
+        params = {
             "from": FROM_ADDRESS,
             "to": [to_email],
             "subject": "Your WealthWise password has been reset",
@@ -197,4 +208,63 @@ def send_password_reset_notification(to_email: str, username: str, temp_password
         return True
     except Exception as e:
         print(f"[email] Failed to send reset notification to {to_email}: {e}")
+        return False
+
+
+def send_password_reset_email(to_email: str, username: str, reset_url: str) -> bool:
+    """Send a self-service password reset link."""
+    if not _get_client():
+        return False
+    try:
+        params = {
+            "from": FROM_ADDRESS,
+            "to": [to_email],
+            "subject": "Reset your WealthWise password",
+            "html": f"""
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <tr><td style="background:#1e1b4b;padding:28px 32px;">
+          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;">WealthWise™</span>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <h2 style="margin:0 0 12px;color:#111827;font-size:1.25rem;">Reset your password</h2>
+          <p style="color:#4b5563;margin:0 0 20px;line-height:1.6;">
+            Hi {username},<br><br>
+            We received a request to reset the password for your WealthWise account.
+            Use the button below to choose a new password. This link expires in <strong>1 hour</strong>.
+          </p>
+          <div style="margin:0 0 24px;">
+            <a href="{reset_url}"
+               style="display:inline-block;background:#6d28d9;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:700;font-size:0.95rem;">
+              Reset password
+            </a>
+          </div>
+          <p style="color:#6b7280;font-size:0.82rem;line-height:1.5;margin:0 0 12px;">
+            If the button doesn't work, copy and paste this link into your browser:
+          </p>
+          <p style="margin:0 0 20px;word-break:break-all;font-size:0.82rem;line-height:1.6;">
+            <a href="{reset_url}" style="color:#6d28d9;">{reset_url}</a>
+          </p>
+          <p style="color:#6b7280;font-size:0.82rem;line-height:1.5;margin:0;">
+            If you didn't request this, you can safely ignore this email and your password will stay the same.
+          </p>
+        </td></tr>
+        <tr><td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;">
+          <p style="color:#9ca3af;font-size:0.75rem;margin:0;">WealthWise · Your data stays yours.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+            """,
+        }
+        resend.Emails.send(params)
+        return True
+    except Exception as e:
+        print(f"[email] Failed to send password reset email to {to_email}: {e}")
         return False

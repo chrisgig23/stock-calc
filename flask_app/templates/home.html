@@ -34,6 +34,19 @@
     font-size: 0.85rem;
     flex-shrink: 0;
 }
+.login-help-row {
+    margin-top: 14px;
+    text-align: center;
+}
+.login-help-row a {
+    color: var(--color-primary);
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+.login-help-row a:hover {
+    text-decoration: underline;
+}
 </style>
 {% endblock %}
 
@@ -120,6 +133,10 @@
                 <input type="password" id="password" name="password" required autocomplete="current-password">
                 <input type="submit" value="Sign In">
             </form>
+
+            <div class="login-help-row">
+                <a href="{{ url_for('auth.forgot_password') }}">Forgot your password?</a>
+            </div>
 
             <div class="login-security-note">
                 <i class="fa-solid fa-lock"></i>

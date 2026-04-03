@@ -193,8 +193,8 @@ Two-step CSV import flow at `/import/<account_id>`:
 - [ ] **F5 — Price caching / rate-limit resilience**
   - Yahoo Finance rate-limits PythonAnywhere's shared IPs (429 errors already patched to return 0.0). Better fix: cache fetched prices in the DB with a 15-minute TTL, or migrate to a keyed free API (Polygon.io, Alpha Vantage, Twelve Data).
 
-- [ ] **F6 — Password recovery via email**
-  - No self-service forgotten-password flow exists. Add a "Forgot Password" link on the login page that sends a time-limited reset link to the user's registered email address.
+- [x] **F6 — Password recovery via email** ✅
+  - Added a self-service "Forgot your password?" flow on the sign-in page. Users can enter a verified email address to receive a signed, time-limited reset link. The request form uses a generic success message so it does not reveal whether an email exists in the system.
 
 - [ ] **F7 — CSV export**
   - Let users download positions and purchase history as a CSV file for use in Excel/Sheets.
@@ -267,7 +267,7 @@ Work through these one at a time. Each is a discrete, shippable unit.
 
 ### Phase 8 — User Management & Auth
 34. `F9` — Add `email` field to User model (foundation for F6 + F8)
-35. `F6` — Password recovery via email ("Forgot Password" on login page)
+35. ~~`F6`~~ ✅ Password recovery via email ("Forgot Password" on login page)
 36. `F8` — Self-service account creation with email verification
 
 ---
@@ -282,6 +282,7 @@ Work through these one at a time. Each is a discrete, shippable unit.
 - **Superuser note:** The "Add New User" form on `/manage_user` is intentional and visible only to the `cgiglio` account — not a bug.
 - **Yahoo Finance fix:** Already applied to `models.py` on prod — `current_price` returns `0.0` on rate-limit errors rather than crashing.
 - **Static asset cache-busting:** Implemented via `asset_url()` helper in `flask_app/__init__.py`, which appends each static file's modified timestamp to CSS/logo/favicon URLs so browsers pick up deploy updates without a hard refresh.
+- **Local email fallback:** `flask_app/email_utils.py` now fails gracefully when the `resend` package is not installed locally, so auth flows can still be tested without crashing the app.
 - **DNS:** `www.wealthtrackapp.com` CNAME → `webapp-2769154.pythonanywhere.com` (Squarespace, propagated 2026-03-26). Bare domain `wealthtrackapp.com` forwards → `https://www.wealthtrackapp.com`.
 - **PythonAnywhere API token:** `3116453ae30a968dfc5eb596939f9b742d4bf2a8`
 

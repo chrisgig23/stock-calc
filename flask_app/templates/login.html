@@ -7,11 +7,15 @@
     <img src="{{ asset_url('images/WealthWise_Logo.PNG') }}" alt="WealthWise" class="login-brand-logo">
     <h2>Sign in to your account</h2>
     <form method="POST" action="{{ url_for('auth.login') }}">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" required autocomplete="username">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <label for="login_id">Username or Email</label>
+        <input type="text" id="login_id" name="login_id" required autocomplete="username">
         <label for="password">Password</label>
         <input type="password" id="password" name="password" required autocomplete="current-password">
         <input type="submit" value="Sign In">
     </form>
+    <div style="margin-top: 14px; text-align: center;">
+        <a href="{{ url_for('auth.forgot_password') }}" style="color: var(--color-primary); font-size: 0.84rem; font-weight: 600; text-decoration: none;">Forgot your password?</a>
+    </div>
 </div>
 {% endblock %}
