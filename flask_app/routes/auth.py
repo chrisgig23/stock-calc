@@ -403,6 +403,28 @@ def signup():
     return render_template('signup.html', username='', email='')
 
 
+@auth_bp.route('/signup/request-code', methods=['POST'])
+@limiter.limit("3 per hour", methods=['POST'])
+def request_invite_code():
+    """Accept an invite code request and notify the admin — requester's info only."""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+
+    name  = request.form.get('requester_name', '').strip()
+    email = request.form.get('requester_email', '').strip().lower()
+    note  = request.form.get('requester_note', '').strip()
+
+    if not name or not email or '@' not in email:
+        flash('Please provide your name and a valid email address.', 'danger')
+        return redirect(url_for('auth.signup'))
+
+    from flask_app.email_utils import send_invite_request_notification
+    send_invite_request_notification(name, email, note)
+
+    flash("Request sent! If approved, you'll receive an invite code by email shortly.", 'success')
+    return redirect(url_for('auth.signup'))
+
+
 @auth_bp.route('/resend-code', methods=['POST'])
 @login_required
 @limiter.limit("3 per 10 minutes")

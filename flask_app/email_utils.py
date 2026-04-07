@@ -268,3 +268,69 @@ def send_password_reset_email(to_email: str, username: str, reset_url: str) -> b
     except Exception as e:
         print(f"[email] Failed to send password reset email to {to_email}: {e}")
         return False
+
+
+def send_invite_request_notification(requester_name: str, requester_email: str, requester_note: str = '') -> bool:
+    """
+    Notify the site admin that someone has requested an invite code.
+    The admin's email address is read from the NOTIFY_EMAIL env var — never
+    exposed in any template or client-side code.
+    """
+    admin_email = os.getenv("NOTIFY_EMAIL", "")
+    if not admin_email:
+        print("[email] NOTIFY_EMAIL not set — invite request notification skipped.")
+        return False
+    if not _get_client():
+        return False
+    try:
+        params = {
+            "from": FROM_ADDRESS,
+            "to": [admin_email],
+            "subject": "WealthWise — New Invite Code Request",
+            "html": f"""
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center" style="padding:40px 16px;">
+      <table width="100%" style="max-width:480px;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;">
+        <tr><td style="background:#0f172a;padding:20px 32px;border-radius:12px 12px 0 0;">
+          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;">WealthWise™</span>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <h2 style="margin:0 0 12px;color:#111827;font-size:1.15rem;">New invite code request</h2>
+          <p style="color:#4b5563;margin:0 0 20px;line-height:1.6;">
+            Someone has requested access to WealthWise:
+          </p>
+          <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+            <tr>
+              <td style="padding:10px 14px;font-size:0.85rem;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px 0 0 0;font-weight:600;width:30%;">Name</td>
+              <td style="padding:10px 14px;font-size:0.85rem;color:#111827;background:#fff;border:1px solid #e5e7eb;border-radius:0 6px 0 0;">{requester_name}</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 14px;font-size:0.85rem;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-top:none;font-weight:600;">Email</td>
+              <td style="padding:10px 14px;font-size:0.85rem;color:#111827;background:#fff;border:1px solid #e5e7eb;border-top:none;">
+                <a href="mailto:{requester_email}" style="color:#6d28d9;">{requester_email}</a>
+              </td>
+            </tr>
+            {'<tr><td style="padding:10px 14px;font-size:0.85rem;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 0 6px;font-weight:600;">Note</td><td style="padding:10px 14px;font-size:0.85rem;color:#111827;background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 6px 0;">' + requester_note + '</td></tr>' if requester_note else ''}
+          </table>
+          <p style="color:#6b7280;font-size:0.82rem;line-height:1.5;margin:0;">
+            If you'd like to grant access, reply to their email with your current invite code.
+          </p>
+        </td></tr>
+        <tr><td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;">
+          <p style="color:#9ca3af;font-size:0.75rem;margin:0;">WealthWise · Your data stays yours.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+            """,
+        }
+        resend.Emails.send(params)
+        return True
+    except Exception as e:
+        print(f"[email] Failed to send invite request notification: {e}")
+        return False
