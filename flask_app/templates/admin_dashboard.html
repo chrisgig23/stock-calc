@@ -479,6 +479,54 @@
     {% endif %}
 </div>
 
+{# ── Invite code ──────────────────────────────────────────────────────────── #}
+<div class="panel-card">
+    <div class="panel-card-header">
+        <h3 class="panel-card-title">
+            <span class="card-icon"><i class="fa-solid fa-ticket"></i></span>
+            Invite Code
+        </h3>
+    </div>
+    <div style="padding:18px 22px;">
+        <p style="font-size:0.86em; color:var(--color-text-secondary); margin:0 0 16px;">
+            New users must enter this code on the sign-up page. Change it any time to invalidate the current code.
+        </p>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+            <input type="password" id="invite-code-display"
+                   value="{{ invite_code or '' }}"
+                   readonly
+                   style="font-family:monospace; padding:9px 12px; border:1px solid var(--color-border);
+                          border-radius:8px; background:var(--color-bg-alt); font-size:0.9em;
+                          min-width:200px; color:var(--color-text);">
+            <button type="button" onclick="toggleInviteCodeVisibility()"
+                    id="toggle-invite-btn"
+                    class="btn btn-ghost" style="white-space:nowrap;">
+                <i class="fa-solid fa-eye" id="toggle-invite-icon"></i> Show
+            </button>
+        </div>
+        {% if not invite_code %}
+        <p style="font-size:0.82em; color:#92400E; background:#FEF3C7; border:1px solid #FDE68A;
+                  border-radius:7px; padding:8px 12px; margin-bottom:14px;">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            No invite code set — sign-ups are currently disabled. Set a code below to enable them.
+        </p>
+        {% endif %}
+        <form method="POST" action="{{ url_for('admin.update_invite_code') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <input type="text" name="invite_code" placeholder="New invite code"
+                       required minlength="6"
+                       style="padding:7px 12px; border:1px solid var(--color-border); border-radius:7px;
+                              font-size:0.84em; font-family:inherit; min-width:200px;
+                              background:var(--color-bg-alt); color:var(--color-text);">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-rotate"></i> Update Code
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 {# ── Delete confirmation modal ────────────────────────────────────────────── #}
 <div class="confirm-modal-overlay" id="deleteModal">
     <div class="confirm-modal">
@@ -502,6 +550,21 @@
 
 {% block scripts %}
 <script>
+function toggleInviteCodeVisibility() {
+    var input = document.getElementById('invite-code-display');
+    var icon  = document.getElementById('toggle-invite-icon');
+    var btn   = document.getElementById('toggle-invite-btn');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash" id="toggle-invite-icon"></i> Hide';
+    } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+        btn.innerHTML = '<i class="fa-solid fa-eye" id="toggle-invite-icon"></i> Show';
+    }
+}
+
 function openDeleteModal(userId, username, accountCount) {
     const modal = document.getElementById('deleteModal');
     const body  = document.getElementById('deleteModalBody');

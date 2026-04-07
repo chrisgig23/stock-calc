@@ -14,8 +14,9 @@
         <input type="password" id="password" name="password" required autocomplete="current-password">
         <input type="submit" value="Sign In">
     </form>
-    <div style="margin-top: 14px; text-align: center;">
+    <div style="margin-top: 14px; text-align: center; display:flex; flex-direction:column; gap:8px;">
         <a href="{{ url_for('auth.forgot_password') }}" style="color: var(--color-primary); font-size: 0.84rem; font-weight: 600; text-decoration: none;">Forgot your password?</a>
+        <a href="{{ url_for('auth.signup') }}" style="color: var(--color-text-secondary); font-size: 0.84rem; text-decoration: none;">Don't have an account? <strong style="color:var(--color-primary);">Create one</strong></a>
     </div>
 </div>
 {% endblock %}

@@ -323,6 +323,86 @@ def email_verify():
     return render_template('email_verify.html', masked_email=masked)
 
 
+# ---------------------------------------------------------------------------
+# Sign up — invite-code-gated self-service account creation
+# ---------------------------------------------------------------------------
+
+@auth_bp.route('/signup', methods=['GET', 'POST'])
+@limiter.limit("5 per hour", methods=['POST'])
+def signup():
+    """Public sign-up page. Requires a valid invite code."""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+
+    if request.method == 'POST':
+        username        = request.form.get('username', '').strip()
+        email           = request.form.get('email', '').strip().lower()
+        invite_code     = request.form.get('invite_code', '').strip()
+        password        = request.form.get('password', '')
+        confirm         = request.form.get('confirm_password', '')
+
+        # ── Validate invite code ──────────────────────────────────────────
+        from flask_app.models import SiteConfig
+        import os
+        valid_code = SiteConfig.get('invite_code') or os.getenv('INVITE_CODE', '')
+        if not valid_code or invite_code != valid_code:
+            flash('Invalid invite code. Please check your code and try again.', 'danger')
+            return render_template('signup.html', username=username, email=email)
+
+        # ── Validate fields ───────────────────────────────────────────────
+        if not username or len(username) < 3:
+            flash('Username must be at least 3 characters.', 'danger')
+            return render_template('signup.html', username=username, email=email)
+
+        if not email or '@' not in email:
+            flash('Please enter a valid email address.', 'danger')
+            return render_template('signup.html', username=username, email=email)
+
+        if len(password) < 8:
+            flash('Password must be at least 8 characters.', 'danger')
+            return render_template('signup.html', username=username, email=email)
+
+        if password != confirm:
+            flash('Passwords do not match.', 'danger')
+            return render_template('signup.html', username=username, email=email)
+
+        # ── Check uniqueness ──────────────────────────────────────────────
+        if User.query.filter_by(username=username).first():
+            flash('That username is already taken.', 'danger')
+            return render_template('signup.html', email=email)
+
+        if User.query.filter(
+            User.email == email,
+            User.email_verified == True  # noqa: E712
+        ).first():
+            flash('An account with that email already exists.', 'danger')
+            return render_template('signup.html', username=username)
+
+        # ── Create user ───────────────────────────────────────────────────
+        new_user = User(
+            username=username,
+            password_hash=generate_password_hash(password),
+            email=email,
+            email_verified=False,
+            must_change_password=False,
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        login_user(new_user)
+
+        # Send email verification code
+        code = new_user.generate_email_code()
+        db.session.commit()
+        from flask_app.email_utils import send_verification_email
+        send_verification_email(email, code, username)
+
+        flash(f'Welcome, {username}! Please verify your email to continue.', 'success')
+        return redirect(url_for('auth.email_verify'))
+
+    return render_template('signup.html', username='', email='')
+
+
 @auth_bp.route('/resend-code', methods=['POST'])
 @login_required
 @limiter.limit("3 per 10 minutes")

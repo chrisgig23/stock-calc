@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from flask_app import db
-from flask_app.models import User, Account
+from flask_app.models import User, Account, SiteConfig
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 import secrets
@@ -39,15 +39,18 @@ def admin_dashboard():
     if err:
         return err
 
+    import os
     users = User.query.order_by(User.id).all()
     total_accounts = Account.query.count()
     admin_count = sum(1 for u in users if _is_admin(u))
+    invite_code = SiteConfig.get('invite_code') or os.getenv('INVITE_CODE', '')
 
     return render_template(
         'admin_dashboard.html',
         users=users,
         total_accounts=total_accounts,
         admin_count=admin_count,
+        invite_code=invite_code,
     )
 
 
@@ -287,3 +290,23 @@ def add_user():
         flash('Unauthorized access.', 'danger')
         return redirect(url_for('accounts.view_account'))
     return redirect(url_for('admin.admin_dashboard'), code=307)
+
+
+# ── Invite code management ─────────────────────────────────────────────────────
+
+@admin_bp.route('/admin/invite-code', methods=['POST'])
+@login_required
+def update_invite_code():
+    """Update the invite code from the admin panel."""
+    err = _require_admin()
+    if err:
+        return err
+
+    new_code = request.form.get('invite_code', '').strip()
+    if not new_code:
+        flash('Invite code cannot be empty.', 'danger')
+        return redirect(url_for('admin.admin_dashboard'))
+
+    SiteConfig.set('invite_code', new_code)
+    flash('Invite code updated successfully.', 'success')
+    return redirect(url_for('admin.admin_dashboard'))

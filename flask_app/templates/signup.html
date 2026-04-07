@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}WealthWise — Create Account{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <img src="{{ asset_url('images/WealthWise_Logo.PNG') }}" alt="WealthWise" class="login-brand-logo">
+    <h2>Create your account</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div style="padding:10px 14px; border-radius:8px; font-size:0.86em; margin-bottom:12px;
+            background:{% if category=='danger' %}#FEE2E2{% elif category=='success' %}#D1FAE5{% else %}#DBEAFE{% endif %};
+            color:{% if category=='danger' %}#991B1B{% elif category=='success' %}#065F46{% else %}#1E40AF{% endif %};">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.signup') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" value="{{ username or '' }}"
+               required minlength="3" autocomplete="username" placeholder="Choose a username">
+
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" value="{{ email or '' }}"
+               required autocomplete="email" placeholder="you@example.com">
+
+        <label for="invite_code">Invite Code</label>
+        <input type="password" id="invite_code" name="invite_code"
+               required autocomplete="off" placeholder="Enter your invite code">
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
+
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" id="confirm_password" name="confirm_password"
+               required autocomplete="new-password" placeholder="Repeat your password">
+
+        <input type="submit" value="Create Account">
+    </form>
+
+    <div style="margin-top:14px; text-align:center; font-size:0.84rem;">
+        Already have an account?
+        <a href="{{ url_for('auth.login') }}" style="color:var(--color-primary); font-weight:600; text-decoration:none;">Sign in</a>
+    </div>
+</div>
+{% endblock %}

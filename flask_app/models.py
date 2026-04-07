@@ -263,3 +263,31 @@ class SchwabToken(db.Model):
 
     def __repr__(self):
         return f'<SchwabToken user={self.user_id} issued={self.access_token_issued}>'
+
+
+# ---------------------------------------------------------------------------
+# SiteConfig  — key/value store for admin-managed app settings
+# ---------------------------------------------------------------------------
+
+class SiteConfig(db.Model):
+    __tablename__ = 'site_config'
+
+    key   = db.Column(db.String(64), primary_key=True)
+    value = db.Column(db.String(255), nullable=True)
+
+    @classmethod
+    def get(cls, key, default=None):
+        row = cls.query.get(key)
+        return row.value if row else default
+
+    @classmethod
+    def set(cls, key, value):
+        row = cls.query.get(key)
+        if row:
+            row.value = value
+        else:
+            db.session.add(cls(key=key, value=value))
+        db.session.commit()
+
+    def __repr__(self):
+        return f'<SiteConfig {self.key}={self.value!r}>'
