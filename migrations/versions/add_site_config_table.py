@@ -14,11 +14,14 @@ depends_on = None
 
 
 def upgrade():
-    op.create_table(
-        'site_config',
-        sa.Column('key',   sa.String(64),  primary_key=True),
-        sa.Column('value', sa.String(255), nullable=True),
-    )
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if 'site_config' not in inspector.get_table_names():
+        op.create_table(
+            'site_config',
+            sa.Column('key',   sa.String(64),  primary_key=True),
+            sa.Column('value', sa.String(255), nullable=True),
+        )
 
 
 def downgrade():
