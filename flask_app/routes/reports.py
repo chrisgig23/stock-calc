@@ -48,6 +48,13 @@ def view_reports(account_id):
             'included':   h.isincluded,
         })
 
+    # Sort server-side so the template doesn't have to handle None comparisons
+    holdings_perf.sort(key=lambda h: h['gain_pct'] if h['gain_pct'] is not None else 0, reverse=True)
+
+    # Compute abs_max for the gain bar width calculation
+    gain_pcts = [h['gain_pct'] for h in holdings_perf if h['gain_pct'] is not None]
+    abs_max   = max((abs(g) for g in gain_pcts), default=1) or 1
+
     # ── Overall summary stats ─────────────────────────────────────────────
     current_value = round(sum(h['mv'] for h in holdings_perf), 2)
     current_cost  = round(sum(h['cost_basis'] for h in holdings_perf
@@ -111,5 +118,6 @@ def view_reports(account_id):
         total_gain_pct=total_gain_pct,
         start_value=start_value,
         holdings_perf=holdings_perf,
+        abs_max=abs_max,
         txn_summary=txn_summary,
     )

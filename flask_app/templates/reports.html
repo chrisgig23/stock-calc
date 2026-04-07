@@ -262,9 +262,7 @@
                 </tr>
             </thead>
             <tbody>
-            {% set max_gain_pct = holdings_perf | selectattr('gain_pct', 'ne', none) | map(attribute='gain_pct') | list %}
-            {% set abs_max = (max_gain_pct | map('abs') | list | max) if max_gain_pct else 100 %}
-            {% for h in holdings_perf | sort(attribute='gain_pct', reverse=true) %}
+            {% for h in holdings_perf %}
             <tr>
                 <td>
                     <span class="rpt-ticker">{{ h.ticker }}</span>
@@ -294,8 +292,9 @@
                     {% if h.gain_pct is not none %}
                     <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
                         <span class="gain-bar-wrap">
+                            {% set bar_w = [(((h.gain_pct | abs) / abs_max) * 100), 100] | min | round(0) %}
                             <span class="gain-bar {% if h.gain_pct >= 0 %}bar-pos{% else %}bar-neg{% endif %}"
-                                  style="width:{{ [((h.gain_pct | abs) / abs_max * 100), 100] | min | round(0) }}%">
+                                  style="width:{{ bar_w }}%">
                             </span>
                         </span>
                         <span class="{% if h.gain_pct >= 0 %}gain-pos{% else %}gain-neg{% endif %}">
