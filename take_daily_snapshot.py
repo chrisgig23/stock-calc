@@ -64,7 +64,6 @@ def run():
                 total_cost_basis=round(total_cb, 2) if total_cb > 0 else None,
             ))
             created += 1
-            print(f"  ✓ Account {account.id} ({account.account_name}): ${total_mv:,.2f}")
 
         db.session.commit()
         print(
