@@ -8,6 +8,7 @@ Requires:
 """
 
 import os
+import html
 try:
     import resend
 except ModuleNotFoundError:
@@ -313,7 +314,7 @@ def send_invite_request_notification(requester_name: str, requester_email: str, 
                 <a href="mailto:{requester_email}" style="color:#6d28d9;">{requester_email}</a>
               </td>
             </tr>
-            {'<tr><td style="padding:10px 14px;font-size:0.85rem;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 0 6px;font-weight:600;">Note</td><td style="padding:10px 14px;font-size:0.85rem;color:#111827;background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 6px 0;">' + requester_note + '</td></tr>' if requester_note else ''}
+            {'<tr><td style="padding:10px 14px;font-size:0.85rem;color:#6b7280;background:#f9fafb;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 0 6px;font-weight:600;">Note</td><td style="padding:10px 14px;font-size:0.85rem;color:#111827;background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 6px 0;">' + html.escape(requester_note) + '</td></tr>' if requester_note else ''}
           </table>
           <p style="color:#6b7280;font-size:0.82rem;line-height:1.5;margin:0;">
             If you'd like to grant access, reply to their email with your current invite code.

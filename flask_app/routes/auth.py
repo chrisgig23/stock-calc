@@ -5,6 +5,7 @@ from flask_app.models import User
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 import pytz
+import secrets
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 auth_bp = Blueprint('auth', __name__)
@@ -345,7 +346,7 @@ def signup():
         from flask_app.models import SiteConfig
         import os
         valid_code = SiteConfig.get('invite_code') or os.getenv('INVITE_CODE', '')
-        if not valid_code or invite_code != valid_code:
+        if not valid_code or not secrets.compare_digest(invite_code, valid_code):
             flash('Invalid invite code. Please check your code and try again.', 'danger')
             return render_template('signup.html', username=username, email=email)
 
