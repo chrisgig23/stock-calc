@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block title %}WealthWise — Record Transaction · {{ account.account_name }}{% endblock %}
+
+{% block styles %}
+<style>
+.rt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.rt-header h2 { margin: 0; font-size: 1.35rem; }
+.rt-back { font-size: 0.875rem; color: var(--color-primary); text-decoration: none; }
+.rt-back:hover { text-decoration: underline; }
+
+.rt-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    max-width: 640px;
+}
+
+.rt-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+@media (max-width: 540px) { .rt-form-grid { grid-template-columns: 1fr; } }
+
+.rt-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.rt-field.full-width { grid-column: 1 / -1; }
+
+.rt-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+}
+.rt-label .required { color: var(--color-danger, #dc2626); margin-left: 2px; }
+
+.rt-input, .rt-select {
+    padding: 9px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.9rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.rt-input:focus, .rt-select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+.rt-hint {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}
+
+.rt-divider {
+    grid-column: 1 / -1;
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 4px 0;
+}
+
+.rt-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+/* Field visibility driven by action type */
+.ticker-row, .qty-price-row { transition: opacity 0.15s; }
+.ticker-row.hidden, .qty-price-row.hidden { opacity: 0.3; pointer-events: none; }
+
+/* Realized gain preview */
+.rt-gain-preview {
+    grid-column: 1 / -1;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    display: none;
+}
+.rt-gain-preview.show { display: block; }
+.rt-gain-preview strong { color: var(--color-text); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rt-header">
+    <div>
+        <a class="rt-back" href="{{ url_for('portfolio.view_transactions', account_id=account.id) }}">← Transaction History</a>
+        <h2>Record Transaction</h2>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+  <div class="flash flash-{{ category }}" style="margin-bottom:16px;">{{ message }}</div>
+  {% endfor %}
+{% endwith %}
+
+<div class="rt-card">
+    <form method="POST" id="rt-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="rt-form-grid">
+
+            {# ── Transaction Type ────────────────────────────────────────── #}
+            <div class="rt-field full-width">
+                <label class="rt-label" for="action_type">Transaction Type <span class="required">*</span></label>
+                <select name="action_type" id="action_type" class="rt-select" required>
+                    <option value="">— Select type —</option>
+                    {% for value, label in action_types %}
+                    <option value="{{ value }}"
+                        {% if (form_data and form_data.get('action_type') == value) or prefill_action == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# ── Date ─────────────────────────────────────────────────────── #}
+            <div class="rt-field">
+                <label class="rt-label" for="txn_date">Date <span class="required">*</span></label>
+                <input type="date" name="txn_date" id="txn_date" class="rt-input" required
+                    value="{{ (form_data and form_data.get('txn_date')) or today }}">
+            </div>
+
+            {# ── Ticker ───────────────────────────────────────────────────── #}
+            <div class="rt-field ticker-row" id="ticker-row">
+                <label class="rt-label" for="ticker">Ticker</label>
+                <input type="text" name="ticker" id="ticker" class="rt-input"
+                    placeholder="e.g. AAPL"
+                    value="{{ (form_data and form_data.get('ticker')) or prefill_ticker }}"
+                    list="ticker-suggestions"
+                    autocomplete="off"
+                    style="text-transform:uppercase">
+                <datalist id="ticker-suggestions">
+                    {% for h in holdings %}
+                    <option value="{{ h.ticker }}">{{ h.ticker }}</option>
+                    {% endfor %}
+                </datalist>
+            </div>
+
+            <hr class="rt-divider">
+
+            {# ── Quantity & Price ─────────────────────────────────────────── #}
+            <div class="rt-field qty-price-row" id="qty-row">
+                <label class="rt-label" for="quantity">Shares / Quantity</label>
+                <input type="number" name="quantity" id="quantity" class="rt-input"
+                    placeholder="0.00" step="any" min="0"
+                    value="{{ form_data.get('quantity', '') if form_data else '' }}">
+            </div>
+
+            <div class="rt-field qty-price-row" id="price-row">
+                <label class="rt-label" for="price">Price per Share ($)</label>
+                <input type="number" name="price" id="price" class="rt-input"
+                    placeholder="0.00" step="any" min="0"
+                    value="{{ form_data.get('price', '') if form_data else '' }}">
+            </div>
+
+            {# ── Amount ───────────────────────────────────────────────────── #}
+            <div class="rt-field">
+                <label class="rt-label" for="amount">Net Amount ($) <span class="required">*</span></label>
+                <input type="number" name="amount" id="amount" class="rt-input"
+                    placeholder="e.g. -1500.00 for a buy, 1500.00 for a credit"
+                    step="any"
+                    value="{{ form_data.get('amount', '') if form_data else '' }}"
+                    required>
+                <div class="rt-hint">Negative = cash out (buy, fee), Positive = cash in (sell, dividend)</div>
+            </div>
+
+            {# ── Fees ─────────────────────────────────────────────────────── #}
+            <div class="rt-field">
+                <label class="rt-label" for="fees">Fees / Commission ($)</label>
+                <input type="number" name="fees" id="fees" class="rt-input"
+                    placeholder="0.00" step="any" min="0"
+                    value="{{ form_data.get('fees', '') if form_data else '' }}">
+            </div>
+
+            {# ── Description ──────────────────────────────────────────────── #}
+            <div class="rt-field full-width">
+                <label class="rt-label" for="description">Notes / Description</label>
+                <input type="text" name="description" id="description" class="rt-input"
+                    placeholder="Optional — e.g. Quarterly dividend, DRIP reinvestment…"
+                    maxlength="200"
+                    value="{{ form_data.get('description', '') if form_data else '' }}">
+            </div>
+
+            {# ── Sell gain preview ────────────────────────────────────────── #}
+            <div class="rt-gain-preview" id="gain-preview">
+                <strong>Sell preview:</strong> <span id="gain-text">—</span>
+            </div>
+
+        </div>{# end grid #}
+
+        <div class="rt-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-check"></i> Record Transaction
+            </button>
+            <a href="{{ url_for('portfolio.view_transactions', account_id=account.id) }}"
+               class="btn btn-ghost">Cancel</a>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    var actionSel  = document.getElementById('action_type');
+    var tickerRow  = document.getElementById('ticker-row');
+    var qtyRow     = document.getElementById('qty-row');
+    var priceRow   = document.getElementById('price-row');
+    var amountInp  = document.getElementById('amount');
+    var tickerInp  = document.getElementById('ticker');
+    var qtyInp     = document.getElementById('quantity');
+    var priceInp   = document.getElementById('price');
+    var gainPreview= document.getElementById('gain-preview');
+    var gainText   = document.getElementById('gain-text');
+
+    // Holdings data for sell preview (cost basis, quantity)
+    var holdingsMap = {
+        {% for h in holdings %}
+        "{{ h.ticker }}": {
+            quantity: {{ h.quantity }},
+            cost_basis: {{ h.cost_basis if h.cost_basis is not none else 'null' }}
+        },
+        {% endfor %}
+    };
+
+    // Action types that require ticker + qty/price
+    var NEEDS_TICKER = ['buy', 'sell', 'reinvest_dividend', 'reinvest_shares'];
+    var NEEDS_QTY    = ['buy', 'sell', 'reinvest_shares'];
+    var NEEDS_PRICE  = ['buy', 'sell'];
+
+    function updateFieldVisibility() {
+        var t = actionSel.value;
+        var needsTicker = NEEDS_TICKER.indexOf(t) !== -1;
+        var needsQty    = NEEDS_QTY.indexOf(t) !== -1;
+
+        tickerRow.classList.toggle('hidden', !needsTicker);
+        qtyRow.classList.toggle('hidden', !needsQty);
+        priceRow.classList.toggle('hidden', NEEDS_PRICE.indexOf(t) === -1);
+
+        // Auto-sign amount for sells (positive) vs buys (negative)
+        if (t === 'sell' && amountInp.value === '') {
+            // leave blank, user fills it
+        } else if (t === 'buy' && amountInp.value === '') {
+            // leave blank
+        }
+
+        updateSellPreview();
+    }
+
+    function updateSellPreview() {
+        if (actionSel.value !== 'sell') { gainPreview.classList.remove('show'); return; }
+        var ticker = tickerInp.value.trim().toUpperCase();
+        var qty    = parseFloat(qtyInp.value) || 0;
+        var price  = parseFloat(priceInp.value) || 0;
+        if (!ticker || !qty || !price) { gainPreview.classList.remove('show'); return; }
+
+        var holding = holdingsMap[ticker];
+        if (!holding || !holding.cost_basis) { gainPreview.classList.remove('show'); return; }
+
+        var costPerShare  = holding.cost_basis / holding.quantity;
+        var proceeds      = qty * price;
+        var basisSold     = costPerShare * qty;
+        var realizedGain  = proceeds - basisSold;
+        var sign          = realizedGain >= 0 ? '+' : '';
+        var color         = realizedGain >= 0 ? '#16a34a' : '#dc2626';
+
+        gainText.innerHTML = 'Selling ' + qty + ' shares of ' + ticker +
+            ' · Proceeds: $' + proceeds.toFixed(2) +
+            ' · Cost Basis: $' + basisSold.toFixed(2) +
+            ' · <strong style="color:' + color + '">Realized G/L: ' + sign + '$' + realizedGain.toFixed(2) + '</strong>';
+        gainPreview.classList.add('show');
+    }
+
+    // Auto-calculate amount from qty × price for buys/sells
+    function autoFillAmount() {
+        var t     = actionSel.value;
+        var qty   = parseFloat(qtyInp.value);
+        var price = parseFloat(priceInp.value);
+        if ((t === 'buy' || t === 'sell') && qty > 0 && price > 0) {
+            var total = (qty * price).toFixed(2);
+            amountInp.value = (t === 'buy') ? (-total) : total;
+        }
+    }
+
+    actionSel.addEventListener('change', updateFieldVisibility);
+    tickerInp.addEventListener('input', updateSellPreview);
+    qtyInp.addEventListener('input',    function() { autoFillAmount(); updateSellPreview(); });
+    priceInp.addEventListener('input',  function() { autoFillAmount(); updateSellPreview(); });
+
+    // Force uppercase on ticker
+    tickerInp.addEventListener('input', function() {
+        var pos = this.selectionStart;
+        this.value = this.value.toUpperCase();
+        this.setSelectionRange(pos, pos);
+    });
+
+    updateFieldVisibility();
+})();
+</script>
+{% endblock %}

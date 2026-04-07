@@ -158,6 +158,16 @@
         <a class="txn-back" href="{{ url_for('accounts.view_account', account_id=account.id) }}">← {{ account.account_name }}</a>
         <h2>Transaction History</h2>
     </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <a href="{{ url_for('portfolio.record_transaction', account_id=account.id) }}"
+           class="btn btn-primary" style="font-size:0.85rem; padding:7px 14px;">
+            <i class="fa-solid fa-plus"></i> Record Transaction
+        </a>
+        <a href="{{ url_for('portfolio.export_transactions', account_id=account.id, type=filter_type, ticker=filter_ticker) }}"
+           class="btn btn-ghost" style="font-size:0.85rem; padding:7px 14px;">
+            <i class="fa-solid fa-download"></i> Export CSV
+        </a>
+    </div>
 </div>
 
 {# ── Filters ─────────────────────────────────────────────────────────── #}

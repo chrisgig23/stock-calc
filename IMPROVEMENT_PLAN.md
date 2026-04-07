@@ -170,26 +170,26 @@ Two-step CSV import flow at `/import/<account_id>`:
 
 ## 🚀 New Features
 
-- [ ] **F1 — Build out the Reports page**
-  - Currently "Coming soon!". Priority content: purchase history table, P&L over time line chart (connects to DASH1's Portfolio Growth chart), performance vs. S&P 500 benchmark.
+- [x] **F1 — Build out the Reports page** ✅
+  - Full reports page: portfolio growth chart (market value vs cost basis over time), per-holding performance table (qty, price, MV, cost basis, avg cost/share, G/L, % return with inline bar), transaction summary (total invested, dividends, interest, fees, sell proceeds). Export buttons for positions and transactions CSV.
 
-- [ ] **F2 — Transaction / purchase history page per account**
-  - A chronological table of all purchases for a given account: date, ticker, shares, price paid, total cost.
+- [x] **F2 — Transaction / purchase history page per account** ✅
+  - Paginated, filterable transaction history at `/view_transactions/<id>`. Filter by type and ticker. "Record Transaction" and "Export CSV" buttons in header.
 
-- [ ] **F3 — Sell / record transaction support**
-  - Currently only buying is tracked. Add a "Record Sale" flow that reduces position quantity and calculates realized gain/loss.
+- [x] **F3 — Sell / record transaction support** ✅
+  - `/record_transaction/<id>` — manual entry form for any transaction type (buy, sell, dividend, transfer, interest, fee, other). Sells reduce holding quantity and adjust cost basis proportionally. Buys update or create holdings. Live sell preview shows estimated realized G/L. Auto-calculates amount from qty × price.
 
-- [ ] **F4 — Portfolio performance chart (per account)**
-  - A line chart of account value over time. Powers both the per-account Reports page and the cross-account Portfolio Growth chart on the Dashboard.
+- [x] **F4 — Portfolio performance chart (per account)** ✅
+  - Per-account growth chart is live on the Reports page — market value vs cost basis line chart powered by PortfolioSnapshot records.
 
-- [ ] **F5 — Price caching / rate-limit resilience**
-  - Yahoo Finance rate-limits PythonAnywhere's shared IPs (429 errors already patched to return 0.0). Better fix: cache fetched prices in the DB with a 15-minute TTL, or migrate to a keyed free API (Polygon.io, Alpha Vantage, Twelve Data).
+- [x] **F5 — Price caching / rate-limit resilience** ✅
+  - `flask_app/utils/price_cache.py` — module-level in-process cache with 15-min TTL. `Holding.current_price` and the dashboard both use `get_price()` / `get_prices()`. Eliminates repeated yfinance calls on a single page load and dramatically reduces 429 rate-limit risk.
 
 - [x] **F6 — Password recovery via email** ✅
   - Added a self-service "Forgot your password?" flow on the sign-in page. Users can enter a verified email address to receive a signed, time-limited reset link. The request form uses a generic success message so it does not reveal whether an email exists in the system.
 
-- [ ] **F7 — CSV export**
-  - Let users download positions and purchase history as a CSV file for use in Excel/Sheets.
+- [x] **F7 — CSV export** ✅
+  - `/export/positions/<id>` — current holdings as CSV (ticker, shares, price, MV, cost basis, G/L, %). `/export/transactions/<id>` — full transaction log as CSV, respects type/ticker filters. Export buttons on Positions page, Transaction History page, and Reports page.
 
 - [ ] **F8 — Self-service account creation with email verification**
   - Currently only admins can create accounts (via `/add_user`). Add a public "Create Account" flow on the login page: user enters username + email + password → receives a verification email → clicks link → account activated.
@@ -249,13 +249,13 @@ Work through these one at a time. Each is a discrete, shippable unit.
 26. ~~`D20`~~ ✅ Tooltip/labels for sidebar pencil & star icons → redesigned as labeled Reorder mode
 27. ~~`D21`~~ ✅ Clean up Manage User Account page styling
 
-### Phase 7 — New Features
-28. `F2` — Transaction history page (per account)
-29. `F3` — Sell / record transaction support
-30. `F4` — Portfolio performance chart (per account, powers Reports + Dashboard)
-31. `F1` — Full Reports page (history table + charts)
-32. `F5` — Price caching / rate-limit resilience
-33. `F7` — CSV export
+### Phase 7 — New Features ✅
+28. ~~`F2`~~ ✅ Transaction history page (per account)
+29. ~~`F3`~~ ✅ Sell / record transaction support
+30. ~~`F4`~~ ✅ Portfolio performance chart (per account, powers Reports + Dashboard)
+31. ~~`F1`~~ ✅ Full Reports page (history table + charts)
+32. ~~`F5`~~ ✅ Price caching / rate-limit resilience
+33. ~~`F7`~~ ✅ CSV export
 
 ### Phase 8 — User Management & Auth
 34. ~~`F9`~~ ✅ Add `email` field to User model (foundation for F6 + F8)

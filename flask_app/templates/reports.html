@@ -3,6 +3,7 @@
 
 {% block styles %}
 <style>
+/* ── Header ───────────────────────────────────────────────────────────── */
 .reports-header {
     display: flex;
     align-items: center;
@@ -15,10 +16,10 @@
 .reports-back { font-size: 0.875rem; color: var(--color-primary); text-decoration: none; }
 .reports-back:hover { text-decoration: underline; }
 
-/* Summary stat cards */
+/* ── Summary stat cards ──────────────────────────────────────────────── */
 .reports-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 14px;
     margin-bottom: 28px;
 }
@@ -29,7 +30,7 @@
     padding: 16px 18px;
 }
 .report-stat-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -37,7 +38,7 @@
     margin-bottom: 6px;
 }
 .report-stat-value {
-    font-size: 1.35rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--color-text);
     line-height: 1.2;
@@ -45,25 +46,114 @@
 .report-stat-value.positive { color: var(--color-success, #16a34a); }
 .report-stat-value.negative { color: var(--color-danger,  #dc2626); }
 
-/* Chart section */
-.chart-card {
+/* ── Section cards ───────────────────────────────────────────────────── */
+.rpt-section {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 20px 24px;
     margin-bottom: 28px;
 }
-.chart-card-title {
+.rpt-section-title {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--color-text);
     margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
+.rpt-section-title i { color: var(--color-primary); }
+
+/* ── Chart ───────────────────────────────────────────────────────────── */
 .chart-container {
     position: relative;
     height: 300px;
 }
 
+/* ── Holdings table ──────────────────────────────────────────────────── */
+.rpt-table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+.rpt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.rpt-table th {
+    padding: 9px 14px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+    background: var(--color-surface);
+}
+.rpt-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+.rpt-table tr:last-child td { border-bottom: none; }
+.rpt-table tr:hover td { background: var(--color-hover); }
+.rpt-ticker { font-weight: 700; font-family: monospace; font-size: 0.9rem; }
+.gain-pos   { color: var(--color-success, #16a34a); font-weight: 600; }
+.gain-neg   { color: var(--color-danger,  #dc2626); font-weight: 600; }
+.gain-bar-wrap {
+    width: 80px;
+    height: 6px;
+    background: var(--color-border);
+    border-radius: 99px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+}
+.gain-bar { height: 100%; border-radius: 99px; }
+.bar-pos { background: var(--color-success, #16a34a); }
+.bar-neg { background: var(--color-danger,  #dc2626); }
+
+/* ── Transaction summary grid ────────────────────────────────────────── */
+.txn-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px;
+}
+.txn-stat {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+.txn-stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    margin-bottom: 4px;
+}
+.txn-stat-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+.txn-stat-value.positive { color: var(--color-success, #16a34a); }
+
+/* ── Export row ──────────────────────────────────────────────────────── */
+.rpt-export-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────── */
 .no-data-msg {
     text-align: center;
     padding: 60px 20px;
@@ -79,11 +169,18 @@
         <a class="reports-back" href="{{ url_for('accounts.view_account', account_id=account.id) }}">← {{ account.account_name }}</a>
         <h2>Reports</h2>
     </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="{{ url_for('portfolio.export_positions', account_id=account.id) }}" class="btn btn-ghost" style="font-size:0.85rem; padding:7px 14px;">
+            <i class="fa-solid fa-download"></i> Export Positions
+        </a>
+        <a href="{{ url_for('portfolio.export_transactions', account_id=account.id) }}" class="btn btn-ghost" style="font-size:0.85rem; padding:7px 14px;">
+            <i class="fa-solid fa-download"></i> Export Transactions
+        </a>
+    </div>
 </div>
 
-{% if snapshots %}
-
-{# ── Summary stats ─────────────────────────────────────────────────── #}
+{# ── Overall summary stats ────────────────────────────────────────────── #}
+{% if current_value or current_cost %}
 <div class="reports-stats">
     <div class="report-stat-card">
         <div class="report-stat-label">Current Value</div>
@@ -95,7 +192,7 @@
     </div>
     {% if total_gain is not none %}
     <div class="report-stat-card">
-        <div class="report-stat-label">Total Gain / Loss</div>
+        <div class="report-stat-label">Unrealized G/L</div>
         <div class="report-stat-value {% if total_gain >= 0 %}positive{% else %}negative{% endif %}">
             {% if total_gain >= 0 %}+{% endif %}${{ "{:,.0f}".format(total_gain | abs) }}
         </div>
@@ -112,25 +209,190 @@
     {% if start_value %}
     <div class="report-stat-card">
         <div class="report-stat-label">Tracking Since</div>
-        <div class="report-stat-value" style="font-size:1.05rem">{{ snapshots[0].snapshot_date.strftime('%b %Y') }}</div>
+        <div class="report-stat-value" style="font-size:1rem">{{ snapshots[0].snapshot_date.strftime('%b %Y') }}</div>
+    </div>
+    {% endif %}
+    {% if txn_summary.total_invested %}
+    <div class="report-stat-card">
+        <div class="report-stat-label">Total Invested</div>
+        <div class="report-stat-value">${{ "{:,.0f}".format(txn_summary.total_invested) }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{# ── Portfolio Growth Chart ───────────────────────────────────────────── #}
+<div class="rpt-section">
+    <div class="rpt-section-title">
+        <i class="fa-solid fa-chart-line"></i> Portfolio Value Over Time
+    </div>
+    {% if snapshots %}
+    <div class="chart-container">
+        <canvas id="performanceChart"></canvas>
+    </div>
+    {% else %}
+    <div class="no-data-msg" style="padding:30px 20px;">
+        <i class="fa-solid fa-chart-line"></i>
+        <div>No historical data yet.</div>
+        <div style="font-size:0.85rem; margin-top:6px;">
+            The daily snapshot task will build this chart over time.
+        </div>
     </div>
     {% endif %}
 </div>
 
-{# ── Performance chart ──────────────────────────────────────────────── #}
-<div class="chart-card">
-    <div class="chart-card-title">Portfolio Value Over Time</div>
-    <div class="chart-container">
-        <canvas id="performanceChart"></canvas>
+{# ── Per-Holding Performance Table ────────────────────────────────────── #}
+{% if holdings_perf %}
+<div class="rpt-section">
+    <div class="rpt-section-title">
+        <i class="fa-solid fa-table"></i> Holding Performance
+    </div>
+    <div class="rpt-table-wrap">
+        <table class="rpt-table">
+            <thead>
+                <tr>
+                    <th>Ticker</th>
+                    <th style="text-align:right">Shares</th>
+                    <th style="text-align:right">Price</th>
+                    <th style="text-align:right">Market Value</th>
+                    <th style="text-align:right">Cost Basis</th>
+                    <th style="text-align:right">Avg Cost/Share</th>
+                    <th style="text-align:right">Unrealized G/L</th>
+                    <th style="text-align:right">Return</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% set max_gain_pct = holdings_perf | selectattr('gain_pct', 'ne', none) | map(attribute='gain_pct') | list %}
+            {% set abs_max = (max_gain_pct | map('abs') | list | max) if max_gain_pct else 100 %}
+            {% for h in holdings_perf | sort(attribute='gain_pct', reverse=true) %}
+            <tr>
+                <td>
+                    <span class="rpt-ticker">{{ h.ticker }}</span>
+                    {% if not h.included %}
+                    <span style="font-size:0.7rem; color:var(--color-text-muted); margin-left:4px;">(untracked)</span>
+                    {% endif %}
+                </td>
+                <td style="text-align:right">{{ "%.4g" | format(h.quantity) }}</td>
+                <td style="text-align:right">
+                    {% if h.price %}${{ "%.2f" | format(h.price) }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:right">${{ "{:,.2f}".format(h.mv) }}</td>
+                <td style="text-align:right">
+                    {% if h.cost_basis is not none %}${{ "{:,.2f}".format(h.cost_basis) }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:right">
+                    {% if h.cb_share is not none %}${{ "%.4f" | format(h.cb_share) }}{% else %}—{% endif %}
+                </td>
+                <td style="text-align:right">
+                    {% if h.gain is not none %}
+                    <span class="{% if h.gain >= 0 %}gain-pos{% else %}gain-neg{% endif %}">
+                        {% if h.gain >= 0 %}+{% endif %}${{ "{:,.2f}".format(h.gain | abs) }}
+                    </span>
+                    {% else %}—{% endif %}
+                </td>
+                <td style="text-align:right">
+                    {% if h.gain_pct is not none %}
+                    <div style="display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+                        <span class="gain-bar-wrap">
+                            <span class="gain-bar {% if h.gain_pct >= 0 %}bar-pos{% else %}bar-neg{% endif %}"
+                                  style="width:{{ [((h.gain_pct | abs) / abs_max * 100), 100] | min | round(0) }}%">
+                            </span>
+                        </span>
+                        <span class="{% if h.gain_pct >= 0 %}gain-pos{% else %}gain-neg{% endif %}">
+                            {% if h.gain_pct >= 0 %}+{% endif %}{{ "%.1f" | format(h.gain_pct) }}%
+                        </span>
+                    </div>
+                    {% else %}—{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr style="border-top: 2px solid var(--color-border);">
+                    <td colspan="3" style="padding:10px 14px; font-weight:600; color:var(--color-text-muted); font-size:0.8rem;">TOTAL</td>
+                    <td style="text-align:right; font-weight:700; padding:10px 14px;">${{ "{:,.2f}".format(current_value) }}</td>
+                    <td style="text-align:right; font-weight:700; padding:10px 14px;">
+                        {% if current_cost %}${{ "{:,.2f}".format(current_cost) }}{% else %}—{% endif %}
+                    </td>
+                    <td style="padding:10px 14px;"></td>
+                    <td style="text-align:right; font-weight:700; padding:10px 14px;">
+                        {% if total_gain is not none %}
+                        <span class="{% if total_gain >= 0 %}gain-pos{% else %}gain-neg{% endif %}">
+                            {% if total_gain >= 0 %}+{% endif %}${{ "{:,.2f}".format(total_gain | abs) }}
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td style="text-align:right; font-weight:700; padding:10px 14px;">
+                        {% if total_gain_pct is not none %}
+                        <span class="{% if total_gain_pct >= 0 %}gain-pos{% else %}gain-neg{% endif %}">
+                            {% if total_gain_pct >= 0 %}+{% endif %}{{ "%.1f" | format(total_gain_pct) }}%
+                        </span>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
 </div>
+{% endif %}
 
-{% else %}
-<div class="no-data-msg">
-    <i class="fa-solid fa-chart-line"></i>
-    <div>No performance data yet.</div>
-    <div style="margin-top:8px; font-size:0.85rem;">
-        Sync from Schwab or import a positions CSV to start tracking your portfolio's growth.
+{# ── Transaction Summary ───────────────────────────────────────────────── #}
+{% if txn_summary.total_transactions > 0 %}
+<div class="rpt-section">
+    <div class="rpt-section-title">
+        <i class="fa-solid fa-receipt"></i> Transaction Summary
+    </div>
+    <div class="txn-summary-grid">
+        <div class="txn-stat">
+            <div class="txn-stat-label">Total Transactions</div>
+            <div class="txn-stat-value">{{ txn_summary.total_transactions }}</div>
+        </div>
+        <div class="txn-stat">
+            <div class="txn-stat-label">Buy Orders</div>
+            <div class="txn-stat-value">{{ txn_summary.buy_count }}</div>
+        </div>
+        {% if txn_summary.sell_count > 0 %}
+        <div class="txn-stat">
+            <div class="txn-stat-label">Sell Orders</div>
+            <div class="txn-stat-value">{{ txn_summary.sell_count }}</div>
+        </div>
+        {% endif %}
+        {% if txn_summary.total_invested %}
+        <div class="txn-stat">
+            <div class="txn-stat-label">Total Invested</div>
+            <div class="txn-stat-value">${{ "{:,.2f}".format(txn_summary.total_invested) }}</div>
+        </div>
+        {% endif %}
+        {% if txn_summary.sell_proceeds %}
+        <div class="txn-stat">
+            <div class="txn-stat-label">Sell Proceeds</div>
+            <div class="txn-stat-value positive">${{ "{:,.2f}".format(txn_summary.sell_proceeds) }}</div>
+        </div>
+        {% endif %}
+        {% if txn_summary.total_dividends %}
+        <div class="txn-stat">
+            <div class="txn-stat-label">Dividends Received</div>
+            <div class="txn-stat-value positive">${{ "{:,.2f}".format(txn_summary.total_dividends) }}</div>
+        </div>
+        {% endif %}
+        {% if txn_summary.total_interest %}
+        <div class="txn-stat">
+            <div class="txn-stat-label">Interest Earned</div>
+            <div class="txn-stat-value positive">${{ "{:,.2f}".format(txn_summary.total_interest) }}</div>
+        </div>
+        {% endif %}
+        {% if txn_summary.total_fees %}
+        <div class="txn-stat">
+            <div class="txn-stat-label">Total Fees</div>
+            <div class="txn-stat-value">${{ "{:,.2f}".format(txn_summary.total_fees) }}</div>
+        </div>
+        {% endif %}
+    </div>
+    <div style="margin-top:14px; text-align:right;">
+        <a href="{{ url_for('portfolio.view_transactions', account_id=account.id) }}"
+           style="font-size:0.85rem; color:var(--color-primary);">
+            View full transaction history →
+        </a>
     </div>
 </div>
 {% endif %}
@@ -148,8 +410,8 @@
 
     var isDark = document.documentElement.classList.contains('dark') ||
                  window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var gridColor  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-    var textColor  = isDark ? '#94a3b8' : '#64748b';
+    var gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    var textColor = isDark ? '#94a3b8' : '#64748b';
 
     new Chart(document.getElementById('performanceChart'), {
         type: 'line',
@@ -203,7 +465,7 @@
             scales: {
                 x: {
                     grid: { color: gridColor },
-                    ticks: { color: textColor, font: { size: 11 } }
+                    ticks: { color: textColor, font: { size: 11 }, maxTicksLimit: 10 }
                 },
                 y: {
                     grid: { color: gridColor },

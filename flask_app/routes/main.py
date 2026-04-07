@@ -1,9 +1,9 @@
 from flask import Blueprint, redirect, url_for, render_template, request
 from flask_login import current_user, login_required
 from flask_app.models import Account, PortfolioSnapshot
+from flask_app.utils.price_cache import get_prices
 from collections import defaultdict
 from datetime import date
-import yfinance as yf
 import json
 
 main_bp = Blueprint('main', __name__)
@@ -31,21 +31,9 @@ def dashboard():
     for account in accounts:
         all_holdings.extend(account.holdings)
 
-    # ── Fetch live prices once per unique ticker ───────────────────────────
+    # ── Fetch live prices once per unique ticker (15-min cache) ──────────
     unique_tickers = list({h.ticker for h in all_holdings if h.ticker})
-    prices = {}
-    for ticker in unique_tickers:
-        try:
-            info = yf.Ticker(ticker).info
-            prices[ticker] = (
-                info.get('currentPrice')
-                or info.get('regularMarketPreviousClose')
-                or info.get('navPrice')
-                or info.get('open')
-                or 0.0
-            )
-        except Exception:
-            prices[ticker] = 0.0
+    prices = get_prices(unique_tickers)
 
     # ── Aggregate by ticker across all accounts ────────────────────────────
     ticker_agg = {}

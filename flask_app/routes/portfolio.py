@@ -1,9 +1,15 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, flash, jsonify, Response
 from flask_login import login_required, current_user
 from flask_app import db
-from flask_app.models import Account, Holding, Transaction, Allocation, ACTION_BUY
-from datetime import datetime
+from flask_app.models import (Account, Holding, Transaction, Allocation,
+                               ACTION_BUY, ACTION_SELL, ACTION_DIVIDEND,
+                               ACTION_REINVEST_DIVIDEND, ACTION_REINVEST_SHARES,
+                               ACTION_TRANSFER_IN, ACTION_TRANSFER_OUT,
+                               ACTION_INTEREST, ACTION_FEE, ACTION_OTHER)
+from datetime import datetime, date as date_type
 import yfinance as yf
+import csv
+import io
 
 portfolio_bp = Blueprint('portfolio', __name__)
 
@@ -415,3 +421,246 @@ def validate_tickers():
     if invalid:
         return jsonify(valid=False, invalid_tickers=invalid)
     return jsonify(valid=True, matches=valid)
+
+
+# ---------------------------------------------------------------------------
+# Record Transaction  (F3 — manual sell, dividend, transfer, etc.)
+# ---------------------------------------------------------------------------
+
+# All action types available for manual entry, with labels
+MANUAL_ACTION_TYPES = [
+    (ACTION_BUY,               'Buy'),
+    (ACTION_SELL,              'Sell'),
+    (ACTION_DIVIDEND,          'Dividend'),
+    (ACTION_REINVEST_DIVIDEND, 'Reinvest Dividend'),
+    (ACTION_REINVEST_SHARES,   'Reinvest Shares'),
+    (ACTION_TRANSFER_IN,       'Transfer In'),
+    (ACTION_TRANSFER_OUT,      'Transfer Out'),
+    (ACTION_INTEREST,          'Interest'),
+    (ACTION_FEE,               'Fee'),
+    (ACTION_OTHER,             'Other'),
+]
+
+@portfolio_bp.route('/record_transaction/<int:account_id>', methods=['GET', 'POST'])
+@login_required
+def record_transaction(account_id):
+    """Manually record any transaction: sell, dividend, transfer, fee, etc."""
+    account  = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
+    holdings = Holding.query.filter_by(account_id=account_id).order_by(Holding.ticker).all()
+
+    if request.method == 'POST':
+        # ── Parse form fields ───────────────────────────────────────────
+        action_type  = request.form.get('action_type', '').strip()
+        ticker_raw   = request.form.get('ticker', '').strip().upper() or None
+        date_str     = request.form.get('txn_date', '').strip()
+        qty_raw      = request.form.get('quantity', '').strip()
+        price_raw    = request.form.get('price', '').strip()
+        amount_raw   = request.form.get('amount', '').strip()
+        description  = request.form.get('description', '').strip() or None
+        fees_raw     = request.form.get('fees', '').strip()
+
+        # Validate action type
+        valid_types = {a for a, _ in MANUAL_ACTION_TYPES}
+        if action_type not in valid_types:
+            flash('Invalid transaction type.', 'danger')
+            return render_template('record_transaction.html', account=account,
+                                   holdings=holdings, action_types=MANUAL_ACTION_TYPES)
+
+        # Parse date
+        try:
+            txn_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Invalid date. Please use YYYY-MM-DD format.', 'danger')
+            return render_template('record_transaction.html', account=account,
+                                   holdings=holdings, action_types=MANUAL_ACTION_TYPES,
+                                   form_data=request.form)
+
+        # Parse numeric fields
+        def _parse_float(raw):
+            try:
+                return float(raw.replace(',', '').replace('$', '')) if raw else None
+            except ValueError:
+                return None
+
+        quantity    = _parse_float(qty_raw)
+        price       = _parse_float(price_raw)
+        fees        = _parse_float(fees_raw)
+        amount      = _parse_float(amount_raw)
+
+        # Amount is required
+        if amount is None:
+            flash('Amount is required.', 'danger')
+            return render_template('record_transaction.html', account=account,
+                                   holdings=holdings, action_types=MANUAL_ACTION_TYPES,
+                                   form_data=request.form)
+
+        # ── For sells: validate and update holding ──────────────────────
+        if action_type == ACTION_SELL:
+            if not ticker_raw:
+                flash('Ticker is required for a sell transaction.', 'danger')
+                return render_template('record_transaction.html', account=account,
+                                       holdings=holdings, action_types=MANUAL_ACTION_TYPES,
+                                       form_data=request.form)
+            if not quantity or quantity <= 0:
+                flash('Quantity is required and must be positive for a sell.', 'danger')
+                return render_template('record_transaction.html', account=account,
+                                       holdings=holdings, action_types=MANUAL_ACTION_TYPES,
+                                       form_data=request.form)
+
+            holding = Holding.query.filter_by(account_id=account_id, ticker=ticker_raw).first()
+            if not holding:
+                flash(f"No holding found for {ticker_raw} in this account.", 'danger')
+                return render_template('record_transaction.html', account=account,
+                                       holdings=holdings, action_types=MANUAL_ACTION_TYPES,
+                                       form_data=request.form)
+            if holding.quantity < quantity:
+                flash(f"Cannot sell {quantity} shares — only {holding.quantity} held.", 'danger')
+                return render_template('record_transaction.html', account=account,
+                                       holdings=holdings, action_types=MANUAL_ACTION_TYPES,
+                                       form_data=request.form)
+
+            # Reduce cost basis proportionally
+            if holding.cost_basis and holding.quantity > 0:
+                cost_per_share = holding.cost_basis / holding.quantity
+                holding.cost_basis = round(holding.cost_basis - cost_per_share * quantity, 4)
+
+            holding.quantity     = round(holding.quantity - quantity, 8)
+            holding.last_updated = datetime.utcnow()
+
+        # ── For manual buys: update holding ────────────────────────────
+        elif action_type == ACTION_BUY:
+            if not ticker_raw:
+                flash('Ticker is required for a buy transaction.', 'danger')
+                return render_template('record_transaction.html', account=account,
+                                       holdings=holdings, action_types=MANUAL_ACTION_TYPES,
+                                       form_data=request.form)
+            if not quantity or quantity <= 0:
+                flash('Quantity is required and must be positive for a buy.', 'danger')
+                return render_template('record_transaction.html', account=account,
+                                       holdings=holdings, action_types=MANUAL_ACTION_TYPES,
+                                       form_data=request.form)
+
+            holding = Holding.query.filter_by(account_id=account_id, ticker=ticker_raw).first()
+            buy_cost = abs(amount)  # use the amount field as the total cost
+            if holding:
+                holding.quantity     += quantity
+                holding.cost_basis    = (holding.cost_basis or 0) + buy_cost
+                holding.last_updated  = datetime.utcnow()
+            else:
+                db.session.add(Holding(
+                    ticker=ticker_raw, quantity=quantity, account_id=account_id,
+                    cost_basis=buy_cost, isincluded=True, last_updated=datetime.utcnow()
+                ))
+
+        # ── Record the transaction ──────────────────────────────────────
+        txn = Transaction(
+            account_id   = account_id,
+            date         = txn_date,
+            action_type  = action_type,
+            raw_action   = action_type.replace('_', ' ').title(),
+            ticker       = ticker_raw,
+            description  = description,
+            quantity     = quantity,
+            price        = price,
+            fees         = fees,
+            amount       = amount,
+            import_source = 'manual',
+        )
+        db.session.add(txn)
+        db.session.commit()
+
+        flash('Transaction recorded successfully!', 'success')
+        return redirect(url_for('portfolio.view_transactions', account_id=account_id))
+
+    # GET — pre-fill date to today, pre-select ticker if passed via query string
+    prefill_ticker = request.args.get('ticker', '').upper()
+    prefill_action = request.args.get('action', '')
+    today_str      = date_type.today().isoformat()
+
+    return render_template(
+        'record_transaction.html',
+        account=account,
+        holdings=holdings,
+        action_types=MANUAL_ACTION_TYPES,
+        today=today_str,
+        prefill_ticker=prefill_ticker,
+        prefill_action=prefill_action,
+    )
+
+
+# ---------------------------------------------------------------------------
+# CSV Export  (F7)
+# ---------------------------------------------------------------------------
+
+@portfolio_bp.route('/export/positions/<int:account_id>')
+@login_required
+def export_positions(account_id):
+    """Download current holdings as a CSV file."""
+    account  = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
+    holdings = Holding.query.filter_by(account_id=account_id).order_by(Holding.ticker).all()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        'Ticker', 'Shares', 'Current Price', 'Market Value',
+        'Total Cost Basis', 'Cost Basis / Share', 'Unrealized G/L ($)', 'Unrealized G/L (%)',
+        'Included in Allocation'
+    ])
+    for h in holdings:
+        writer.writerow([
+            h.ticker,
+            h.quantity,
+            round(h.current_price, 4) if h.current_price else '',
+            round(h.market_value, 2),
+            round(h.cost_basis, 2) if h.cost_basis is not None else '',
+            round(h.cost_basis_per_share, 4) if h.cost_basis_per_share is not None else '',
+            round(h.unrealized_gain, 2) if h.unrealized_gain is not None else '',
+            round(h.unrealized_gain_pct, 2) if h.unrealized_gain_pct is not None else '',
+            'Yes' if h.isincluded else 'No',
+        ])
+
+    filename = f"{account.account_name.replace(' ', '_')}_positions_{date_type.today().isoformat()}.csv"
+    return Response(
+        buf.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+    )
+
+
+@portfolio_bp.route('/export/transactions/<int:account_id>')
+@login_required
+def export_transactions(account_id):
+    """Download transaction history as a CSV file (respects type/ticker filters)."""
+    account = Account.query.filter_by(id=account_id, user_id=current_user.id).first_or_404()
+
+    filter_type   = request.args.get('type', '')
+    filter_ticker = request.args.get('ticker', '').strip().upper()
+
+    query = Transaction.query.filter_by(account_id=account_id)
+    if filter_type:
+        query = query.filter(Transaction.action_type == filter_type)
+    if filter_ticker:
+        query = query.filter(Transaction.ticker == filter_ticker)
+    transactions = query.order_by(Transaction.date.desc(), Transaction.id.desc()).all()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(['Date', 'Type', 'Ticker', 'Description', 'Quantity', 'Price', 'Fees', 'Amount'])
+    for t in transactions:
+        writer.writerow([
+            t.date.isoformat(),
+            t.action_type,
+            t.ticker or '',
+            t.description or '',
+            t.quantity if t.quantity is not None else '',
+            round(t.price, 4) if t.price is not None else '',
+            round(t.fees, 4) if t.fees is not None else '',
+            round(t.amount, 2),
+        ])
+
+    filename = f"{account.account_name.replace(' ', '_')}_transactions_{date_type.today().isoformat()}.csv"
+    return Response(
+        buf.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+    )

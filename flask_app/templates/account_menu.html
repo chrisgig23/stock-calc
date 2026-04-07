@@ -647,6 +647,14 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </a>
 
+        <a href="{{ url_for('portfolio.record_transaction', account_id=account.id) }}" class="action-card">
+            <div class="action-icon"><i class="fa-solid fa-pen-ruler"></i></div>
+            <div>
+                <div class="action-title">Record Transaction</div>
+                <div class="action-desc">Log a sell, dividend, transfer, fee, or other event</div>
+            </div>
+        </a>
+
         <a href="{{ url_for('portfolio.edit_portfolio', account_id=account.id) }}" class="action-card">
             <div class="action-icon"><i class="fa-solid fa-pen-to-square"></i></div>
             <div>

@@ -1,7 +1,6 @@
 from flask_app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-import yfinance as yf
 from datetime import datetime
 from flask_app.utils.encryption import EncryptedText
 import secrets
@@ -114,19 +113,12 @@ class Holding(db.Model):
         self.isincluded   = isincluded
         self.last_updated = last_updated
 
-    # ---- live price (yfinance) ----
+    # ---- live price (cached via price_cache, 15-min TTL) ----
 
     @property
     def current_price(self):
-        try:
-            info = yf.Ticker(self.ticker).info
-            return (info.get('currentPrice')
-                    or info.get('regularMarketPreviousClose')
-                    or info.get('navPrice')
-                    or info.get('open')
-                    or 0.0)
-        except Exception:
-            return 0.0
+        from flask_app.utils.price_cache import get_price
+        return get_price(self.ticker)
 
     # ---- derived properties ----
 
