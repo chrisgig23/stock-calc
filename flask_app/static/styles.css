@@ -166,6 +166,10 @@ body.sidebar-collapsed .main-wrapper {
     margin-bottom: 10px;
     text-decoration: none;
     color: inherit;
+    cursor: pointer;
+}
+.sidebar-brand-logo * {
+    cursor: pointer;
 }
 .sidebar-brand-logo:hover {
     opacity: 0.85;
