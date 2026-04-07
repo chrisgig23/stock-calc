@@ -23,10 +23,10 @@
 
         <div class="sidebar-brand">
             <div class="sidebar-brand-content">
-                <div class="sidebar-brand-logo">
+                <a href="{{ url_for('main.view_account') }}" class="sidebar-brand-logo" title="Go to Dashboard">
                     <img src="{{ asset_url('images/wealthwise_icon.png') }}" alt="" class="sidebar-brand-icon" aria-hidden="true">
                     <span class="brand-wordmark">WealthWise™</span>
-                </div>
+                </a>
                 <div class="market-badge {% if market_state %}market-open{% else %}market-closed{% endif %}">
                     <span class="market-status-label">{{ market_status_text }}</span>
                     {% if market_next_event %}<span class="market-next">{{ market_next_event }}</span>{% endif %}

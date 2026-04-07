@@ -164,6 +164,11 @@ body.sidebar-collapsed .main-wrapper {
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+.sidebar-brand-logo:hover {
+    opacity: 0.85;
 }
 .sidebar-brand-icon {
     height: 30px;
