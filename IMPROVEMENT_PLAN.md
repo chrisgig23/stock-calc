@@ -35,11 +35,11 @@
 - [x] **D6 — Modernize the header bar** ✅
   - Refreshed the authenticated app shell: tightened top brand/header spacing, polished the market status pill, and replaced the plain footer identity text with a proper profile card + action buttons for Settings, Logout, and Admin.
 
-- [ ] **D7 — Market status bar: add color and next-open time**
-  - "Markets are closed" in a flat teal bar is functional but minimal. Make the bar green when open, red/gray when closed, and show the next open or close time.
+- [x] **D7 — Market status bar: add color and next-open time** ✅
+  - Market status pill is green when open, gray when closed. Next open/close time shown dynamically. CSS polished (removed full-width stretch).
 
-- [ ] **D5 — Make the layout responsive (mobile-friendly)**
-  - The two-column sidebar + content layout is not responsive. Add breakpoints so the sidebar collapses to a hamburger/drawer on mobile/tablet.
+- [x] **D5 — Make the layout responsive (mobile-friendly)** ✅
+  - Hamburger drawer + overlay already implemented for ≤768px. Added: hide desktop collapse button on mobile, tablet intermediate breakpoint at 960px (narrower sidebar, tighter padding), responsive stat card stacking, account tab bar adjustments, settings row stacking on small screens.
 
 ---
 
@@ -47,25 +47,17 @@
 
 > Based on the provided mockup. This is the highest-visibility change — it transforms the first impression of the app.
 
-- [ ] **DASH1 — Build a Portfolio Overview Dashboard as the post-login landing page**
-  - Currently login → Account 1's menu. Instead, login should land on a Portfolio Overview Dashboard.
-  - The dashboard is a **cross-account summary** containing:
-    1. **Portfolio Allocation pie chart** — combined allocation across all accounts, broken down by asset type (US Stocks, International Stocks, Bonds, etc.). For now can use per-stock data; asset-type classification can be a future enhancement.
-    2. **Portfolio Growth line chart** — total portfolio value over time (monthly), built from purchase history + current prices.
-    3. **Top Performing Assets bar chart** — % gain per stock across all accounts, sorted descending.
-  - Navigation bar replaces the current sidebar header: **Overview | Accounts | Dashboard | Reports** + "Markets are closed" status on the right.
+- [x] **DASH1 — Build a Portfolio Overview Dashboard as the post-login landing page** ✅
+  - Login now lands on `/dashboard` — a cross-account summary with three charts:
+    1. **Portfolio Allocation pie chart** — combined allocation across all accounts by ticker.
+    2. **Portfolio Growth line chart** — total portfolio value over time, built from `PortfolioSnapshot` records. "Build Growth Chart" backfill button in empty state.
+    3. **Top Performing Assets bar chart** — % gain per holding across all accounts, sorted descending.
 
-- [ ] **DASH2 — Add per-account summary cards below the overview charts**
-  - Below the overview charts, show a card for each account containing:
-    - Account name
-    - Total current value
-    - Total cost basis
-    - Unrealized P&L ($ and %)
-    - Quick-action links: View Positions, Make a Purchase
-  - Clicking an account card navigates into that account's detail view.
+- [x] **DASH2 — Add per-account summary cards below the overview charts** ✅
+  - Account cards below the charts show: account name, total market value, cost basis, unrealized G/L ($ and %), and quick-action links (View Positions, Make a Purchase).
 
-- [ ] **D3 — Replace the per-account "6 buttons" menu page with a proper account detail layout**
-  - Once inside an account, replace the static list of 6 blue buttons with a tabbed or sidebar-nav layout so content is visible without an extra click. The main content area should never be just buttons on an empty background.
+- [x] **D3 — Replace the per-account "6 buttons" menu page with a proper account detail layout** ✅
+  - Account detail page (`/view_account/<id>`) now has summary stat cards (Market Value, Cost Basis, Unrealized G/L, Total Return, Holdings count) and four tabs: Positions (inline table), Recent Activity (last 10 transactions), Allocation (mini doughnut + delta table), and Actions (card grid). Inline rename via pencil icon.
 
 - [x] **D4 — Highlight the active account in navigation** ✅
   - Sidebar account links now show a persistent active state when viewing any page scoped to that account, including the account overview, positions, allocation, purchase, import, and report flows.
@@ -126,11 +118,11 @@
 
 ## ⚙️ Account Management Polish
 
-- [ ] **D20 — Add tooltips/labels to the sidebar pencil & star icons**
-  - The pencil icon's purpose (reorder/favorite mode) is unclear with no tooltip. The star icon's function is also unexplained. Add descriptive tooltips, or redesign to a labeled "Reorder Accounts" mode with drag handles.
+- [x] **D20 — Add tooltips/labels to the sidebar pencil & star icons** ✅
+  - Old ambiguous icon approach replaced with a clearly labeled "Reorder" toggle button in the Accounts section header. Click to enter reorder mode — each account shows ↑↓ chevron buttons with descriptive `title` attributes. Account order is saved to localStorage and restored on page load (no migration required).
 
-- [ ] **D21 — Clean up the Manage User Account page layout**
-  - The page has three buttons (Reset Password, Change Username, Exit) where "Exit" uses inconsistent plain styling. Unify button styles and make the flow clearer.
+- [x] **D21 — Clean up the Manage User Account page layout** ✅
+  - Unified button styles across the Settings page. Added a back breadcrumb at the top of the page. Removed the redundant "← Back to Accounts" button at the bottom. All action buttons now use consistent `.btn` classes.
 
 ---
 
@@ -204,8 +196,8 @@ Two-step CSV import flow at `/import/<account_id>`:
   - Requires: storing `email` + `is_verified` + `verification_token` on the User model; sending email via Flask-Mail or similar; a `/verify/<token>` route.
   - Security note: token should be time-limited (e.g. 24 hrs) and single-use.
 
-- [ ] **F9 — Store user email for account recovery**
-  - Even before F6/F8 are built, add an optional `email` field to the User model so existing users can register their email for future password recovery. Can be done via the Manage Account page.
+- [x] **F9 — Store user email for account recovery** ✅
+  - `email` and `email_verified` fields added to User model. Manage Account page (`/manage_user/<id>`) lets users set/change their email; changing it sends a 6-digit verification code via Resend. Used by F6 (password reset) and DCA reminders.
 
 ---
 
@@ -223,9 +215,9 @@ Work through these one at a time. Each is a discrete, shippable unit.
 5. ~~`D1`~~ ✅ Establish consistent design system: fonts, color palette, unified button classes
 
 ### Phase 3 — Dashboard (biggest UX transformation)
-6. `DASH1` — Build Portfolio Overview Dashboard with 3 charts (allocation pie, growth line, top performers bar)
-7. `DASH2` — Add per-account summary cards below the overview
-8. `D3` — Replace per-account "6 buttons" menu with tabbed/inline account detail layout
+6. ~~`DASH1`~~ ✅ Build Portfolio Overview Dashboard with 3 charts (allocation pie, growth line, top performers bar)
+7. ~~`DASH2`~~ ✅ Add per-account summary cards below the overview
+8. ~~`D3`~~ ✅ Replace per-account "6 buttons" menu with tabbed/inline account detail layout
 9. ~~`D4`~~ ✅ Active account highlight in navigation
 10. ~~`D6`~~ ✅ Modernize the header bar
 
@@ -245,17 +237,17 @@ Work through these one at a time. Each is a discrete, shippable unit.
 ### Phase 5 — Form & Flow Polish
 17. ~~`D13`~~ ✅ Show current % alongside inputs in Adjust Allocations
 18. ~~`D14`~~ ✅ Live-updating total % on Adjust Allocations
-19. `D15` — Rename "Cash Value" to "Amount to Invest" with explanation
-20. `D16` — Show all rebalancing suggestions on purchase step 2
-21. `D17` — Add post-purchase success/redirect state
+19. ~~`D15`~~ ✅ Rename "Cash Value" to "Amount to Invest" with explanation
+20. ~~`D16`~~ ✅ Show all rebalancing suggestions on purchase step 2
+21. ~~`D17`~~ ✅ Add post-purchase success/redirect state
 22. ~~`D18`~~ ✅ Remove empty row in Edit Portfolio; add "+ Add Holding" button
 23. ~~`D19`~~ ✅ Ticker symbol validation in Edit Portfolio
 
 ### Phase 6 — Layout & Accessibility
-24. `D5` — Responsive/mobile layout
-25. `D7` — Market status bar: color + next open/close time
-26. `D20` — Tooltip/labels for sidebar pencil & star icons
-27. `D21` — Clean up Manage User Account page styling
+24. ~~`D5`~~ ✅ Responsive/mobile layout
+25. ~~`D7`~~ ✅ Market status bar: color + next open/close time
+26. ~~`D20`~~ ✅ Tooltip/labels for sidebar pencil & star icons → redesigned as labeled Reorder mode
+27. ~~`D21`~~ ✅ Clean up Manage User Account page styling
 
 ### Phase 7 — New Features
 28. `F2` — Transaction history page (per account)
@@ -266,7 +258,7 @@ Work through these one at a time. Each is a discrete, shippable unit.
 33. `F7` — CSV export
 
 ### Phase 8 — User Management & Auth
-34. `F9` — Add `email` field to User model (foundation for F6 + F8)
+34. ~~`F9`~~ ✅ Add `email` field to User model (foundation for F6 + F8)
 35. ~~`F6`~~ ✅ Password recovery via email ("Forgot Password" on login page)
 36. `F8` — Self-service account creation with email verification
 

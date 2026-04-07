@@ -222,6 +222,11 @@
 {% endblock %}
 
 {% block content %}
+<div style="margin-bottom:18px;">
+    <a href="{{ url_for('accounts.view_account') }}" style="font-size:0.84em; color:var(--color-text-secondary); text-decoration:none; display:inline-flex; align-items:center; gap:5px;">
+        <i class="fa-solid fa-chevron-left" style="font-size:0.75em;"></i> Back to Accounts
+    </a>
+</div>
 <div class="settings-header">
     <h2>Settings</h2>
     <p>Manage your account, integrations, and preferences.</p>
@@ -400,10 +405,6 @@
 </div>
 {% endif %}
 
-<!-- ── Back ──────────────────────────────────────────────────────────────── -->
-<a href="{{ url_for('accounts.view_account') }}" class="btn btn-secondary">
-    ← Back to Accounts
-</a>
 {% endblock %}
 
 {% block scripts %}

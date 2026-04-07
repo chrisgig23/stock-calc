@@ -57,16 +57,31 @@
         <div class="sidebar-section">
             <div class="sidebar-section-header">
                 <span class="sidebar-section-label">Accounts</span>
+                {% if accounts %}
+                <button class="sidebar-reorder-btn" id="sidebar-reorder-toggle"
+                        title="Reorder your accounts — drag them into your preferred order">
+                    <i class="fa-solid fa-arrows-up-down"></i>
+                    <span class="reorder-label">Reorder</span>
+                </button>
+                {% endif %}
             </div>
-            <ul class="sidebar-nav-list">
+            <ul class="sidebar-nav-list" id="sidebar-account-list">
                 {% for account in accounts %}
-                <li>
+                <li data-account-id="{{ account.id }}">
                     <div class="account-item {% if account.id == active_account_id %}account-item-active{% endif %}">
                         <a href="{{ url_for('accounts.view_account', account_id=account.id) }}"
                            class="sidebar-nav-link {% if account.id == active_account_id %}sidebar-nav-link-active{% endif %}">
                             {{ account.account_name }}
                         </a>
+                        <div class="reorder-buttons" style="display:none;" aria-hidden="true">
+                            <button class="chevron-btn reorder-up" title="Move up" tabindex="-1">
+                                <i class="fa-solid fa-chevron-up"></i>
+                            </button>
+                            <button class="chevron-btn reorder-down" title="Move down" tabindex="-1">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
                         </div>
+                    </div>
                 </li>
                 {% endfor %}
             </ul>
@@ -265,6 +280,63 @@
             applySidebarCollapse(nowCollapsed, true);
             localStorage.setItem('sidebarCollapsed', nowCollapsed);
         });
+
+        /* ── Sidebar account reorder ──────────────────────── */
+        var accountList   = document.getElementById('sidebar-account-list');
+        var reorderToggle = document.getElementById('sidebar-reorder-toggle');
+
+        if (accountList && reorderToggle) {
+            // Restore saved order on load
+            (function restoreOrder() {
+                try {
+                    var saved = JSON.parse(localStorage.getItem('ww_account_order') || '[]');
+                    if (!saved.length) return;
+                    var items = Array.from(accountList.querySelectorAll('li[data-account-id]'));
+                    var map = {};
+                    items.forEach(function(li) { map[li.dataset.accountId] = li; });
+                    saved.forEach(function(id) {
+                        if (map[id]) accountList.appendChild(map[id]);
+                    });
+                } catch(e) {}
+            })();
+
+            function saveOrder() {
+                var ids = Array.from(accountList.querySelectorAll('li[data-account-id]'))
+                              .map(function(li) { return li.dataset.accountId; });
+                try { localStorage.setItem('ww_account_order', JSON.stringify(ids)); } catch(e) {}
+            }
+
+            function setReorderMode(on) {
+                accountList.classList.toggle('reorder-mode', on);
+                reorderToggle.classList.toggle('active', on);
+                reorderToggle.title = on ? 'Done reordering — click to exit' : 'Reorder your accounts';
+                reorderToggle.querySelector('.reorder-label').textContent = on ? 'Done' : 'Reorder';
+                // toggle tabindex on chevron buttons
+                accountList.querySelectorAll('.chevron-btn').forEach(function(btn) {
+                    btn.tabIndex = on ? 0 : -1;
+                });
+                // toggle aria-hidden on reorder-buttons wrappers
+                accountList.querySelectorAll('.reorder-buttons').forEach(function(div) {
+                    div.setAttribute('aria-hidden', on ? 'false' : 'true');
+                });
+            }
+
+            reorderToggle.addEventListener('click', function() {
+                setReorderMode(!accountList.classList.contains('reorder-mode'));
+            });
+
+            accountList.addEventListener('click', function(e) {
+                var btn = e.target.closest('.reorder-up, .reorder-down');
+                if (!btn) return;
+                var li = btn.closest('li');
+                if (btn.classList.contains('reorder-up') && li.previousElementSibling) {
+                    accountList.insertBefore(li, li.previousElementSibling);
+                } else if (btn.classList.contains('reorder-down') && li.nextElementSibling) {
+                    accountList.insertBefore(li.nextElementSibling, li);
+                }
+                saveOrder();
+            });
+        }
 
         {% endif %}
     });
