@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}WealthWise — {{ account.account_name }}{% endblock %}
+{% block title %}WealthTrack — {{ account.account_name }}{% endblock %}
 
 {% block styles %}
 <style>
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }).then(function(r) { return r.json(); }).then(function(data) {
                 if (data.success) {
                     titleEl.textContent = data.name;
-                    document.title = 'WealthWise — ' + data.name;
+                    document.title = 'WealthTrack — ' + data.name;
                     document.querySelectorAll('.sidebar-nav-link').forEach(function(link) {
                         if (link.href && link.href.includes('/view_account/' + accountId))
                             link.textContent = data.name;

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}WealthWise — Login{% endblock %}
+{% block title %}WealthTrack — Login{% endblock %}
 
 {% block content %}
 <div class="login-container">
-    <img src="{{ asset_url('images/WealthWise_Logo.PNG') }}" alt="WealthWise" class="login-brand-logo">
+    <img src="{{ asset_url('images/WealthTrack_Logo.png') }}" alt="WealthTrack" class="login-brand-logo">
     <h2>Sign in to your account</h2>
     <form method="POST" action="{{ url_for('auth.login') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

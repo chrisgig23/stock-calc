@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}WealthWise — Import Data{% endblock %}
+{% block title %}WealthTrack — Import Data{% endblock %}
 
 {% block styles %}
 <style>
@@ -228,7 +228,7 @@
         </p>
         <ol class="step-list">
             <li>Go to <strong>Settings</strong> and click <strong>Connect Schwab Account</strong></li>
-            <li>Log in to Schwab and authorize WealthWise to read your account data</li>
+            <li>Log in to Schwab and authorize WealthTrack to read your account data</li>
             <li>Return here and use <strong>Sync from Schwab Now</strong> instead of the CSV steps above</li>
         </ol>
         <a href="{{ url_for('admin.manage_user', user_id=current_user.id) }}" class="btn-primary">

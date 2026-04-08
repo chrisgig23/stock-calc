@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}WealthWise — Settings{% endblock %}
+{% block title %}WealthTrack — Settings{% endblock %}
 
 {% block styles %}
 <style>
@@ -332,7 +332,7 @@
         <span class="schwab-status disconnected">✗ Not connected</span>
         <p class="settings-card-desc" style="margin-top:10px;">
             Connect your Schwab account to sync positions and transactions automatically — no more manual CSV exports.
-            After connecting, link each WealthWise account to its corresponding Schwab account from the account's page.
+            After connecting, link each WealthTrack account to its corresponding Schwab account from the account's page.
         </p>
         <a href="{{ url_for('schwab.connect') }}" class="btn btn-primary">
             <i class="fa-solid fa-link"></i> Connect Schwab Account

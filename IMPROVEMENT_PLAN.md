@@ -191,13 +191,75 @@ Two-step CSV import flow at `/import/<account_id>`:
 - [x] **F7 — CSV export** ✅
   - `/export/positions/<id>` — current holdings as CSV (ticker, shares, price, MV, cost basis, G/L, %). `/export/transactions/<id>` — full transaction log as CSV, respects type/ticker filters. Export buttons on Positions page, Transaction History page, and Reports page.
 
-- [ ] **F8 — Self-service account creation with email verification**
-  - Currently only admins can create accounts (via `/add_user`). Add a public "Create Account" flow on the login page: user enters username + email + password → receives a verification email → clicks link → account activated.
-  - Requires: storing `email` + `is_verified` + `verification_token` on the User model; sending email via Flask-Mail or similar; a `/verify/<token>` route.
-  - Security note: token should be time-limited (e.g. 24 hrs) and single-use.
+- [x] **F8 — Self-service account creation with email verification** ✅
+  - `/signup` route: invite-code gated public registration (username, email, password, invite code). On success: sends 6-digit OTP verification email via Resend, redirects to `/verify-email`. Security gate in `__init__.py` holds unverified users at the verify page. `email` + `email_verified` on User model. Invite code managed from Admin panel or `INVITE_CODE` env var. "Request a Code" modal emails admin via `NOTIFY_EMAIL` env var.
 
 - [x] **F9 — Store user email for account recovery** ✅
   - `email` and `email_verified` fields added to User model. Manage Account page (`/manage_user/<id>`) lets users set/change their email; changing it sends a 6-digit verification code via Resend. Used by F6 (password reset) and DCA reminders.
+
+---
+
+## 📈 Phase 9 — Analytics & Reporting
+
+- [ ] **A1 — Realized gain/loss tracking (FIFO)**
+  - Store cost basis at time of sell in the Transaction record. Add `realized_gain` and `cost_basis_at_sale` columns to Transaction. Implement FIFO lot matching when recording sells. Dedicated realized G/L section on Reports page showing short-term vs long-term gains (held <1yr vs ≥1yr). Essential for tax reporting.
+
+- [ ] **A2 — Dividend income dashboard**
+  - Dedicated page (or Reports tab) showing: total dividends received by year/month, dividend income per holding, yield on cost per ticker, rolling 12-month income chart. Data is already in the Transaction model — just needs surfacing.
+
+- [ ] **A3 — Benchmark comparison (SPY / custom index)**
+  - Overlay portfolio growth chart against SPY (or user-selected benchmark). Use yfinance to pull historical benchmark prices from the account's first snapshot date. Show annualized return vs benchmark return. Add to Reports page.
+
+- [ ] **A4 — Tax report export**
+  - Generate a Form 8949–style CSV/PDF showing all realized gains/losses for a selected tax year, split by short-term and long-term. Depends on A1.
+
+---
+
+## 🎨 Phase 10 — UX & Polish
+
+- [ ] **U1 — Dark mode**
+  - Full dark theme toggled by a button in the sidebar footer. Persist preference in localStorage. CSS custom properties are already structured for this — mostly additive work.
+
+- [ ] **U2 — Onboarding flow for new users**
+  - First-login walkthrough: welcome screen → create first account → import or add holdings manually → set allocations → done. Step-by-step wizard with progress indicator. Skippable. Triggered only on first login (track via a `has_onboarded` flag on User).
+
+- [ ] **U3 — Cash balance tracking**
+  - `cash_balance` already exists on PortfolioSnapshot but isn't shown anywhere. Add cash as a line item on the account detail page and positions page. Let users manually set/update their cash balance per account. Include cash in total portfolio value calculations and allocation charts.
+
+- [ ] **U4 — PWA / mobile installability**
+  - Add a Web App Manifest and service worker so the app can be installed on iOS/Android home screen. Mostly a config addition given the app is already mobile-responsive.
+
+---
+
+## 🔌 Phase 11 — Integrations & Data Import
+
+- [ ] **I1 — Fidelity CSV importer**
+  - Parse Fidelity's positions and transaction history CSV export format. Fidelity has no public OAuth API so CSV is the only path. Model after the existing Schwab CSV importer.
+
+- [ ] **I2 — Vanguard CSV importer**
+  - Parse Vanguard's export format. Similar approach to I1.
+
+- [ ] **I3 — Generic CSV importer (column mapping UI)**
+  - A flexible import flow where users map their brokerage's CSV columns to WealthTrack fields. Handles any brokerage not covered by dedicated parsers. Useful long-term catch-all.
+
+- [ ] **I4 — Interactive Brokers (IBKR) integration**
+  - IBKR has a well-documented public API (Client Portal API) accessible to individual account holders — no developer approval required. Higher-effort but covers a significant user base.
+
+- [ ] **I5 — Alpaca integration**
+  - Alpaca's API is developer-friendly and free to access. Good coverage for users who trade programmatically or use commission-free accounts.
+
+---
+
+## 💰 Phase 12 — Monetization
+
+- [ ] **M1 — Subscription tiers (Stripe)**
+  - Integrate Stripe for billing. Define free vs paid tiers (e.g. free: 1 account, paid: unlimited accounts + advanced analytics + CSV export). Add `subscription_status` and `stripe_customer_id` to User model. Webhook handler for subscription events.
+
+- [ ] **M2 — Usage limits enforcement**
+  - Gate features by subscription tier. Show upgrade prompts when free users hit limits. Graceful degradation (don't break existing data if subscription lapses).
+
+- [ ] **M3 — Admin billing dashboard**
+  - Show active subscribers, MRR, churn in the admin panel. Stripe dashboard covers most of this but a lightweight in-app view is useful.
 
 ---
 
@@ -260,7 +322,31 @@ Work through these one at a time. Each is a discrete, shippable unit.
 ### Phase 8 — User Management & Auth
 34. ~~`F9`~~ ✅ Add `email` field to User model (foundation for F6 + F8)
 35. ~~`F6`~~ ✅ Password recovery via email ("Forgot Password" on login page)
-36. `F8` — Self-service account creation with email verification
+36. ~~`F8`~~ ✅ Self-service account creation with email verification
+
+### Phase 9 — Analytics & Reporting
+37. `A1` — Realized G/L tracking with FIFO cost basis
+38. `A2` — Dividend income dashboard
+39. `A3` — Benchmark comparison (SPY / custom index)
+40. `A4` — Tax report export (depends on A1)
+
+### Phase 10 — UX & Polish
+41. `U1` — Dark mode
+42. `U2` — Onboarding flow for new users
+43. `U3` — Cash balance tracking
+44. `U4` — PWA / mobile installability
+
+### Phase 11 — Integrations & Data Import
+45. `I1` — Fidelity CSV importer
+46. `I2` — Vanguard CSV importer
+47. `I3` — Generic CSV importer with column mapping UI
+48. `I4` — Interactive Brokers (IBKR) API integration
+49. `I5` — Alpaca API integration
+
+### Phase 12 — Monetization
+50. `M1` — Stripe subscription integration
+51. `M2` — Usage limits enforcement by tier
+52. `M3` — Admin billing dashboard
 
 ---
 

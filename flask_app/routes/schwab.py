@@ -8,7 +8,7 @@ Routes
   GET  /schwab/connect          — redirect user to Schwab OAuth page
   GET  /schwab/callback         — handle OAuth redirect, store tokens
   GET  /schwab/accounts         — JSON: list linked Schwab accounts (for link modal)
-  POST /schwab/link/<acct_id>   — save schwab_account_hash onto a WealthWise account
+  POST /schwab/link/<acct_id>   — save schwab_account_hash onto a WealthTrack account
   POST /schwab/sync/<acct_id>   — sync positions + transactions from Schwab into account
   POST /schwab/disconnect       — delete stored tokens for current user
 
@@ -217,7 +217,7 @@ def list_schwab_accounts():
     Returns:
     {
       "accounts": [{"accountNumber": "...", "hashValue": "..."}, ...],
-      "linked_hashes": ["hash1", ...]   # hashes already linked to a WealthWise account
+      "linked_hashes": ["hash1", ...]   # hashes already linked to a WealthTrack account
     }
     """
     token = _get_token_or_redirect()
@@ -235,7 +235,7 @@ def list_schwab_accounts():
     # [{"accountNumber": "...", "hashValue": "..."}, ...]
     accounts = resp.json()
 
-    # Hashes already linked to one of this user's WealthWise accounts
+    # Hashes already linked to one of this user's WealthTrack accounts
     linked_hashes = [
         a.schwab_account_hash
         for a in Account.query.filter_by(user_id=current_user.id).all()
@@ -248,7 +248,7 @@ def list_schwab_accounts():
 @schwab_bp.route('/link/<int:account_id>', methods=['POST'])
 @login_required
 def link_account(account_id):
-    """Save the Schwab account hash onto a WealthWise account."""
+    """Save the Schwab account hash onto a WealthTrack account."""
     account = Account.query.filter_by(
         id=account_id, user_id=current_user.id).first_or_404()
 
@@ -266,7 +266,7 @@ def link_account(account_id):
 @schwab_bp.route('/unlink/<int:account_id>', methods=['POST'])
 @login_required
 def unlink_account(account_id):
-    """Remove the Schwab account hash from a WealthWise account."""
+    """Remove the Schwab account hash from a WealthTrack account."""
     account = Account.query.filter_by(
         id=account_id, user_id=current_user.id).first_or_404()
     account.schwab_account_hash = None
@@ -282,7 +282,7 @@ def unlink_account(account_id):
 def sync_account(account_id):
     """
     Pull live positions and recent transactions from Schwab and sync them
-    into the WealthWise account.
+    into the WealthTrack account.
 
     Positions  → upserts Holding rows  (quantity + cost_basis)
     Transactions → inserts new Transaction rows (deduped by date+action+ticker+amount)

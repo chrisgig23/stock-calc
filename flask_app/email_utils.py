@@ -14,7 +14,7 @@ try:
 except ModuleNotFoundError:
     resend = None
 
-FROM_ADDRESS = "WealthWise <noreply@wealthtrackapp.com>"
+FROM_ADDRESS = "WealthTrack <noreply@wealthtrackapp.com>"
 
 
 def _get_client():
@@ -34,7 +34,7 @@ def send_verification_email(to_email: str, code: str, username: str) -> bool:
         params = {
             "from": FROM_ADDRESS,
             "to": [to_email],
-            "subject": "Verify your email — WealthWise",
+            "subject": "Verify your email — WealthTrack",
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -45,7 +45,7 @@ def send_verification_email(to_email: str, code: str, username: str) -> bool:
 
         <!-- Header -->
         <tr><td style="background:#1e1b4b;padding:28px 32px;">
-          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;">WealthWise™</span>
+          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;">WealthTrack™</span>
         </td></tr>
 
         <!-- Body -->
@@ -53,7 +53,7 @@ def send_verification_email(to_email: str, code: str, username: str) -> bool:
           <h2 style="margin:0 0 12px;color:#111827;font-size:1.25rem;">Verify your email address</h2>
           <p style="color:#4b5563;margin:0 0 24px;line-height:1.6;">
             Hi {username},<br><br>
-            Enter the code below to verify <strong>{to_email}</strong> as your login email for WealthWise.
+            Enter the code below to verify <strong>{to_email}</strong> as your login email for WealthTrack.
             This code expires in <strong>15 minutes</strong>.
           </p>
 
@@ -70,7 +70,7 @@ def send_verification_email(to_email: str, code: str, username: str) -> bool:
         <!-- Footer -->
         <tr><td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;">
           <p style="color:#9ca3af;font-size:0.75rem;margin:0;line-height:1.5;">
-            WealthWise · Your data stays yours. No ads, no sharing.
+            WealthTrack · Your data stays yours. No ads, no sharing.
           </p>
         </td></tr>
 
@@ -96,7 +96,7 @@ def send_dca_reminder_email(to_email: str, username: str) -> bool:
         params = {
             "from": FROM_ADDRESS,
             "to": [to_email],
-            "subject": "💰 Your monthly DCA reminder — WealthWise",
+            "subject": "💰 Your monthly DCA reminder — WealthTrack",
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -107,7 +107,7 @@ def send_dca_reminder_email(to_email: str, username: str) -> bool:
 
         <!-- Header -->
         <tr><td style="background:#1e1b4b;padding:28px 32px;">
-          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;">WealthWise™</span>
+          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;">WealthTrack™</span>
         </td></tr>
 
         <!-- Body -->
@@ -126,12 +126,12 @@ def send_dca_reminder_email(to_email: str, username: str) -> bool:
             </p>
             <a href="https://www.wealthtrackapp.com"
                style="display:inline-block;background:#6d28d9;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:700;font-size:0.95rem;">
-              Open WealthWise →
+              Open WealthTrack →
             </a>
           </div>
 
           <p style="color:#6b7280;font-size:0.82rem;line-height:1.6;margin:0 0 8px;">
-            After making your purchase, remember to log it in WealthWise under <strong>Make a Purchase</strong>
+            After making your purchase, remember to log it in WealthTrack under <strong>Make a Purchase</strong>
             or import your updated transactions from your broker.
           </p>
           <p style="color:#9ca3af;font-size:0.78rem;line-height:1.5;margin:0;">
@@ -143,7 +143,7 @@ def send_dca_reminder_email(to_email: str, username: str) -> bool:
         <!-- Footer -->
         <tr><td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;">
           <p style="color:#9ca3af;font-size:0.75rem;margin:0;line-height:1.5;">
-            WealthWise · Stay consistent. Stay invested.
+            WealthTrack · Stay consistent. Stay invested.
           </p>
         </td></tr>
 
@@ -169,7 +169,7 @@ def send_password_reset_notification(to_email: str, username: str, temp_password
         params = {
             "from": FROM_ADDRESS,
             "to": [to_email],
-            "subject": "Your WealthWise password has been reset",
+            "subject": "Your WealthTrack password has been reset",
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -178,13 +178,13 @@ def send_password_reset_notification(to_email: str, username: str, temp_password
     <tr><td align="center">
       <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
         <tr><td style="background:#1e1b4b;padding:28px 32px;">
-          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;">WealthWise™</span>
+          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;">WealthTrack™</span>
         </td></tr>
         <tr><td style="padding:32px;">
           <h2 style="margin:0 0 12px;color:#111827;font-size:1.25rem;">Password reset by administrator</h2>
           <p style="color:#4b5563;margin:0 0 20px;line-height:1.6;">
             Hi {username},<br><br>
-            An administrator has reset your WealthWise password. Use the temporary password below to sign in,
+            An administrator has reset your WealthTrack password. Use the temporary password below to sign in,
             then you'll be prompted to choose a new one.
           </p>
           <div style="background:#fef3c7;border:2px solid #f59e0b;border-radius:10px;padding:20px 24px;margin:0 0 24px;">
@@ -196,7 +196,7 @@ def send_password_reset_notification(to_email: str, username: str, temp_password
           </p>
         </td></tr>
         <tr><td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;">
-          <p style="color:#9ca3af;font-size:0.75rem;margin:0;">WealthWise · Your data stays yours.</p>
+          <p style="color:#9ca3af;font-size:0.75rem;margin:0;">WealthTrack · Your data stays yours.</p>
         </td></tr>
       </table>
     </td></tr>
@@ -220,7 +220,7 @@ def send_password_reset_email(to_email: str, username: str, reset_url: str) -> b
         params = {
             "from": FROM_ADDRESS,
             "to": [to_email],
-            "subject": "Reset your WealthWise password",
+            "subject": "Reset your WealthTrack password",
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -229,13 +229,13 @@ def send_password_reset_email(to_email: str, username: str, reset_url: str) -> b
     <tr><td align="center">
       <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
         <tr><td style="background:#1e1b4b;padding:28px 32px;">
-          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;">WealthWise™</span>
+          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;">WealthTrack™</span>
         </td></tr>
         <tr><td style="padding:32px;">
           <h2 style="margin:0 0 12px;color:#111827;font-size:1.25rem;">Reset your password</h2>
           <p style="color:#4b5563;margin:0 0 20px;line-height:1.6;">
             Hi {username},<br><br>
-            We received a request to reset the password for your WealthWise account.
+            We received a request to reset the password for your WealthTrack account.
             Use the button below to choose a new password. This link expires in <strong>1 hour</strong>.
           </p>
           <div style="margin:0 0 24px;">
@@ -255,7 +255,7 @@ def send_password_reset_email(to_email: str, username: str, reset_url: str) -> b
           </p>
         </td></tr>
         <tr><td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;">
-          <p style="color:#9ca3af;font-size:0.75rem;margin:0;">WealthWise · Your data stays yours.</p>
+          <p style="color:#9ca3af;font-size:0.75rem;margin:0;">WealthTrack · Your data stays yours.</p>
         </td></tr>
       </table>
     </td></tr>
@@ -287,7 +287,7 @@ def send_invite_request_notification(requester_name: str, requester_email: str, 
         params = {
             "from": FROM_ADDRESS,
             "to": [admin_email],
-            "subject": "WealthWise — New Invite Code Request",
+            "subject": "WealthTrack — New Invite Code Request",
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -296,12 +296,12 @@ def send_invite_request_notification(requester_name: str, requester_email: str, 
     <tr><td align="center" style="padding:40px 16px;">
       <table width="100%" style="max-width:480px;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;">
         <tr><td style="background:#0f172a;padding:20px 32px;border-radius:12px 12px 0 0;">
-          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;">WealthWise™</span>
+          <span style="color:#a78bfa;font-size:1.3rem;font-weight:700;">WealthTrack™</span>
         </td></tr>
         <tr><td style="padding:32px;">
           <h2 style="margin:0 0 12px;color:#111827;font-size:1.15rem;">New invite code request</h2>
           <p style="color:#4b5563;margin:0 0 20px;line-height:1.6;">
-            Someone has requested access to WealthWise:
+            Someone has requested access to WealthTrack:
           </p>
           <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
             <tr>
@@ -321,7 +321,7 @@ def send_invite_request_notification(requester_name: str, requester_email: str, 
           </p>
         </td></tr>
         <tr><td style="background:#f9fafb;padding:20px 32px;border-top:1px solid #e5e7eb;">
-          <p style="color:#9ca3af;font-size:0.75rem;margin:0;">WealthWise · Your data stays yours.</p>
+          <p style="color:#9ca3af;font-size:0.75rem;margin:0;">WealthTrack · Your data stays yours.</p>
         </td></tr>
       </table>
     </td></tr>

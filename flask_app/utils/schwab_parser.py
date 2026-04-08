@@ -63,7 +63,7 @@ def _parse_money(val: str):
 
 
 # ---------------------------------------------------------------------------
-# Action-type mapping  (Schwab raw → WealthWise canonical)
+# Action-type mapping  (Schwab raw → WealthTrack canonical)
 # ---------------------------------------------------------------------------
 
 _ACTION_MAP = {
