@@ -1404,9 +1404,10 @@ th {
 
 .login-brand-logo {
     display: block;
-    width: 220px;
+    width: 80%;
+    max-width: 300px;
     height: auto;
-    margin: 0 auto 16px;
+    margin: 0 auto 20px;
 }
 
 .login-container form {
