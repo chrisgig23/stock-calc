@@ -1390,7 +1390,7 @@ th {
 .login-container {
     background: white;
     border-radius: 14px;
-    padding: 36px 32px 32px;
+    padding: 28px 32px 32px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.25);
     width: 100%;
 }
@@ -1404,9 +1404,9 @@ th {
 
 .login-brand-logo {
     display: block;
-    height: 200px;
-    width: auto;
-    margin: -20px auto 4px;
+    width: 220px;
+    height: auto;
+    margin: 0 auto 16px;
 }
 
 .login-container form {
