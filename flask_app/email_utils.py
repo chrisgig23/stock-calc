@@ -34,7 +34,16 @@ def send_verification_email(to_email: str, code: str, username: str) -> bool:
         params = {
             "from": FROM_ADDRESS,
             "to": [to_email],
-            "subject": "Verify your email — WealthTrack",
+            "subject": "Verify your email for WealthTrack",
+            "text": (
+                f"Hi {username},\n\n"
+                f"Use this 6-digit code to verify {to_email} for your WealthTrack account:\n\n"
+                f"{code}\n\n"
+                "This code expires in 15 minutes.\n\n"
+                "If the message landed in spam or junk, mark it as Not Spam and add "
+                "noreply@wealthtrackapp.com to your contacts or safe senders list.\n\n"
+                "If you didn't request this, you can safely ignore this email."
+            ),
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -97,6 +106,14 @@ def send_dca_reminder_email(to_email: str, username: str) -> bool:
             "from": FROM_ADDRESS,
             "to": [to_email],
             "subject": "💰 Your monthly DCA reminder — WealthTrack",
+            "text": (
+                f"Hi {username},\n\n"
+                "This is your scheduled reminder to make your monthly dollar cost averaging "
+                "(DCA) purchase.\n\n"
+                "Open WealthTrack: https://www.wealthtrackapp.com\n\n"
+                "You're receiving this because you opted in to monthly DCA reminders. "
+                "To turn this off, visit your WealthTrack settings."
+            ),
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -170,6 +187,14 @@ def send_password_reset_notification(to_email: str, username: str, temp_password
             "from": FROM_ADDRESS,
             "to": [to_email],
             "subject": "Your WealthTrack password has been reset",
+            "text": (
+                f"Hi {username},\n\n"
+                "An administrator has reset your WealthTrack password.\n\n"
+                f"Temporary password: {temp_password}\n\n"
+                "Use it to sign in, then choose a new password.\n\n"
+                "If you didn't expect this email, please contact your account administrator "
+                "immediately."
+            ),
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -221,6 +246,14 @@ def send_password_reset_email(to_email: str, username: str, reset_url: str) -> b
             "from": FROM_ADDRESS,
             "to": [to_email],
             "subject": "Reset your WealthTrack password",
+            "text": (
+                f"Hi {username},\n\n"
+                "We received a request to reset the password for your WealthTrack account.\n\n"
+                f"Reset password: {reset_url}\n\n"
+                "This link expires in 1 hour.\n\n"
+                "If you didn't request this, you can safely ignore this email and your "
+                "password will stay the same."
+            ),
             "html": f"""
 <!DOCTYPE html>
 <html>
@@ -288,6 +321,14 @@ def send_invite_request_notification(requester_name: str, requester_email: str, 
             "from": FROM_ADDRESS,
             "to": [admin_email],
             "subject": "WealthTrack — New Invite Code Request",
+            "text": (
+                "Someone has requested access to WealthTrack.\n\n"
+                f"Name: {requester_name}\n"
+                f"Email: {requester_email}\n"
+                f"Note: {requester_note or '(none)'}\n\n"
+                "If you'd like to grant access, reply to their email with your current "
+                "invite code."
+            ),
             "html": f"""
 <!DOCTYPE html>
 <html>
