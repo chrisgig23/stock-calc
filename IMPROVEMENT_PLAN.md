@@ -199,6 +199,30 @@ Two-step CSV import flow at `/import/<account_id>`:
 
 ---
 
+## ✅ Recent Product Positioning Updates (completed 2026-04-09)
+
+- **Email verification deliverability UX**
+  - Added a clear note on the verification screen telling users to check spam/junk and add `noreply@wealthtrackapp.com` to their safe senders or contacts list.
+  - Added plain-text fallbacks for transactional emails to improve deliverability without changing the visual HTML design of the verification email.
+  - Kept the branded email design intact while improving the behind-the-scenes trust signals and user guidance.
+
+- **First-account onboarding refresh**
+  - Rebuilt `/add_account` into an adaptive page that now behaves differently based on account count.
+  - Users with **0 accounts** see a richer onboarding experience with clearer guidance, value explanation, and lightweight visuals showing what WealthTrack can do.
+  - Users with **1+ accounts** see a lighter-weight "add another account" experience with practical tips instead of a full onboarding pitch.
+
+- **Broader investor messaging**
+  - Reworked product copy across onboarding, help content, and empty states so WealthTrack reads as a portfolio tracking tool for regular investors, not just a rebalancing tool.
+  - Messaging now emphasizes account organization, holdings tracking, gain/loss visibility, transaction history, imports, and cross-account dashboard value.
+  - Allocation features are now framed as optional rather than central to the product experience.
+
+- **ETF / target-based tool clarification**
+  - Clarified that the Allocation and Purchase Planner workflows are optional strategy tools intended for ETF, index-fund, model-portfolio, or other target-based investors.
+  - Renamed or re-labeled user-facing copy around these tools so regular investors are less likely to confuse them with the app's core tracking workflows.
+  - Added explicit explanatory text on the account page, allocation pages, purchase-planning page, dashboard links, and home page so users can immediately tell when a feature is target-allocation-specific.
+
+---
+
 ## 📈 Phase 9 — Analytics & Reporting
 
 - [ ] **A1 — Realized gain/loss tracking (FIFO)**

@@ -577,6 +577,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {# ── Allocation tab ───────────────────────────────────────────────────── #}
 <div id="allocation" class="acct-tab-panel">
+    <div style="margin-bottom:14px; font-size:0.84rem; line-height:1.6; color:var(--color-text-secondary);">
+        Optional strategy tool for ETF, index-fund, or target-based investors. Use this if you invest toward planned weights. If you mainly track holdings and performance, you can safely ignore it.
+    </div>
     {% if alloc_rows %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <div class="alloc-mini-wrap">
@@ -619,9 +622,9 @@ document.addEventListener('DOMContentLoaded', function() {
     {% else %}
     <div class="empty-tab">
         <i class="fa-solid fa-chart-pie"></i>
-        <div>No allocations set yet.</div>
+        <div>No allocation targets set yet.</div>
         <div style="margin-top:8px; font-size:0.82rem;">
-            <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" style="color:var(--color-primary);">Set target allocations</a> to enable purchase suggestions.
+            <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" style="color:var(--color-primary);">Set target allocations</a> if you want ETF or target-based purchase guidance.
         </div>
     </div>
     {% endif %}
@@ -642,8 +645,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="action-card action-primary">
             <div class="action-icon"><i class="fa-solid fa-coins"></i></div>
             <div>
-                <div class="action-title">Make a Purchase</div>
-                <div class="action-desc">Invest cash and rebalance toward your targets</div>
+                <div class="action-title">Purchase Planner</div>
+                <div class="action-desc">Optional target-based tool for ETF or model-portfolio buy suggestions</div>
             </div>
         </a>
 
@@ -666,8 +669,8 @@ document.addEventListener('DOMContentLoaded', function() {
         <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="action-card">
             <div class="action-icon"><i class="fa-solid fa-sliders"></i></div>
             <div>
-                <div class="action-title">Adjust Allocations</div>
-                <div class="action-desc">Set target percentages for each holding</div>
+                <div class="action-title">Allocation Targets</div>
+                <div class="action-desc">Optional ETF or target-based planning setup for each holding</div>
             </div>
         </a>
 

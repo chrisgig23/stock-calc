@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}WealthTrack — Adjust Allocations · {{ account.account_name }}{% endblock %}
+{% block title %}WealthTrack — Allocation Targets · {{ account.account_name }}{% endblock %}
 
 {% block styles %}
 <style>
@@ -89,10 +89,10 @@ form { max-width: none; }
     <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="back-button">← Back to Allocations</a>
 </div>
 
-<h2>Adjust Allocations — {{ account.account_name }}</h2>
+<h2>Allocation Targets — {{ account.account_name }}</h2>
 <p style="color:var(--color-text-secondary); font-size:0.9em; margin-bottom:20px;">
-    Set target percentages for included holdings. Must total exactly 100%.
-    Tracked holdings (not in allocation) are shown for reference only.
+    Optional strategy setup for ETF, index-fund, or target-based investors. Set target percentages for included holdings if you want planning help for future buys or rebalancing.
+    Must total exactly 100%. Tracked holdings not included in the strategy are shown for reference only.
 </p>
 
 <!-- Live total bar -->
@@ -145,7 +145,7 @@ form { max-width: none; }
     </table>
 
     <div class="form-actions">
-        <button type="submit" class="btn-primary">Save Allocations</button>
+        <button type="submit" class="btn-primary">Save Targets</button>
         <a href="{{ url_for('portfolio.view_allocation', account_id=account.id) }}" class="btn-ghost">Cancel</a>
     </div>
 </form>

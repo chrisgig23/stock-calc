@@ -299,7 +299,7 @@
         {% endif %}
         <div class="account-card-actions">
             <a href="{{ url_for('portfolio.view_positions', account_id=card.id) }}">View Positions</a>
-            <a href="{{ url_for('portfolio.make_purchase', account_id=card.id) }}">Make a Purchase</a>
+            <a href="{{ url_for('portfolio.make_purchase', account_id=card.id) }}">Purchase Planner</a>
         </div>
     </div>
     {% endfor %}
@@ -474,8 +474,8 @@ const PALETTE = [
 <div style="text-align:center; padding:72px 0; color:var(--color-text-secondary);">
     <div style="font-size:3.5em; margin-bottom:16px;">📊</div>
     <p style="font-size:1.1em; font-weight:600; margin-bottom:8px; color:var(--color-text);">No portfolio data yet.</p>
-    <p style="margin-bottom:24px;">Add an account and import your holdings to get started.</p>
-    <a href="{{ url_for('accounts.add_account') }}" class="btn-primary">Add Account</a>
+    <p style="margin-bottom:24px;">Open one of your accounts and add holdings, import positions, or log transactions to start tracking your portfolio.</p>
+    <a href="{{ url_for('accounts.view_account', account_id=account_cards[0].id) }}" class="btn-primary">Open Account</a>
 </div>
 
 {% endif %}

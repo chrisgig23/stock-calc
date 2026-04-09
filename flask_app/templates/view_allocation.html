@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}WealthTrack — Allocations · {{ account.account_name }}{% endblock %}
+{% block title %}WealthTrack — Allocation Targets · {{ account.account_name }}{% endblock %}
 
 {% block styles %}
 <style>
@@ -98,11 +98,15 @@
     <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
 </div>
 
-<h2>Allocation — {{ account.account_name }}</h2>
+<h2>Allocation Targets — {{ account.account_name }}</h2>
+<p style="color:var(--color-text-secondary); font-size:0.9em; line-height:1.6; margin:10px 0 18px;">
+    Optional strategy view for ETF, index-fund, or target-based investors. Use it to compare target versus actual weights and guide planned buys.
+    If you mostly use WealthTrack to track holdings, gains, and account history, you can ignore this page.
+</p>
 
 <div class="action-row">
     <a href="{{ url_for('portfolio.adjust_allocation', account_id=account.id) }}" class="btn-primary">Adjust Targets</a>
-    <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="btn-ghost">Make a Purchase</a>
+    <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}" class="btn-ghost">Open Purchase Planner</a>
 </div>
 
 {% if allocations %}
@@ -152,8 +156,8 @@
             </tbody>
         </table>
         <p style="margin-top:12px; font-size:0.8em; color:var(--color-text-secondary);">
-            <span style="color:#1a7a3e;">■</span> Under target — consider buying &nbsp;
-            <span style="color:var(--color-danger);">■</span> Over target — consider trimming
+            <span style="color:#1a7a3e;">■</span> Under target - consider buying if you use target allocations &nbsp;
+            <span style="color:var(--color-danger);">■</span> Over target - consider trimming if rebalancing is part of your strategy
         </p>
     </div>
 </div>
@@ -214,7 +218,7 @@ new Chart(document.getElementById('allocChart'), {
 
 {% else %}
 <div style="text-align:center; padding:48px 0; color:var(--color-text-secondary);">
-    <p style="margin-bottom:16px;">No holdings found to display allocations.</p>
+    <p style="margin-bottom:16px;">No holdings found to compare against targets yet.</p>
     <a href="{{ url_for('import_data.import_page', account_id=account.id) }}" class="btn-primary">Import Holdings</a>
 </div>
 {% endif %}

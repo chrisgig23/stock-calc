@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}WealthTrack — Make a Purchase · {{ account.account_name }}{% endblock %}
+{% block title %}WealthTrack — Purchase Planner · {{ account.account_name }}{% endblock %}
 
 {% block styles %}
 <style>
@@ -132,7 +132,13 @@
     <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="back-button">← Back to Account</a>
 </div>
 
-<h2>Make a Purchase — {{ account.account_name }}</h2>
+<h2>Purchase Planner — {{ account.account_name }}</h2>
+<p style="color:var(--color-text-secondary); font-size:0.9em; line-height:1.6; margin:10px 0 18px;">
+    Optional strategy tool for ETF, index-fund, or target-based investors. It suggests buys based on your saved allocation targets.
+    If you just want to log a manual buy, use
+    <a href="{{ url_for('portfolio.record_transaction', account_id=account.id) }}" style="color:var(--color-primary);">Record Transaction</a>
+    instead.
+</p>
 
 {% if last_purchase_date %}
 <p style="color:var(--color-text-secondary); font-size:0.9em; margin-bottom:20px;">
@@ -144,14 +150,14 @@
 
 <!-- ── Step 1: Enter amount to invest ──────────────── -->
 <div class="invest-card">
-    <h3>How much would you like to invest?</h3>
-    <p>Enter the cash you want to deploy across your portfolio targets.</p>
+    <h3>How much cash do you want to plan across your targets?</h3>
+    <p>Enter the amount you want to allocate using your target weights. This tool is designed for planned, target-based purchases rather than one-off manual buys.</p>
     <form method="post" action="{{ url_for('portfolio.make_purchase', account_id=account.id) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="cash_value">Amount to Invest ($)</label>
         <input type="number" id="cash_value" name="cash_value"
                step="0.01" min="0.01" required placeholder="e.g. 1000.00">
-        <button type="submit" class="btn-primary">Calculate Suggestions →</button>
+        <button type="submit" class="btn-primary">Calculate Target-Based Suggestions →</button>
     </form>
 </div>
 
@@ -159,7 +165,7 @@
 
 <!-- ── Step 2: Suggestions table ───────────────────── -->
 <div class="purchase-info-bar">
-    Investing <strong style="margin: 0 4px;">${{ "%.2f"|format(cash_value) }}</strong> across your portfolio.
+    Planning how to deploy <strong style="margin: 0 4px;">${{ "%.2f"|format(cash_value) }}</strong> across your target allocation.
     <a href="{{ url_for('portfolio.make_purchase', account_id=account.id) }}"
        class="btn-ghost" style="margin-left:auto; padding:6px 14px; font-size:0.85em;">
         ← Change Amount
@@ -223,12 +229,12 @@
     </div>
 
     <p style="font-size:0.8em; color:var(--color-text-secondary); margin-bottom:16px;">
-        <span style="color:#1a7a3e;">■</span> Under target — suggested for purchase &nbsp;
-        <span style="color:var(--color-text-secondary);">■</span> Over target — no purchase suggested
+        <span style="color:#1a7a3e;">■</span> Under target - suggested for purchase based on your targets &nbsp;
+        <span style="color:var(--color-text-secondary);">■</span> Over target - no purchase suggested
     </p>
 
     <div class="form-actions">
-        <button type="submit" name="submit_purchase" class="btn-primary">Confirm Purchases</button>
+        <button type="submit" name="submit_purchase" class="btn-primary">Confirm Planned Buys</button>
         <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" class="btn-ghost">Cancel</a>
     </div>
 </form>

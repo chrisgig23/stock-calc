@@ -221,7 +221,7 @@ def make_purchase(account_id):
                     .scalar() or 0)
 
     if abs(total_target - 100) > 0.01:
-        flash("Please set desired allocation (must total 100%) before making a purchase.", 'warning')
+        flash("Please set allocation targets that total 100% before using the Purchase Planner.", 'warning')
         return redirect(url_for('portfolio.adjust_allocation', account_id=account_id))
 
     last_txn = (Transaction.query
