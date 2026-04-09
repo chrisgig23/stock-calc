@@ -476,6 +476,16 @@ body.sidebar-collapsed .main-wrapper {
     color: #C4B5FD;
 }
 
+.sidebar-privacy-link {
+    margin-top: -4px;
+    font-size: 12px;
+    color: rgba(148, 163, 184, 0.82);
+}
+
+.sidebar-privacy-link:hover {
+    color: #CBD5E1;
+}
+
 .sidebar-security-note {
     display: flex;
     align-items: center;

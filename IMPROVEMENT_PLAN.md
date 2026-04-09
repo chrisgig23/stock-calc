@@ -221,6 +221,11 @@ Two-step CSV import flow at `/import/<account_id>`:
   - Renamed or re-labeled user-facing copy around these tools so regular investors are less likely to confuse them with the app's core tracking workflows.
   - Added explicit explanatory text on the account page, allocation pages, purchase-planning page, dashboard links, and home page so users can immediately tell when a feature is target-allocation-specific.
 
+- **Privacy & Security page**
+  - Added a dedicated in-app Privacy & Security page with plain-language explanations of what WealthTrack stores, what is protected, what is not claimed, and how users should think about admin/operator access.
+  - Added a subtle `Privacy & Security` link to the authenticated sidebar footer so the page is always accessible without making it feel like a loud marketing element.
+  - Framed the product's privacy promises honestly: private from other users, protected with standard safeguards, but not currently a zero-knowledge system.
+
 ---
 
 ## 📈 Phase 9 — Analytics & Reporting

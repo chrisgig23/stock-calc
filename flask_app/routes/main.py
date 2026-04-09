@@ -131,3 +131,10 @@ def dashboard():
 def help_page():
     """Help & Guide page — overview of the app, concepts, and how-tos."""
     return render_template("help.html")
+
+
+@main_bp.route('/privacy-security')
+@login_required
+def privacy_security_page():
+    """Privacy & Security page — plain-language explanation of data handling."""
+    return render_template("privacy_security.html")
