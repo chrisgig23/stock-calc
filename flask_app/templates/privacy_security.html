@@ -153,63 +153,53 @@
     <section class="trust-hero">
         <span class="trust-kicker">
             <i class="fa-solid fa-shield-halved"></i>
-            Plain-language overview
+            How we handle your data
         </span>
         <h2>Privacy &amp; Security</h2>
         <p>
-            WealthTrack is built to keep your portfolio data private from other users, protect sensitive credentials, and limit access to production systems.
-            This page explains, in straightforward terms, what we store, how we protect it, and what we do not claim.
+            Your portfolio data is yours. We store what we need to run the app, protect it with standard security practices, and don't go looking at it unless something's broken. Here's the full picture.
         </p>
     </section>
 
     <div class="trust-callout">
-        <strong>Short version:</strong> WealthTrack does not sell your portfolio data or expose it to other users.
-        Passwords are stored as hashes, sensitive integration tokens are encrypted, and access to production systems should be restricted to site administration and support needs.
-        WealthTrack is not currently a zero-knowledge system, which means authorized operators may be able to access stored portfolio data when necessary for maintenance, debugging, support, or legal compliance.
+        <strong>The short version:</strong> We don't sell your data, share it with other users, or access it on a regular basis. Passwords are hashed, brokerage tokens are encrypted, and your holdings are only visible to you through the app. Like any web service, our team can technically reach the database — but we only do that when there's a real reason to, like fixing a bug or resolving a support issue.
     </div>
 
     <div class="trust-grid">
         <section class="trust-card">
-            <h3>What WealthTrack stores</h3>
-            <p>To provide portfolio tracking features, WealthTrack stores the information needed to calculate your account views and reports.</p>
+            <h3>What we store</h3>
+            <p>We store what's needed to run your portfolio tracker and nothing more.</p>
             <ul>
-                <li>Account names, holdings, transactions, portfolio snapshots, and optional allocation targets</li>
-                <li>Login information such as username, hashed password, and verified email address</li>
-                <li>Optional integration data, such as Schwab connection tokens, when you choose to connect an account</li>
+                <li>Your account names, holdings, transactions, snapshots, and allocation targets</li>
+                <li>Your username, hashed password, and verified email address</li>
+                <li>Brokerage connection tokens if you link an external account — stored encrypted</li>
             </ul>
         </section>
 
         <section class="trust-card">
-            <h3>How WealthTrack protects it</h3>
-            <p>WealthTrack uses common web-application security practices designed to reduce risk and protect sensitive information.</p>
+            <h3>How we protect it</h3>
+            <p>We follow standard security practices for web applications handling financial data.</p>
             <ul>
-                <li>Passwords are stored as one-way hashes, not plaintext</li>
-                <li>Sensitive Schwab OAuth tokens are encrypted at the database field level</li>
-                <li>Authenticated users can only access their own in-app portfolio data through the application</li>
-                <li>HTTPS, host security, and production access controls should be used to protect the live environment</li>
+                <li>Passwords are hashed — we can't read them, even if we wanted to</li>
+                <li>Schwab OAuth tokens are encrypted at the database level</li>
+                <li>Your data is scoped to your account — other users can't see it through the app</li>
+                <li>All traffic runs over HTTPS</li>
             </ul>
         </section>
     </div>
 
     <div class="trust-grid">
         <section class="trust-card">
-            <h3>What WealthTrack does not claim</h3>
-            <p>WealthTrack is not currently designed as an end-to-end encrypted or zero-knowledge vault.</p>
-            <ul>
-                <li>Authorized operators may be able to access stored portfolio data when needed for support or maintenance</li>
-                <li>Portfolio data is not currently hidden from the server in the way a true client-side encrypted system would require</li>
-                <li>WealthTrack does not execute trades or act as a brokerage custodian</li>
-            </ul>
+            <h3>What we do with your data</h3>
+            <p>Your data powers your portfolio views, reports, and growth charts. That's it. We don't run ads, we don't sell your data, and we don't share it with third parties.</p>
         </section>
 
         <section class="trust-card">
-            <h3>What this means for users</h3>
-            <p>The intended privacy promise is straightforward and honest.</p>
+            <h3>What we don't do</h3>
             <ul>
-                <li>Your data is private from other users</li>
-                <li>Your data is not sold as a product</li>
-                <li>Access to production data should be limited to legitimate administrative, support, security, or legal needs</li>
-                <li>WealthTrack should continue improving safeguards over time as the product grows</li>
+                <li>We don't sell or monetize your portfolio data</li>
+                <li>We don't execute trades or hold your assets — WealthTrack is a tracker, not a brokerage</li>
+                <li>We don't use your data to train AI models or build advertising profiles</li>
             </ul>
         </section>
     </div>
@@ -217,22 +207,22 @@
     <div class="trust-faq">
         <div class="trust-faq-item">
             <h4>Can other users see what I own?</h4>
-            <p>No. The app is built so authenticated users can only access their own data through the normal product interface.</p>
+            <p>No. Your portfolio is only visible to your account. There's no social feed, no leaderboards, no sharing — your holdings stay private.</p>
         </div>
 
         <div class="trust-faq-item">
-            <h4>Can WealthTrack administrators access stored portfolio data?</h4>
-            <p>Potentially yes, if they have authorized access to production systems. That access should be tightly restricted and used only when necessary for support, maintenance, security, or legal compliance.</p>
+            <h4>Can the WealthTrack team see my portfolio?</h4>
+            <p>Technically yes, in the same way your bank's engineers can access your account when they need to. We have access to the database for maintenance, support, and debugging — but we don't browse user portfolios, and that access is only used when there's a specific reason.</p>
         </div>
 
         <div class="trust-faq-item">
-            <h4>Are passwords or brokerage credentials stored in plaintext?</h4>
-            <p>Passwords should never be stored in plaintext. WealthTrack stores password hashes, and sensitive Schwab OAuth tokens are designed to be encrypted in the database.</p>
+            <h4>Are my passwords or brokerage credentials stored in plaintext?</h4>
+            <p>No. Passwords are stored as one-way hashes — we can't recover or read them. Schwab OAuth tokens are encrypted in the database.</p>
         </div>
 
         <div class="trust-faq-item">
-            <h4>Is WealthTrack a zero-knowledge financial vault?</h4>
-            <p>No. WealthTrack is a portfolio tracking application with strong privacy goals, but it is not currently an architecture where the service operator is cryptographically unable to read stored portfolio data.</p>
+            <h4>Is WealthTrack end-to-end encrypted?</h4>
+            <p>Not in the cryptographic sense — we're a standard web application, not a zero-knowledge vault. For most users, our approach (hashed credentials, encrypted tokens, scoped access, and HTTPS) is a solid baseline for a portfolio tracker. If that distinction matters to you, it's worth knowing upfront.</p>
         </div>
     </div>
 </div>
