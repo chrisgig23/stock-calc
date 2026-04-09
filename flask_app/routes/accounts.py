@@ -64,10 +64,16 @@ def view_account(account_id):
 @login_required
 def add_account():
     """Allows users to create a new account."""
+    account_count = Account.query.filter_by(user_id=current_user.id).count()
+    entered_name = ''
+
     if request.method == 'POST':
-        new_account_name = request.form['new_account']
+        entered_name = request.form.get('new_account', '').strip()
+        new_account_name = entered_name
         existing_account = Account.query.filter_by(user_id=current_user.id, account_name=new_account_name).first()
-        if existing_account:
+        if not new_account_name:
+            flash('Please enter an account name.', 'danger')
+        elif existing_account:
             flash('Account name already exists.', 'danger')
         else:
             new_account = Account(account_name=new_account_name, user_id=current_user.id)
@@ -75,7 +81,12 @@ def add_account():
             db.session.commit()
             flash('Account added successfully!', 'success')
             return redirect(url_for('accounts.view_account', account_id=new_account.id))
-    return render_template('add_account.html')
+    return render_template(
+        'add_account.html',
+        account_count=account_count,
+        is_first_account=(account_count == 0),
+        entered_name=entered_name,
+    )
 
 # @accounts_bp.route('/remove_account/<int:account_id>', methods=['POST'])
 # @login_required

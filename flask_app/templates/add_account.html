@@ -2,12 +2,631 @@
 
 {% block title %}WealthTrack — Add Account{% endblock %}
 
+{% block styles %}
+<style>
+.add-account-shell {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.add-account-layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 460px) minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+}
+
+.add-account-card,
+.add-account-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 22px;
+    box-shadow: var(--shadow-md);
+}
+
+.add-account-card {
+    padding: 30px;
+    position: sticky;
+    top: 28px;
+}
+
+.account-form-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #EEF2FF;
+    color: #4338CA;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.add-account-card h1 {
+    margin: 18px 0 10px;
+    font-size: 2rem;
+    line-height: 1.08;
+    letter-spacing: -0.04em;
+    color: var(--color-text);
+}
+
+.add-account-lead {
+    margin: 0 0 24px;
+    font-size: 0.98rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+}
+
+.account-name-examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 0;
+}
+
+.account-chip {
+    border: 1px solid #C7D2FE;
+    background: #F8FAFF;
+    color: #4338CA;
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.add-account-form {
+    margin: 0;
+    max-width: none;
+    padding: 0;
+    box-shadow: none;
+    border: 0;
+    background: transparent;
+}
+
+.add-account-form label {
+    margin-top: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--color-text);
+}
+
+.add-account-form input[type="text"] {
+    margin-top: 8px;
+    height: 52px;
+    border-radius: 14px;
+    padding: 0 14px;
+    font-size: 1rem;
+}
+
+.form-help {
+    margin: 10px 0 0;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.form-actions .btn-primary {
+    min-width: 180px;
+    height: 46px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.form-subtle-note {
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+}
+
+.add-account-panel {
+    padding: 26px;
+    overflow: hidden;
+}
+
+.welcome-panel {
+    background:
+        radial-gradient(circle at top right, rgba(99,102,241,0.18), transparent 34%),
+        linear-gradient(145deg, #FFFFFF 0%, #F8FAFC 100%);
+}
+
+.mini-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0F766E;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.panel-title {
+    margin: 14px 0 10px;
+    font-size: 1.6rem;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-text);
+}
+
+.panel-copy {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    max-width: 60ch;
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 18px;
+    margin-top: 24px;
+}
+
+.preview-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.preview-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.preview-title strong {
+    font-size: 0.92rem;
+    color: var(--color-text);
+}
+
+.preview-title span {
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+}
+
+.preview-badge {
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: #ECFDF5;
+    color: #047857;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.metric-stack {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.metric-pill {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 10px;
+}
+
+.metric-pill span {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 6px;
+}
+
+.metric-pill strong {
+    font-size: 1rem;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+}
+
+.allocation-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.allocation-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 52px;
+    gap: 10px;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+.allocation-track {
+    height: 10px;
+    border-radius: 999px;
+    background: #E2E8F0;
+    overflow: hidden;
+}
+
+.allocation-fill {
+    height: 100%;
+    border-radius: inherit;
+}
+
+.fill-stocks { width: 52%; background: linear-gradient(90deg, #6366F1, #818CF8); }
+.fill-cash { width: 18%; background: linear-gradient(90deg, #10B981, #34D399); }
+.fill-bonds { width: 30%; background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+
+.preview-side {
+    display: grid;
+    gap: 14px;
+}
+
+.feature-card {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 16px;
+}
+
+.feature-card i {
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    background: #EEF2FF;
+    color: #4F46E5;
+}
+
+.feature-card strong {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--color-text);
+}
+
+.feature-card p {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+}
+
+.step-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 18px;
+}
+
+.step-number {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #E0E7FF;
+    color: #4338CA;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.step-card h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: var(--color-text);
+}
+
+.step-card p {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+.compact-tips {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+}
+
+.compact-tip {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 16px;
+}
+
+.compact-tip i {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #EEF2FF;
+    color: #4F46E5;
+}
+
+.compact-tip strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--color-text);
+    font-size: 0.92rem;
+}
+
+.compact-tip p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+@media (max-width: 980px) {
+    .add-account-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .add-account-card {
+        position: static;
+    }
+
+    .preview-grid,
+    .steps-grid,
+    .compact-tips {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .add-account-card,
+    .add-account-panel {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .add-account-card h1 {
+        font-size: 1.65rem;
+    }
+
+    .metric-stack {
+        grid-template-columns: 1fr;
+    }
+
+    .allocation-row {
+        grid-template-columns: 48px 1fr 44px;
+        gap: 8px;
+    }
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<h2>Add a New Account</h2>
-<form method="post" action="{{ url_for('accounts.add_account') }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label for="new_account">Account Name:</label>
-    <input type="text" id="new_account" name="new_account" required>
-    <input type="submit" value="Add Account">
-</form>
+<div class="add-account-shell">
+    <div class="add-account-layout">
+        <section class="add-account-card">
+            <div class="account-form-badge">
+                <i class="fa-solid {% if is_first_account %}fa-sparkles{% else %}fa-layer-group{% endif %}"></i>
+                {% if is_first_account %}First portfolio step{% else %}Add another account{% endif %}
+            </div>
+
+            <h1>
+                {% if is_first_account %}
+                Start by creating your first account
+                {% else %}
+                Add a new account to your portfolio
+                {% endif %}
+            </h1>
+
+            <p class="add-account-lead">
+                {% if is_first_account %}
+                Give this account a simple name like your brokerage, IRA, or 401(k). Once it is created, you can add holdings, record purchases, and watch everything roll up into your dashboard.
+                {% else %}
+                Keep separate accounts for different buckets of money while still seeing everything together in WealthTrack. A clear name now makes the rest of the workflow much easier later.
+                {% endif %}
+            </p>
+
+            <form method="post" action="{{ url_for('accounts.add_account') }}" class="add-account-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <label for="new_account">Account name</label>
+                <input
+                    type="text"
+                    id="new_account"
+                    name="new_account"
+                    required
+                    maxlength="50"
+                    placeholder="{% if is_first_account %}Fidelity Roth IRA{% else %}Charles Schwab Taxable{% endif %}"
+                    value="{{ entered_name or '' }}"
+                >
+
+                <p class="form-help">
+                    {% if is_first_account %}
+                    Good examples: the institution plus the account type, like “Vanguard Brokerage” or “401(k)”.
+                    {% else %}
+                    Tip: use the real-world account name you recognize fastest when reviewing positions and transactions.
+                    {% endif %}
+                </p>
+
+                <div class="account-name-examples">
+                    <span class="account-chip">Fidelity Roth IRA</span>
+                    <span class="account-chip">Schwab Brokerage</span>
+                    <span class="account-chip">401(k)</span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        <i class="fa-solid fa-plus"></i>
+                        Create account
+                    </button>
+                    <span class="form-subtle-note">
+                        {% if is_first_account %}
+                        You can add more accounts any time.
+                        {% else %}
+                        You currently have {{ account_count }} account{% if account_count != 1 %}s{% endif %}.
+                        {% endif %}
+                    </span>
+                </div>
+            </form>
+        </section>
+
+        {% if is_first_account %}
+        <section class="add-account-panel welcome-panel">
+            <span class="mini-kicker">
+                <i class="fa-solid fa-chart-line"></i>
+                What WealthTrack helps with
+            </span>
+            <h2 class="panel-title">Turn one account into a full portfolio view</h2>
+            <p class="panel-copy">
+                WealthTrack helps you organize your accounts, monitor your allocation, and keep a running view of how your portfolio is growing over time. The first account unlocks the rest of that experience.
+            </p>
+
+            <div class="preview-grid">
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-title">
+                            <strong>Your dashboard</strong>
+                            <span>Everything rolls up here once data is added</span>
+                        </div>
+                        <span class="preview-badge">Live view</span>
+                    </div>
+
+                    <div class="metric-stack">
+                        <div class="metric-pill">
+                            <span>Total value</span>
+                            <strong>$124.8k</strong>
+                        </div>
+                        <div class="metric-pill">
+                            <span>Gain</span>
+                            <strong>+8.4%</strong>
+                        </div>
+                        <div class="metric-pill">
+                            <span>Accounts</span>
+                            <strong>3</strong>
+                        </div>
+                    </div>
+
+                    <div class="allocation-bars">
+                        <div class="allocation-row">
+                            <span>Stocks</span>
+                            <div class="allocation-track"><div class="allocation-fill fill-stocks"></div></div>
+                            <span>52%</span>
+                        </div>
+                        <div class="allocation-row">
+                            <span>Cash</span>
+                            <div class="allocation-track"><div class="allocation-fill fill-cash"></div></div>
+                            <span>18%</span>
+                        </div>
+                        <div class="allocation-row">
+                            <span>Bonds</span>
+                            <div class="allocation-track"><div class="allocation-fill fill-bonds"></div></div>
+                            <span>30%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-side">
+                    <div class="feature-card">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <strong>Keep accounts separate</strong>
+                        <p>Name each brokerage, retirement, or cash account individually and review them on their own when needed.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fa-solid fa-bullseye"></i>
+                        <strong>Track your allocation</strong>
+                        <p>See whether your money is matching the targets you want across the entire portfolio.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fa-solid fa-receipt"></i>
+                        <strong>Record activity over time</strong>
+                        <p>Log purchases and imports so your dashboard becomes more useful every time you update it.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Create the account</h3>
+                    <p>Use a name you would instantly recognize, like the institution and account type.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Add holdings or transactions</h3>
+                    <p>Populate the account with what you own so WealthTrack can start calculating portfolio data.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Use the dashboard</h3>
+                    <p>Review totals, allocation, and performance from one clean place instead of juggling spreadsheets.</p>
+                </div>
+            </div>
+        </section>
+        {% else %}
+        <section class="add-account-panel">
+            <span class="mini-kicker">
+                <i class="fa-solid fa-briefcase"></i>
+                Quick guidance
+            </span>
+            <h2 class="panel-title">Keep your portfolio organized without extra clutter</h2>
+            <p class="panel-copy">
+                This page stays intentionally lightweight for existing users. Add the account, then jump right back into tracking. If you want a clean setup, these are the main things to keep in mind.
+            </p>
+
+            <div class="compact-tips">
+                <div class="compact-tip">
+                    <i class="fa-solid fa-signature"></i>
+                    <div>
+                        <strong>Name it clearly</strong>
+                        <p>Use labels like “Roth IRA”, “Brokerage”, or the institution plus account type.</p>
+                    </div>
+                </div>
+                <div class="compact-tip">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <div>
+                        <strong>It still rolls up</strong>
+                        <p>Each account stays separate, but WealthTrack combines them on the dashboard automatically.</p>
+                    </div>
+                </div>
+                <div class="compact-tip">
+                    <i class="fa-solid fa-arrow-up-right-dots"></i>
+                    <div>
+                        <strong>Next step after this</strong>
+                        <p>Create the account, then add holdings or transactions so the totals and charts start reflecting it.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
