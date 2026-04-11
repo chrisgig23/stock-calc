@@ -1,4 +1,4 @@
-# WealthWise — Site Improvement Plan
+# WealthTrack — Site Improvement Plan
 
 > Living document. Check off items as they are completed. Work through one item at a time in the order defined in the Master Checklist at the bottom.
 
@@ -228,6 +228,25 @@ Two-step CSV import flow at `/import/<account_id>`:
 
 ---
 
+## 🔍 Competitive Research Summary (2026-04)
+
+Research across Copilot, Empower, Monarch Money, YNAB, Sharesight, and Kubera identified the following consistent pain points and market gaps. Items marked *(new)* below are net-new features added to the roadmap as a result.
+
+**Universal pain points across all competitors:**
+- Unreliable bank/brokerage sync (Plaid outages, accounts unlinking) — WealthTrack's manual-entry model is a quiet advantage here
+- Aggressive upselling / sales calls once net worth is visible (Empower especially)
+- Investment tracking is an afterthought in budgeting apps (Copilot, YNAB, Monarch treat it as a balance aggregator)
+- Transaction recategorization rules are hidden and uneditable by users
+
+**Confirmed gaps that WealthTrack can own:**
+- No mainstream app does tax-aware tracking cleanly for US DIY investors (cost basis, realized vs unrealized, short vs long-term, loss harvesting)
+- Nobody surfaces meaningful multi-account performance comparison
+- Almost no app offers forward-looking portfolio projections
+- Allocation drift alerts exist nowhere in the market despite allocation tracking being common
+- The "active self-directed investor with multiple brokerages" is underserved — too advanced for YNAB, too small for Empower, too expensive for Kubera ($249/yr)
+
+---
+
 ## 📈 Phase 9 — Analytics & Reporting
 
 - [ ] **A1 — Realized gain/loss tracking (FIFO)**
@@ -289,6 +308,30 @@ Two-step CSV import flow at `/import/<account_id>`:
 
 - [ ] **M3 — Admin billing dashboard**
   - Show active subscribers, MRR, churn in the admin panel. Stripe dashboard covers most of this but a lightweight in-app view is useful.
+
+---
+
+## 🎯 Phase 13 — Competitive Differentiators
+
+Features identified through competitive research (2026-04) that directly address gaps in the market. These are the items most likely to make WealthTrack feel meaningfully better than existing tools for the self-directed investor.
+
+- [x] **C1 — "Positions at a loss" quick view (Tax-Loss Harvesting helper)** ✅
+  - Panel on the Positions page showing only holdings currently below cost basis, sorted by largest loss first. Shows total harvestable loss, estimated tax savings at 15% and 20% capital gains rates, per-holding breakdown, and a "Record Sell" quick-action link for each. Includes wash-sale rule disclaimer. Only visible when at least one position is at a loss.
+
+- [ ] **C2 — Realized gain/loss tax-year summary (depends on A1)**
+  - A dedicated section on the Reports page (or standalone page) showing: total short-term gains, total long-term gains, total realized losses, and net taxable gain for a selected calendar year. Formatted to mirror what ends up on Schedule D. Currently no mainstream portfolio tracker does this simply for US investors — Sharesight does it well for AU/NZ/CA but feels clunky for US users. Depends on FIFO lot tracking in A1.
+
+- [ ] **C3 — Allocation drift alerts**
+  - Let users set a drift threshold per account (e.g., "alert me if any position moves more than 3% from its target allocation"). Send an in-app notification and/or email when the threshold is breached. The allocation model is already built — this is mostly a scheduled check + notification layer. No competitor does this for stock-level portfolios. Pairs naturally with the DCA email reminder system already in place.
+
+- [ ] **C4 — Multi-account performance comparison**
+  - A dashboard view that places all accounts side-by-side: total return %, unrealized G/L, cost basis, and market value for each. Lets users instantly see which account strategy is winning. Power-user retention feature — the kind of thing that makes people say "I can't leave, I'd lose all my history." Could live as a tab on the main dashboard.
+
+- [ ] **C5 — Projected portfolio value chart**
+  - A forward-looking chart showing estimated portfolio value at a user-defined future date, based on a configurable assumed annual return rate (default 7%). Show optimistic/base/conservative bands. No budgeting or portfolio app does this cleanly for stock portfolios. YNAB users specifically call out the absence of forward-looking projections as their biggest frustration with the category. Could live on the Reports page or Dashboard.
+
+- [ ] **C6 — Shareable account snapshot (read-only link)**
+  - Let users generate a time-limited, read-only shareable link to their portfolio summary (no transaction history, just current positions and performance). Useful for sharing with a financial advisor, spouse, or accountant. Monarch and Copilot have joint/shared modes but they require both parties to have accounts — a simple read-only link is far easier. Important: no login required for the recipient, and the link expires.
 
 ---
 
@@ -376,6 +419,14 @@ Work through these one at a time. Each is a discrete, shippable unit.
 50. `M1` — Stripe subscription integration
 51. `M2` — Usage limits enforcement by tier
 52. `M3` — Admin billing dashboard
+
+### Phase 13 — Competitive Differentiators
+53. ~~`C1`~~ ✅ "Positions at a loss" quick view / tax-loss harvesting helper
+54. `C2` — Realized gain/loss tax-year summary for Schedule D *(depends on A1)*
+55. `C3` — Allocation drift alerts (threshold-based, email or in-app)
+56. `C4` — Multi-account performance comparison view
+57. `C5` — Projected portfolio value chart (forward-looking, configurable return rate)
+58. `C6` — Shareable read-only account snapshot link
 
 ---
 

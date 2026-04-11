@@ -38,6 +38,13 @@ def view_positions(account_id):
     included_mv         = sum(h.market_value for h in holdings if h.isincluded)
     tracked_mv          = sum(h.market_value for h in holdings if not h.isincluded)
 
+    # Tax-loss harvesting: holdings with a known unrealized loss, sorted largest loss first
+    loss_positions = sorted(
+        [h for h in holdings if h.unrealized_gain is not None and h.unrealized_gain < 0],
+        key=lambda h: h.unrealized_gain
+    )
+    total_harvestable_loss = sum(h.unrealized_gain for h in loss_positions)
+
     return render_template(
         'view_positions.html',
         account=account,
@@ -48,6 +55,8 @@ def view_positions(account_id):
         total_unrealized=total_unrealized,
         included_market_value=included_mv,
         tracked_market_value=tracked_mv,
+        loss_positions=loss_positions,
+        total_harvestable_loss=total_harvestable_loss,
     )
 
 
