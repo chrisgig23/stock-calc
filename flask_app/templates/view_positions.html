@@ -66,42 +66,73 @@
 .na-dash { color: var(--color-text-secondary); }
 
 /* ── Tax-Loss Harvesting panel ── */
-.harvest-panel {
-    background: #FFFBEB;
-    border: 1px solid #FCD34D;
-    border-radius: 14px;
-    padding: 20px 22px;
-    margin-bottom: 24px;
-}
-.harvest-header {
+.harvest-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 14px;
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    border-radius: 12px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
 }
-.harvest-title {
+.harvest-toggle:hover { background: #FEF3C7; }
+.harvest-toggle-left {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 0.95em;
+    gap: 10px;
+}
+.harvest-toggle-icon {
+    font-size: 0.9em;
     color: #92400E;
 }
-.harvest-subtitle {
+.harvest-toggle-label {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: #92400E;
+}
+.harvest-toggle-sub {
+    font-size: 0.8em;
+    color: #B45309;
+    margin-left: 4px;
+}
+.harvest-toggle-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: 0.82em;
     color: #B45309;
-    margin-top: 2px;
 }
+.harvest-chevron {
+    font-size: 0.75em;
+    color: #92400E;
+    transition: transform 0.2s;
+}
+.harvest-chevron.open { transform: rotate(180deg); }
+
+.harvest-panel {
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    padding: 18px 22px 20px;
+    margin-top: -16px;
+    margin-bottom: 24px;
+    display: none;
+}
+.harvest-panel.open { display: block; }
 .harvest-totals {
     display: flex;
     gap: 18px;
     flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #FCD34D;
 }
-.harvest-stat {
-    text-align: right;
-}
+.harvest-stat { }
 .harvest-stat .hlabel {
     font-size: 0.75em;
     text-transform: uppercase;
@@ -142,11 +173,57 @@
 .harvest-table .savings-val { color: #059669; font-weight: 500; }
 .harvest-action { white-space: nowrap; }
 .harvest-note {
-    margin-top: 12px;
+    margin-top: 14px;
     font-size: 0.78em;
     color: #B45309;
 }
 .harvest-note i { margin-right: 4px; }
+
+/* ── Harvest explainer modal ── */
+.harvest-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.harvest-modal-backdrop.open { display: flex; }
+.harvest-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px 32px;
+    max-width: 520px;
+    width: 92%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    max-height: 85vh;
+    overflow-y: auto;
+}
+.harvest-modal h3 {
+    margin: 0 0 6px;
+    font-size: 1.1em;
+    color: var(--color-text);
+}
+.harvest-modal p {
+    font-size: 0.88em;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    margin: 0 0 14px;
+}
+.harvest-modal .modal-section {
+    font-size: 0.82em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin: 18px 0 6px;
+}
+.harvest-modal .modal-close {
+    display: block;
+    margin-top: 20px;
+    text-align: right;
+}
 
 .section-header {
     display: flex;
@@ -294,30 +371,36 @@
 
 <!-- Tax-Loss Harvesting Panel -->
 {% if loss_positions %}
-<div class="harvest-panel">
-    <div class="harvest-header">
-        <div>
-            <div class="harvest-title">
-                <i class="fa-solid fa-scissors"></i>
-                Tax-Loss Harvesting Opportunities
-            </div>
-            <div class="harvest-subtitle">
-                {{ loss_positions | length }} position{{ 's' if loss_positions | length != 1 }} currently below cost basis
-            </div>
+<div id="harvest-toggle" class="harvest-toggle" onclick="toggleHarvest()">
+    <div class="harvest-toggle-left">
+        <i class="fa-solid fa-scissors harvest-toggle-icon"></i>
+        <span class="harvest-toggle-label">Tax-Loss Harvesting</span>
+        <span class="harvest-toggle-sub">
+            {{ loss_positions | length }} position{{ 's' if loss_positions | length != 1 }} at a loss
+            &nbsp;·&nbsp; ${{ "{:,.2f}".format(total_harvestable_loss) }} harvestable
+        </span>
+    </div>
+    <div class="harvest-toggle-right">
+        <span onclick="event.stopPropagation(); openHarvestModal();" style="text-decoration:underline; cursor:pointer;">
+            What is this?
+        </span>
+        <i id="harvest-chevron" class="fa-solid fa-chevron-down harvest-chevron"></i>
+    </div>
+</div>
+
+<div id="harvest-panel" class="harvest-panel">
+    <div class="harvest-totals">
+        <div class="harvest-stat">
+            <div class="hlabel">Total Harvestable Loss</div>
+            <div class="hvalue">${{ "{:,.2f}".format(total_harvestable_loss) }}</div>
         </div>
-        <div class="harvest-totals">
-            <div class="harvest-stat">
-                <div class="hlabel">Total Harvestable Loss</div>
-                <div class="hvalue">${{ "{:,.2f}".format(total_harvestable_loss) }}</div>
-            </div>
-            <div class="harvest-stat">
-                <div class="hlabel">Est. Savings @ 15%</div>
-                <div class="hvalue" style="color:#059669;">${{ "{:,.2f}".format(total_harvestable_loss * 0.15) }}</div>
-            </div>
-            <div class="harvest-stat">
-                <div class="hlabel">Est. Savings @ 20%</div>
-                <div class="hvalue" style="color:#059669;">${{ "{:,.2f}".format(total_harvestable_loss * 0.20) }}</div>
-            </div>
+        <div class="harvest-stat">
+            <div class="hlabel">Est. Tax Savings @ 15%</div>
+            <div class="hvalue" style="color:#059669;">${{ "{:,.2f}".format(total_harvestable_loss * 0.15) }}</div>
+        </div>
+        <div class="harvest-stat">
+            <div class="hlabel">Est. Tax Savings @ 20%</div>
+            <div class="hvalue" style="color:#059669;">${{ "{:,.2f}".format(total_harvestable_loss * 0.20) }}</div>
         </div>
     </div>
 
@@ -365,11 +448,49 @@
 
     <p class="harvest-note">
         <i class="fa-solid fa-circle-info"></i>
-        Estimated savings assume capital gains rates and do not account for your specific tax situation.
+        Estimated savings assume long-term capital gains rates and do not account for your specific tax situation.
         Repurchasing the same or substantially identical security within 30 days triggers the wash-sale rule and disqualifies the deduction.
         Consult a tax advisor before acting.
     </p>
 </div>
+
+<!-- What is this? Modal -->
+<div id="harvest-modal" class="harvest-modal-backdrop" onclick="if(event.target===this)closeHarvestModal()">
+    <div class="harvest-modal">
+        <h3><i class="fa-solid fa-scissors" style="color:#92400E;margin-right:8px;"></i>Tax-Loss Harvesting</h3>
+        <p>Tax-loss harvesting is a strategy where you sell investments that are currently worth less than you paid for them. The realized loss can offset capital gains elsewhere in your portfolio — reducing the taxes you owe for the year.</p>
+
+        <div class="modal-section">How to read this table</div>
+        <p><strong>Unrealized Loss</strong> — the dollar amount you're currently down on this position based on your average cost per share versus today's price. No taxes are owed until you actually sell.<br><br>
+        <strong>Est. Tax Savings</strong> — a rough estimate of the tax benefit if you harvested this loss. The 15% and 20% columns reflect the two most common long-term capital gains tax brackets. Your actual rate depends on your income and filing status.<br><br>
+        <strong>Record Sell</strong> — logs the sale in WealthTrack. You'll still need to execute the actual trade through your brokerage.</p>
+
+        <div class="modal-section">The wash-sale rule</div>
+        <p>The IRS disallows the deduction if you buy the same or a "substantially identical" security within 30 days before or after the sale. For example, you can't sell VOO and immediately buy VOOG to stay invested. A common workaround is to buy a similar-but-different ETF for 31+ days before switching back.</p>
+
+        <div class="modal-section">When does this make sense?</div>
+        <p>It's most useful when you have realized gains elsewhere to offset, or when you're in a high tax bracket. It's generally not worth disrupting a long-term position for a small loss. Always consult a tax advisor before acting — everyone's situation is different.</p>
+
+        <div class="modal-close">
+            <button class="btn-primary" onclick="closeHarvestModal()">Got it</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleHarvest() {
+    var panel   = document.getElementById('harvest-panel');
+    var chevron = document.getElementById('harvest-chevron');
+    panel.classList.toggle('open');
+    chevron.classList.toggle('open');
+}
+function openHarvestModal() {
+    document.getElementById('harvest-modal').classList.add('open');
+}
+function closeHarvestModal() {
+    document.getElementById('harvest-modal').classList.remove('open');
+}
+</script>
 {% endif %}
 
 <!-- Summary Cards -->
