@@ -308,15 +308,15 @@
         <div class="harvest-totals">
             <div class="harvest-stat">
                 <div class="hlabel">Total Harvestable Loss</div>
-                <div class="hvalue">${{ "{:,.2f}".format(total_harvestable_loss | abs) }}</div>
+                <div class="hvalue">${{ "{:,.2f}".format(total_harvestable_loss) }}</div>
             </div>
             <div class="harvest-stat">
                 <div class="hlabel">Est. Savings @ 15%</div>
-                <div class="hvalue" style="color:#059669;">${{ "{:,.2f}".format((total_harvestable_loss | abs) * 0.15) }}</div>
+                <div class="hvalue" style="color:#059669;">${{ "{:,.2f}".format(total_harvestable_loss * 0.15) }}</div>
             </div>
             <div class="harvest-stat">
                 <div class="hlabel">Est. Savings @ 20%</div>
-                <div class="hvalue" style="color:#059669;">${{ "{:,.2f}".format((total_harvestable_loss | abs) * 0.20) }}</div>
+                <div class="hvalue" style="color:#059669;">${{ "{:,.2f}".format(total_harvestable_loss * 0.20) }}</div>
             </div>
         </div>
     </div>
@@ -348,10 +348,10 @@
                     {% endif %}
                 </td>
                 <td>${{ "%.2f"|format(h.current_price) }}</td>
-                <td class="loss-val">${{ "{:,.2f}".format(h.unrealized_gain | abs) }}</td>
-                <td class="loss-val">{{ "%.2f"|format(h.unrealized_gain_pct | abs) }}%</td>
-                <td class="savings-val">${{ "{:,.2f}".format((h.unrealized_gain | abs) * 0.15) }}</td>
-                <td class="savings-val">${{ "{:,.2f}".format((h.unrealized_gain | abs) * 0.20) }}</td>
+                <td class="loss-val">${{ "{:,.2f}".format(-h.unrealized_gain) }}</td>
+                <td class="loss-val">{{ "%.2f"|format(-h.unrealized_gain_pct) }}%</td>
+                <td class="savings-val">${{ "{:,.2f}".format((-h.unrealized_gain) * 0.15) }}</td>
+                <td class="savings-val">${{ "{:,.2f}".format((-h.unrealized_gain) * 0.20) }}</td>
                 <td class="harvest-action">
                     <a href="{{ url_for('portfolio.record_transaction', account_id=account.id, ticker=h.ticker, action='sell') }}"
                        class="btn-ghost" style="font-size:0.8em; padding:4px 10px;">

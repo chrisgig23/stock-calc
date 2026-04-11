@@ -43,7 +43,7 @@ def view_positions(account_id):
         [h for h in holdings if h.unrealized_gain is not None and h.unrealized_gain < 0],
         key=lambda h: h.unrealized_gain
     )
-    total_harvestable_loss = sum(h.unrealized_gain for h in loss_positions)
+    total_harvestable_loss = abs(sum(h.unrealized_gain for h in loss_positions))
 
     return render_template(
         'view_positions.html',
