@@ -57,6 +57,7 @@ def view_positions(account_id):
         tracked_market_value=tracked_mv,
         loss_positions=loss_positions,
         total_harvestable_loss=total_harvestable_loss,
+        available_cash=0,
     )
 
 
