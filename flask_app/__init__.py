@@ -99,7 +99,8 @@ def load_user(user_id):
 
 # ── Security gates (applied in priority order) ────────────────────────────────
 # Gate 1: forced password change
-_ALLOWED_WHILE_MUST_CHANGE = {'auth.reset_password', 'auth.logout', 'static'}
+_ALLOWED_WHILE_MUST_CHANGE = {'auth.reset_password', 'auth.logout', 'static',
+                               'main.service_worker', 'main.manifest'}
 
 # Gate 2: email not yet verified — send to email capture / OTP flow
 _ALLOWED_WITHOUT_EMAIL = {
@@ -108,6 +109,8 @@ _ALLOWED_WITHOUT_EMAIL = {
     'auth.resend_code',
     'auth.logout',
     'static',
+    'main.service_worker',
+    'main.manifest',
 }
 
 @app.before_request

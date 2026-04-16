@@ -1,12 +1,34 @@
-from flask import Blueprint, redirect, url_for, render_template, request
+from flask import Blueprint, redirect, url_for, render_template, request, send_from_directory, current_app
 from flask_login import current_user, login_required
 from flask_app.models import Account, PortfolioSnapshot
 from flask_app.utils.price_cache import get_prices
 from collections import defaultdict
 from datetime import date
+import os
 import json
 
 main_bp = Blueprint('main', __name__)
+
+
+# ── PWA assets served from root scope ────────────────────────────────────────
+
+@main_bp.route('/sw.js')
+def service_worker():
+    """Serve the service worker from root so it can control all pages."""
+    static_dir = os.path.join(current_app.root_path, 'static')
+    response = send_from_directory(static_dir, 'sw.js')
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Service-Worker-Allowed'] = '/'
+    return response
+
+
+@main_bp.route('/manifest.json')
+def manifest():
+    """Serve the web app manifest from root."""
+    static_dir = os.path.join(current_app.root_path, 'static')
+    response = send_from_directory(static_dir, 'manifest.json')
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
 
 
 @main_bp.route('/')

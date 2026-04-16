@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-8170829086367629">
     <title>{% block title %}WealthTrack{% endblock %}</title>
+
+    <!-- PWA manifest & theme -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0F172A">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- iOS PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WealthTrack">
+    <link rel="apple-touch-icon" href="{{ asset_url('images/icon-180.png') }}">
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="{{ asset_url('styles.css') }}">
@@ -13,6 +25,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {% block styles %}{% endblock %}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8170829086367629" crossorigin="anonymous"></script>
+
+    <!-- Register service worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .catch(function() { /* silently ignore registration failures */ });
+        });
+      }
+    </script>
 </head>
 <body class="{% if current_user.is_authenticated %}app-layout{% else %}auth-layout{% endif %} {% block extra_body_class %}{% endblock %}">
 

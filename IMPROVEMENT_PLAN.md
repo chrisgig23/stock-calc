@@ -274,8 +274,8 @@ Research across Copilot, Empower, Monarch Money, YNAB, Sharesight, and Kubera id
 - [ ] **U3 — Cash balance tracking**
   - `cash_balance` already exists on PortfolioSnapshot but isn't shown anywhere. Add cash as a line item on the account detail page and positions page. Let users manually set/update their cash balance per account. Include cash in total portfolio value calculations and allocation charts.
 
-- [ ] **U4 — PWA / mobile installability**
-  - Add a Web App Manifest and service worker so the app can be installed on iOS/Android home screen. Mostly a config addition given the app is already mobile-responsive.
+- [x] **U4 — PWA / mobile installability** ✅
+  - Web App Manifest at `/manifest.json` (name, icons, theme color, start_url, standalone display). Service worker at `/sw.js` with cache-first for static assets, network-first for pages, and an offline fallback screen. Apple PWA meta tags added to base.html. Icons generated at 180, 192, and 512px. App is now installable to iOS/Android home screen via Safari/Chrome "Add to Home Screen".
 
 ---
 
@@ -406,7 +406,7 @@ Work through these one at a time. Each is a discrete, shippable unit.
 41. `U1` — Dark mode
 42. `U2` — Onboarding flow for new users
 43. `U3` — Cash balance tracking
-44. `U4` — PWA / mobile installability
+44. ~~`U4`~~ ✅ PWA / mobile installability
 
 ### Phase 11 — Integrations & Data Import
 45. `I1` — Fidelity CSV importer
