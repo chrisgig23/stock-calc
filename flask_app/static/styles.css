@@ -1719,6 +1719,35 @@ body.dark-mode p { color: var(--color-text-secondary); }
 /* Stat cards on dashboard */
 /* (stat-card dark mode rules defined above) */
 
+/* ── Admin pages: panel cards, manage-users card ─────────────────────────── */
+body.dark-mode .panel-card,
+body.dark-mode .manage-users-card {
+    background: #1E293B !important;
+    border-color: var(--color-border);
+}
+body.dark-mode .panel-card-header {
+    background: #1E293B !important;
+    border-bottom-color: var(--color-border);
+}
+body.dark-mode .manage-users-text h3 { color: var(--color-text); }
+body.dark-mode .manage-users-text p  { color: var(--color-text-secondary); }
+body.dark-mode .add-code-form,
+body.dark-mode .user-toolbar {
+    background: #162032 !important;
+    border-color: var(--color-border);
+}
+body.dark-mode .add-code-form input,
+body.dark-mode .user-toolbar input,
+body.dark-mode .user-toolbar select {
+    background: #1E293B !important;
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+body.dark-mode .invite-codes-table td,
+body.dark-mode .users-table td { border-bottom-color: var(--color-border); }
+body.dark-mode .invite-codes-table tbody tr:hover,
+body.dark-mode .users-table tbody tr:hover { background: #162032; }
+
 /* Dark mode toggle button in sidebar */
 .dark-mode-toggle {
     display: flex;

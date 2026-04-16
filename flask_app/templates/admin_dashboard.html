@@ -45,7 +45,7 @@
     margin-bottom: 24px;
 }
 .stat-card {
-    background: #fff;
+    background: var(--color-surface, #fff);
     border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 18px 20px;
@@ -68,7 +68,7 @@
 
 /* ── Panel card ──────────────────────────────────────────────────────── */
 .panel-card {
-    background: #fff;
+    background: var(--color-surface, #fff);
     border: 1px solid var(--color-border);
     border-radius: 12px;
     box-shadow: var(--shadow-sm);
@@ -108,7 +108,7 @@
 
 /* ── Manage Users card ───────────────────────────────────────────────── */
 .manage-users-card {
-    background: #fff;
+    background: var(--color-surface, #fff);
     border: 1px solid var(--color-border);
     border-radius: 12px;
     box-shadow: var(--shadow-sm);
@@ -212,13 +212,13 @@
 }
 .invite-codes-table th {
     padding: 9px 16px;
-    text-align: left;
+    text-align: left !important;
     font-size: 0.78em;
     font-weight: 700;
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary) !important;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    background: var(--color-bg-alt, #f9fafb);
+    background: var(--color-bg-alt, #f9fafb) !important;
     border-bottom: 1px solid var(--color-border);
 }
 .invite-codes-table td {

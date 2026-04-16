@@ -105,7 +105,7 @@
 .user-toolbar input[type="search"] { min-width: 220px; }
 .user-toolbar input[type="search"]:focus,
 .user-toolbar select:focus { outline: none; border-color: var(--color-primary); }
-#row-count { font-size: 0.82em; color: var(--color-text-secondary); margin-left: auto; }
+#row-count { font-size: 0.82em; color: var(--color-text-secondary); }
 
 /* ── Bulk bar ────────────────────────────────────────────────────────────── */
 .bulk-bar {
@@ -121,11 +121,12 @@
 }
 .bulk-bar.visible { display: flex; }
 
-/* ── Add user form ───────────────────────────────────────────────────────── */
+/* ── Add user form (lives in toolbar) ────────────────────────────────────── */
 .add-user-form {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
+    margin-left: auto;
 }
 .add-user-form input[type="text"] {
     padding: 7px 12px;
@@ -133,14 +134,13 @@
     border-radius: 7px;
     font-size: 0.84em;
     font-family: inherit;
-    background: var(--color-bg-alt, #f9fafb);
+    background: var(--color-surface, #fff);
     color: var(--color-text);
-    min-width: 170px;
+    width: 160px;
 }
 .add-user-form input[type="text"]:focus {
     outline: none;
     border-color: var(--color-primary);
-    background: var(--color-surface, #fff);
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
@@ -180,13 +180,13 @@
 }
 .users-table thead th {
     padding: 10px 14px;
-    text-align: left;
+    text-align: left !important;
     font-size: 0.76em;
     font-weight: 700;
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary) !important;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    background: var(--color-bg-alt, #f9fafb);
+    background: var(--color-bg-alt, #f9fafb) !important;
     border-bottom: 1px solid var(--color-border);
     white-space: nowrap;
 }
@@ -347,16 +347,9 @@
             Users
             <span style="font-weight:400; font-size:0.88em; color:var(--color-text-secondary);">{{ users | length }}</span>
         </h3>
-        <form action="{{ url_for('admin.admin_add_user') }}" method="POST" class="add-user-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="text" name="new_username" placeholder="New username" required minlength="3">
-            <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-user-plus"></i> Add User
-            </button>
-        </form>
     </div>
 
-    {# Toolbar #}
+    {# Toolbar: search + filter + add user #}
     <div class="user-toolbar">
         <input type="search" id="user-search" placeholder="Search username or email…" oninput="filterUsers()">
         {% if used_codes %}
@@ -368,6 +361,13 @@
         </select>
         {% endif %}
         <span id="row-count"></span>
+        <form action="{{ url_for('admin.admin_add_user') }}" method="POST" class="add-user-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="new_username" placeholder="New username" required minlength="3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-user-plus"></i> Add User
+            </button>
+        </form>
     </div>
 
     {# Bulk action bar #}
