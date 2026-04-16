@@ -367,5 +367,125 @@
     });
 </script>
 {% block scripts %}{% endblock %}
+
+<!-- iOS "Add to Home Screen" prompt -->
+<div id="ios-install-prompt" style="
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 9999;
+    padding: 0 12px 12px;
+    animation: slideUp 0.3s ease;
+">
+    <div style="
+        background: #1E293B;
+        border: 1px solid #334155;
+        border-radius: 16px;
+        padding: 16px 18px;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        box-shadow: 0 -4px 32px rgba(0,0,0,0.4);
+        position: relative;
+    ">
+        <img src="{{ asset_url('images/icon-180.png') }}"
+             style="width:48px; height:48px; border-radius:11px; flex-shrink:0;"
+             alt="WealthTrack">
+        <div style="flex: 1; min-width: 0;">
+            <div style="font-weight:700; font-size:0.9rem; color:#F1F5F9; margin-bottom:4px;">
+                Add WealthTrack to your Home Screen
+            </div>
+            <div style="font-size:0.8rem; color:#94A3B8; line-height:1.5;">
+                Tap
+                <span style="
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 2px;
+                    background: #334155;
+                    border-radius: 5px;
+                    padding: 1px 6px;
+                    font-size: 0.75rem;
+                    color: #CBD5E1;
+                    vertical-align: middle;
+                ">
+                    <svg width="11" height="14" viewBox="0 0 11 14" fill="none" style="margin-right:2px;">
+                        <path d="M5.5 9V1M5.5 1L2.5 4M5.5 1L8.5 4" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <rect x="0.75" y="5.75" width="9.5" height="7.5" rx="1.25" stroke="#94A3B8" stroke-width="1.5"/>
+                    </svg>
+                    Share
+                </span>
+                then <strong style="color:#CBD5E1;">"Add to Home Screen"</strong>
+            </div>
+        </div>
+        <button onclick="dismissIOSPrompt()" style="
+            background: none;
+            border: none;
+            color: #64748B;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 0 0 4px;
+            line-height: 1;
+            flex-shrink: 0;
+        " aria-label="Dismiss">✕</button>
+    </div>
+    <!-- Small arrow pointing down toward the Safari toolbar -->
+    <div style="
+        width: 14px; height: 7px;
+        background: #1E293B;
+        clip-path: polygon(0 0, 100% 0, 50% 100%);
+        margin: 0 auto;
+        position: relative; top: -1px;
+    "></div>
+</div>
+
+<style>
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+</style>
+
+<script>
+(function() {
+    var STORAGE_KEY = 'wt_ios_prompt_dismissed';
+    var COOLDOWN_DAYS = 30;
+
+    function isIosSafari() {
+        var ua = navigator.userAgent;
+        var isIOS = /iPhone|iPad/.test(ua);
+        // Chrome on iOS includes 'CriOS', Firefox includes 'FxiOS' — exclude both
+        var isSafari = isIOS && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+        return isSafari;
+    }
+
+    function isStandalone() {
+        return window.navigator.standalone === true ||
+               window.matchMedia('(display-mode: standalone)').matches;
+    }
+
+    function wasDismissedRecently() {
+        try {
+            var ts = localStorage.getItem(STORAGE_KEY);
+            if (!ts) return false;
+            var days = (Date.now() - parseInt(ts, 10)) / 86400000;
+            return days < COOLDOWN_DAYS;
+        } catch(e) { return false; }
+    }
+
+    function showPrompt() {
+        document.getElementById('ios-install-prompt').style.display = 'block';
+    }
+
+    window.dismissIOSPrompt = function() {
+        document.getElementById('ios-install-prompt').style.display = 'none';
+        try { localStorage.setItem(STORAGE_KEY, Date.now().toString()); } catch(e) {}
+    };
+
+    if (isIosSafari() && !isStandalone() && !wasDismissedRecently()) {
+        // Slight delay so it doesn't pop up before the page finishes loading
+        setTimeout(showPrompt, 2500);
+    }
+})();
+</script>
 </body>
 </html>
