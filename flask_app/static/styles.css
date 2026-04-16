@@ -59,6 +59,16 @@ body {
 
 body.no-scroll { overflow: hidden; }
 
+/* ── Global scrollbar styling (thin, unobtrusive) ────────────────────────── */
+* { scrollbar-width: thin; scrollbar-color: #CBD5E1 transparent; }
+*::-webkit-scrollbar { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+*::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+body.dark-mode * { scrollbar-color: #334155 transparent; }
+body.dark-mode *::-webkit-scrollbar-thumb { background: #334155; }
+body.dark-mode *::-webkit-scrollbar-thumb:hover { background: #475569; }
+
 /* ============================================================
    APP SHELL — Authenticated layout
    body.app-layout: sidebar fixed left + main-wrapper fills rest
@@ -86,9 +96,9 @@ body.app-layout {
                 transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar::-webkit-scrollbar { width: 4px; }
-.sidebar::-webkit-scrollbar-track { background: transparent; }
-.sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+/* Hide sidebar scrollbar visually but keep it scrollable */
+.sidebar { scrollbar-width: none; }
+.sidebar::-webkit-scrollbar { display: none; }
 
 /* Brand / logo area */
 .sidebar-brand {
@@ -231,7 +241,9 @@ body.sidebar-collapsed .main-wrapper {
     padding: 14px 0 8px;
     overflow-y: auto;
     min-height: 0;
+    scrollbar-width: none;
 }
+.sidebar-section::-webkit-scrollbar { display: none; }
 
 .sidebar-section-header {
     display: flex;
@@ -1131,7 +1143,14 @@ body.auth-layout.home-layout .main-content {
 /* ============================================================
    FORM STYLES
    ============================================================ */
+/* Base form reset — no max-width or forced flex so forms can be any width.
+   Standalone card forms use the .form-card class for the card styling.      */
 form {
+    /* intentionally minimal — individual forms add their own layout */
+}
+
+/* Standalone card form (login, signup, settings, etc.) */
+.form-card {
     background-color: var(--color-surface);
     padding: 24px;
     border-radius: 10px;

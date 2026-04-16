@@ -39,6 +39,31 @@
     font-size: 1em;
     margin-bottom: 14px;
     box-sizing: border-box;
+    background: var(--color-bg-alt, #f9fafb);
+    color: var(--color-text);
+}
+
+/* ── Reset global form styles for utility forms ──────────────────────────── */
+form.purchase-form {
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: none !important;
+    display: block !important;
+    width: 100%;
+}
+.invest-card form {
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: none !important;
+    display: block !important;
 }
 
 /* ── Info bar (step 2 header) ──────────────────────── */
@@ -47,12 +72,16 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background: #f0f4ff;
-    border: 1px solid #c7d7ff;
+    background: var(--color-surface, #f0f4ff);
+    border: 1px solid var(--color-border);
     border-radius: 8px;
     margin-bottom: 20px;
     font-size: 0.9em;
     color: var(--color-text);
+}
+body:not(.dark-mode) .purchase-info-bar {
+    background: #f0f4ff;
+    border-color: #c7d7ff;
 }
 
 /* ── Suggestions table ─────────────────────────────── */
@@ -63,26 +92,28 @@
     margin-bottom: 16px;
 }
 .purchase-table th {
-    background: var(--color-bg);
-    border-bottom: 2px solid var(--color-border);
+    background: var(--color-bg-alt, #f9fafb) !important;
+    border-bottom: 2px solid var(--color-border) !important;
     padding: 9px 12px;
-    text-align: right;
+    text-align: right !important;
     font-size: 0.82em;
     font-weight: 600;
-    color: var(--color-text-secondary);
+    color: var(--color-text-secondary) !important;
     text-transform: uppercase;
     letter-spacing: 0.04em;
     white-space: nowrap;
 }
-.purchase-table th:first-child { text-align: left; }
+.purchase-table th:first-child { text-align: left !important; }
 .purchase-table td {
     padding: 10px 12px;
     border-bottom: 1px solid var(--color-border);
     text-align: right;
     vertical-align: middle;
+    color: var(--color-text);
 }
 .purchase-table td:first-child { text-align: left; font-weight: 600; }
-.purchase-table tbody tr:hover { background: #f8f9fa; }
+.purchase-table tbody tr:hover { background: var(--color-bg-alt, #f8f9fa); }
+.purchase-table tr.over-allocated { background: rgba(220, 38, 38, 0.06); }
 .purchase-table tr.over-allocated td {
     color: var(--color-text-secondary);
 }
@@ -96,12 +127,15 @@
     border-radius: 4px;
     font-size: 0.9em;
     text-align: right;
+    background: var(--color-surface, #fff);
+    color: var(--color-text);
 }
 
 /* ── Delta colours (same as view_allocation) ───────── */
-.delta-positive { color: #1a7a3e; font-weight: 500; }
+.delta-positive { color: #16a34a; font-weight: 500; }
 .delta-negative { color: var(--color-danger); font-weight: 500; }
 .delta-zero     { color: var(--color-text-secondary); }
+body.dark-mode .delta-positive { color: #34d399; }
 
 /* ── Cost summary bar ──────────────────────────────── */
 .cost-bar {

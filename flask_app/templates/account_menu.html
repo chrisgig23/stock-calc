@@ -93,7 +93,9 @@
     border-bottom: 2px solid var(--color-border);
     margin-bottom: 20px;
     overflow-x: auto;
+    scrollbar-width: none;
 }
+.acct-tabs::-webkit-scrollbar { display: none; }
 .acct-tab-btn {
     background: none;
     border: none;
@@ -116,6 +118,7 @@
 /* ── Positions tab ──────────────────────────────────────────────────── */
 .positions-table-wrap {
     overflow-x: auto;
+    scrollbar-width: thin;
     border-radius: 10px;
     border: 1px solid var(--color-border);
     background: var(--color-surface);
