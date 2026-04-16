@@ -6,6 +6,18 @@
 
 ## 🐛 Bugs
 
+- [x] **B7 — Global `form` rule capped all forms at 600px wide** ✅
+  - The global `form { max-width: 600px; display: flex; flex-direction: column }` rule in `styles.css` was turning every `<form>` into a narrow card, breaking the purchase table, admin user table, and any other full-width form. Fixed by removing those properties from the bare `form` selector and moving card-form styling to a new `.form-card` class. `change_username.html` was the only page that needed `.form-card` added.
+
+- [x] **B8 — Hardcoded `#fff` backgrounds broke dark mode on all pages** ✅
+  - Every page-level `<style>` block used literal `background: #fff` on card elements. Since page-level styles have higher specificity than the `styles.css` dark mode block, dark mode never reached the cards. Fixed across 11 templates by replacing `#fff` / `#FFFFFF` with `var(--color-surface, #fff)`, which automatically resolves to `#1E293B` in dark mode via the existing CSS custom property.
+
+- [x] **B9 — Table headers globally overridden by `.purchase-table th`, `.users-table thead th`, etc.** ✅
+  - Global `th { background-color: var(--color-primary); color: white }` overrode page-level table header styles on the admin, purchase, allocation, and tax-loss harvesting tables. Fixed with `!important` on the page-level `th` rules for each affected table.
+
+- [x] **B10 — Scroll bars appearing in sidebar and account tab bar** ✅
+  - `.sidebar` and `.sidebar-section` used `overflow-y: auto`, causing a scrollbar to flash when content was even slightly taller than the viewport. `.acct-tabs` used `overflow-x: auto`, causing a scrollbar to appear in the tab header. Fixed with `scrollbar-width: none` + `webkit-scrollbar: display: none` on those elements. Also added a global thin scrollbar style in `styles.css` to make all other scroll areas use slim, unobtrusive scrollbars.
+
 - [x] **B1 — "No purchases made yet" on Positions page is wrong** ✅
   - `view_positions` was missing the `last_purchase_date` query entirely — fixed by adding the same Purchase join query that `make_purchase` uses and passing it to the template.
 
@@ -247,6 +259,25 @@ Research across Copilot, Empower, Monarch Money, YNAB, Sharesight, and Kubera id
 
 ---
 
+## 🛡️ Admin Panel Improvements (completed 2026-04-16)
+
+- [x] **ADM1 — One-click approve/deny buttons in invite code request emails** ✅
+  - When a user submits the "Request a Code" form, the admin notification email now contains one green **Approve** button per active invite code (so the admin can choose which code to send), plus a single red **Deny** button. Clicking either opens a no-login-required result page that sends the appropriate follow-up email to the applicant. Implemented using `itsdangerous.URLSafeTimedSerializer` with a 7-day expiry (same pattern as password reset). Routes: `GET /invite/approve/<token>` and `GET /invite/deny/<token>` in `auth.py`.
+
+- [x] **ADM2 — Multiple active invite codes with label, use count, and per-code delete** ✅
+  - Replaced the single `SiteConfig` invite_code entry with a new `InviteCode` model (`invite_codes` table: `id`, `code`, `label`, `created_at`, `use_count`). The admin dashboard now shows a full invite codes table — code, label, number of sign-ups, creation date, and a "✕ Remove" button per row. New codes can be added with an optional label (e.g., "Beta v2"). Multiple codes can be active simultaneously; any valid code grants sign-up access.
+
+- [x] **ADM3 — Track which invite code each user used at signup** ✅
+  - `invite_code_used` column added to `User` model. Set on registration from the code submitted in the signup form. Displayed as a monospace chip in the admin user table. `InviteCode.record_use()` increments the use count when a code is successfully used.
+
+- [x] **ADM4 — Dedicated `/admin/users` page accessible from the admin dashboard** ✅
+  - User management moved off the admin dashboard and onto a standalone page at `/admin/users`. The dashboard now shows a clean "Manage Users →" card linking to it. The user management page includes: full-width sortable table (checkbox, user/ID, email + verified status, role badge, invite code chip, joined date, account count, inline action buttons), client-side search by username/email, filter by invite code, bulk delete with confirmation modal, and single-user delete modal. Action buttons (`Reset PW`, `Toggle Admin`, `Delete`) are inline using `display: contents` on their `<form>` elements to prevent block stacking.
+
+- [x] **ADM5 — Bulk delete users by invite code** ✅
+  - Checkboxes on each user row (except the current admin) allow selecting multiple users. A yellow bulk-action bar appears when any are checked, showing selected count with **Delete Selected** and **Cancel** buttons. Confirmation modal shows the exact count before submitting `POST /admin/users/bulk-delete`. The invite code filter lets admins quickly select all users from a specific batch for bulk removal.
+
+---
+
 ## 📈 Phase 9 — Analytics & Reporting
 
 - [ ] **A1 — Realized gain/loss tracking (FIFO)**
@@ -265,8 +296,8 @@ Research across Copilot, Empower, Monarch Money, YNAB, Sharesight, and Kubera id
 
 ## 🎨 Phase 10 — UX & Polish
 
-- [ ] **U1 — Dark mode**
-  - Full dark theme toggled by a button in the sidebar footer. Persist preference in localStorage. CSS custom properties are already structured for this — mostly additive work.
+- [x] **U1 — Dark mode** ✅
+  - Full dark theme toggled by a moon/sun button in the sidebar footer. Preference is persisted to the `dark_mode` boolean column on the `User` model (server-side), so it survives browser/device changes and eliminates flash-of-wrong-theme on load. CSS custom property token overrides applied to body via `body.dark-mode` class. Covered: sidebar, all stat/chart/account/summary cards, admin panel, purchase planner, help page, positions page, allocation pages, privacy page, manage user page, add account page, import page, and all table headers. Dark mode overrides live in `styles.css` dark mode block plus page-level `var(--color-surface)` fallbacks.
 
 - [ ] **U2 — Onboarding flow for new users**
   - First-login walkthrough: welcome screen → create first account → import or add holdings manually → set allocations → done. Step-by-step wizard with progress indicator. Skippable. Triggered only on first login (track via a `has_onboarded` flag on User).
@@ -344,6 +375,10 @@ Work through these one at a time. Each is a discrete, shippable unit.
 2. ~~`B4`~~ ✅ Fix dollar formatting in Edit Portfolio market value column
 3. ~~`B5`~~ ✅ Add back/cancel navigation to Reset Password page
 4. ~~`B1`~~ ✅ Fix "Date of Last Purchase" showing "No purchases made yet" incorrectly
+5. ~~`B7`~~ ✅ Root-cause fix for global `form` max-width: 600px breaking all full-width table forms
+6. ~~`B8`~~ ✅ Dark mode card backgrounds — all 11 templates converted from `#fff` to `var(--color-surface)`
+7. ~~`B9`~~ ✅ Table header purple override fixed with `!important` on affected page-level `th` rules
+8. ~~`B10`~~ ✅ Unwanted scroll bars in sidebar, tab bar, and table wrappers
 
 ### Phase 2 — Design System Foundation (do this before any visual work)
 5. ~~`D1`~~ ✅ Establish consistent design system: fonts, color palette, unified button classes
@@ -402,8 +437,15 @@ Work through these one at a time. Each is a discrete, shippable unit.
 39. `A3` — Benchmark comparison (SPY / custom index)
 40. `A4` — Tax report export (depends on A1)
 
+### Phase 8.5 — Admin & Invite System (completed 2026-04-16)
+- ~~`ADM1`~~ ✅ One-click approve/deny buttons in invite code request emails
+- ~~`ADM2`~~ ✅ Multiple active invite codes with label, use count, and delete
+- ~~`ADM3`~~ ✅ Track which invite code each user used at signup
+- ~~`ADM4`~~ ✅ Dedicated `/admin/users` page linked from admin dashboard
+- ~~`ADM5`~~ ✅ Bulk delete users by invite code
+
 ### Phase 10 — UX & Polish
-41. `U1` — Dark mode
+41. ~~`U1`~~ ✅ Dark mode (server-persisted, sidebar toggle, full coverage across all pages)
 42. `U2` — Onboarding flow for new users
 43. `U3` — Cash balance tracking
 44. ~~`U4`~~ ✅ PWA / mobile installability
