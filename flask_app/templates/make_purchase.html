@@ -5,7 +5,7 @@
 <style>
 /* ── Step 1 card ───────────────────────────────────── */
 .invest-card {
-    background: #fff;
+    background: var(--color-surface, #fff);
     border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 28px 32px;
@@ -111,13 +111,16 @@
     padding: 14px 16px;
     border-radius: 8px;
     border: 2px solid var(--color-border);
-    background: #fff;
+    background: var(--color-surface, #fff);
     margin-bottom: 20px;
     transition: border-color 0.2s;
 }
 .cost-bar.over-budget {
     border-color: var(--color-danger);
-    background: #fff5f5;
+    background: var(--color-danger-bg, #fff5f5);
+}
+body.dark-mode .cost-bar.over-budget {
+    background: #2d1a1a !important;
 }
 .cost-bar-label { font-size: 0.85em; color: var(--color-text-secondary); font-weight: 500; }
 .cost-bar-value { font-size: 1.4em; font-weight: 700; min-width: 80px; }

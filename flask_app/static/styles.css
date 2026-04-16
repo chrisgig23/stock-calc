@@ -1748,6 +1748,39 @@ body.dark-mode .users-table td { border-bottom-color: var(--color-border); }
 body.dark-mode .invite-codes-table tbody tr:hover,
 body.dark-mode .users-table tbody tr:hover { background: #162032; }
 
+/* ── Comprehensive dark mode card overrides ── */
+body.dark-mode .trust-hero,
+body.dark-mode .trust-card,
+body.dark-mode .help-card,
+body.dark-mode .help-callout,
+body.dark-mode .help-section,
+body.dark-mode .invest-card,
+body.dark-mode .settings-card,
+body.dark-mode .add-account-card,
+body.dark-mode .import-section,
+body.dark-mode .alloc-table-wrap,
+body.dark-mode .chart-container,
+body.dark-mode .harvest-panel,
+body.dark-mode .harvest-toggle,
+body.dark-mode .over-allocated {
+    background: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+    color: var(--color-text) !important;
+}
+body.dark-mode .trust-card h3,
+body.dark-mode .trust-card p,
+body.dark-mode .trust-hero h1,
+body.dark-mode .trust-hero p,
+body.dark-mode .help-card h3,
+body.dark-mode .help-card p,
+body.dark-mode .settings-card-title,
+body.dark-mode .settings-card-desc {
+    color: var(--color-text) !important;
+}
+body.dark-mode .over-allocated {
+    background: rgba(220, 38, 38, 0.15) !important;
+}
+
 /* Dark mode toggle button in sidebar */
 .dark-mode-toggle {
     display: flex;
