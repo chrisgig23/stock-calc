@@ -123,7 +123,8 @@
 
 /* ── Add user form (lives in toolbar) ────────────────────────────────────── */
 .add-user-form {
-    display: flex;
+    display: flex !important;
+    flex-direction: row !important;
     gap: 6px;
     align-items: center;
     margin-left: auto;
@@ -141,6 +142,35 @@
 .add-user-form input[type="text"]:focus {
     outline: none;
     border-color: var(--color-primary);
+}
+
+/* ── Reset global form styles for utility forms ──────────────────────────── */
+/* action-group per-row forms: display:contents so buttons join the flex row */
+.action-group form {
+    all: unset;
+    display: contents;
+}
+/* bulk-form wraps the whole table — must be block, full-width, no card styling */
+#bulk-form {
+    display: block !important;
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: none !important;
+    width: 100%;
+}
+/* add-user-form sits inline in the toolbar flex row */
+.add-user-form {
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: none !important;
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
