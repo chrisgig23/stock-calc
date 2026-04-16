@@ -32,6 +32,10 @@ class User(UserMixin, db.Model):
     # ── Display preferences ───────────────────────────────────────────────
     dark_mode                = db.Column(db.Boolean, nullable=False, default=False)
 
+    # ── Signup tracking ───────────────────────────────────────────────────
+    invite_code_used         = db.Column(db.String(100), nullable=True)   # code used at signup
+    created_at               = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+
     accounts = db.relationship('Account', backref='owner', lazy=True)
 
     def set_password(self, password):
@@ -258,6 +262,36 @@ class SchwabToken(db.Model):
 
     def __repr__(self):
         return f'<SchwabToken user={self.user_id} issued={self.access_token_issued}>'
+
+
+# ---------------------------------------------------------------------------
+# InviteCode  — multiple active invite codes, replacing single SiteConfig entry
+# ---------------------------------------------------------------------------
+
+class InviteCode(db.Model):
+    __tablename__ = 'invite_codes'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    code       = db.Column(db.String(100), unique=True, nullable=False)
+    label      = db.Column(db.String(200), nullable=True)   # optional note, e.g. "Beta testers"
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    use_count  = db.Column(db.Integer, nullable=False, default=0)
+
+    @classmethod
+    def is_valid(cls, code: str) -> bool:
+        """Return True if the code matches any active invite code."""
+        return cls.query.filter_by(code=code).first() is not None
+
+    @classmethod
+    def record_use(cls, code: str):
+        """Increment use_count for the matching code (no-op if not found)."""
+        row = cls.query.filter_by(code=code).first()
+        if row:
+            row.use_count += 1
+            db.session.commit()
+
+    def __repr__(self):
+        return f'<InviteCode {self.code!r} uses={self.use_count}>'
 
 
 # ---------------------------------------------------------------------------

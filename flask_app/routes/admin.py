@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from flask_app import db
-from flask_app.models import User, Account, SiteConfig
+from flask_app.models import User, Account, SiteConfig, InviteCode
 from werkzeug.security import generate_password_hash
 from datetime import datetime
 import secrets
@@ -39,18 +39,21 @@ def admin_dashboard():
     if err:
         return err
 
-    import os
     users = User.query.order_by(User.id).all()
     total_accounts = Account.query.count()
     admin_count = sum(1 for u in users if _is_admin(u))
-    invite_code = SiteConfig.get('invite_code') or os.getenv('INVITE_CODE', '')
+    invite_codes = InviteCode.query.order_by(InviteCode.created_at.desc()).all()
+
+    # Unique codes used at signup (for filter dropdown)
+    used_codes = sorted({u.invite_code_used for u in users if u.invite_code_used})
 
     return render_template(
         'admin_dashboard.html',
         users=users,
         total_accounts=total_accounts,
         admin_count=admin_count,
-        invite_code=invite_code,
+        invite_codes=invite_codes,
+        used_codes=used_codes,
     )
 
 
@@ -294,19 +297,72 @@ def add_user():
 
 # ── Invite code management ─────────────────────────────────────────────────────
 
-@admin_bp.route('/admin/invite-code', methods=['POST'])
+@admin_bp.route('/admin/invite-codes/add', methods=['POST'])
 @login_required
-def update_invite_code():
-    """Update the invite code from the admin panel."""
+def add_invite_code():
+    """Add a new active invite code."""
     err = _require_admin()
     if err:
         return err
 
-    new_code = request.form.get('invite_code', '').strip()
-    if not new_code:
+    code  = request.form.get('code', '').strip()
+    label = request.form.get('label', '').strip() or None
+
+    if not code:
         flash('Invite code cannot be empty.', 'danger')
         return redirect(url_for('admin.admin_dashboard'))
 
-    SiteConfig.set('invite_code', new_code)
-    flash('Invite code updated successfully.', 'success')
+    if InviteCode.query.filter_by(code=code).first():
+        flash(f'Code "{code}" already exists.', 'warning')
+        return redirect(url_for('admin.admin_dashboard'))
+
+    db.session.add(InviteCode(code=code, label=label))
+    db.session.commit()
+    flash(f'Invite code "{code}" added.', 'success')
+    return redirect(url_for('admin.admin_dashboard'))
+
+
+@admin_bp.route('/admin/invite-codes/<int:code_id>/delete', methods=['POST'])
+@login_required
+def delete_invite_code(code_id):
+    """Remove an invite code (deactivates it immediately)."""
+    err = _require_admin()
+    if err:
+        return err
+
+    row = InviteCode.query.get_or_404(code_id)
+    db.session.delete(row)
+    db.session.commit()
+    flash(f'Invite code "{row.code}" removed.', 'success')
+    return redirect(url_for('admin.admin_dashboard'))
+
+
+@admin_bp.route('/admin/users/bulk-delete', methods=['POST'])
+@login_required
+def bulk_delete_users():
+    """Delete all selected users by checkbox or by invite code filter."""
+    err = _require_admin()
+    if err:
+        return err
+
+    user_ids = request.form.getlist('user_ids')  # list of string IDs
+    if not user_ids:
+        flash('No users selected.', 'warning')
+        return redirect(url_for('admin.admin_dashboard'))
+
+    deleted = 0
+    for uid in user_ids:
+        try:
+            uid = int(uid)
+        except (ValueError, TypeError):
+            continue
+        if uid == current_user.id:
+            continue   # never self-delete
+        user = User.query.get(uid)
+        if user:
+            db.session.delete(user)
+            deleted += 1
+
+    db.session.commit()
+    flash(f'{deleted} user{"s" if deleted != 1 else ""} deleted.', 'success' if deleted else 'warning')
     return redirect(url_for('admin.admin_dashboard'))

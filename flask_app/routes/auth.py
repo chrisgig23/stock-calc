@@ -48,10 +48,13 @@ def _load_password_reset_user(token, max_age=3600):
 # Invite-action token helpers (approve / deny from email)
 # ---------------------------------------------------------------------------
 
-def _make_invite_action_token(name: str, email: str) -> str:
-    """Create a signed, time-limited token encoding the requester's name and email."""
+def _make_invite_action_token(name: str, email: str, specific_code: str = None) -> str:
+    """Create a signed, time-limited token encoding the requester's name, email, and optional code."""
     serializer = _get_reset_serializer()
-    return serializer.dumps({'name': name, 'email': email}, salt='invite-action')
+    payload = {'name': name, 'email': email}
+    if specific_code:
+        payload['code'] = specific_code
+    return serializer.dumps(payload, salt='invite-action')
 
 
 def _load_invite_action_data(token: str, max_age: int = 604800):
@@ -395,10 +398,15 @@ def signup():
         confirm         = request.form.get('confirm_password', '')
 
         # ── Validate invite code ──────────────────────────────────────────
-        from flask_app.models import SiteConfig
+        from flask_app.models import SiteConfig, InviteCode
         import os
-        valid_code = SiteConfig.get('invite_code') or os.getenv('INVITE_CODE', '')
-        if not valid_code or not secrets.compare_digest(invite_code, valid_code):
+        # Primary: check InviteCode table (supports multiple active codes)
+        # Fallback: legacy SiteConfig / env var for backward compatibility
+        code_valid = InviteCode.is_valid(invite_code)
+        if not code_valid:
+            legacy = SiteConfig.get('invite_code') or os.getenv('INVITE_CODE', '')
+            code_valid = bool(legacy) and secrets.compare_digest(invite_code, legacy)
+        if not code_valid:
             flash('Invalid invite code. Please check your code and try again.', 'danger')
             return render_template('signup.html', username=username, email=email)
 
@@ -432,15 +440,19 @@ def signup():
             return render_template('signup.html', username=username)
 
         # ── Create user ───────────────────────────────────────────────────
+        from datetime import datetime as _dt
         new_user = User(
             username=username,
             password_hash=generate_password_hash(password),
             email=email,
             email_verified=False,
             must_change_password=False,
+            invite_code_used=invite_code,
+            created_at=_dt.utcnow(),
         )
         db.session.add(new_user)
         db.session.commit()
+        InviteCode.record_use(invite_code)
 
         login_user(new_user)
 
@@ -471,13 +483,34 @@ def request_invite_code():
         flash('Please provide your name and a valid email address.', 'danger')
         return redirect(url_for('auth.signup'))
 
-    # Build signed approve / deny URLs (valid 7 days)
-    action_token = _make_invite_action_token(name, email)
-    approve_url  = url_for('auth.approve_invite', token=action_token, _external=True)
-    deny_url     = url_for('auth.deny_invite',    token=action_token, _external=True)
+    # Build one approve URL per active invite code + a single deny URL
+    from flask_app.models import InviteCode as _IC
+    active_codes = _IC.query.order_by(_IC.created_at.desc()).all()
+
+    deny_token = _make_invite_action_token(name, email)   # code-agnostic deny token
+    deny_url   = url_for('auth.deny_invite', token=deny_token, _external=True)
+
+    if active_codes:
+        approve_options = []
+        for ic in active_codes:
+            tok = _make_invite_action_token(name, email, specific_code=ic.code)
+            url = url_for('auth.approve_invite', token=tok, _external=True)
+            approve_options.append((ic.code, url))
+    else:
+        # Fallback: legacy single-code token (may be empty)
+        tok = _make_invite_action_token(name, email)
+        approve_options = None
+        legacy_approve_url = url_for('auth.approve_invite', token=tok, _external=True)
 
     from flask_app.email_utils import send_invite_request_notification
-    send_invite_request_notification(name, email, note, approve_url=approve_url, deny_url=deny_url)
+    if active_codes:
+        send_invite_request_notification(name, email, note,
+                                         deny_url=deny_url,
+                                         approve_options=approve_options)
+    else:
+        send_invite_request_notification(name, email, note,
+                                         approve_url=legacy_approve_url,
+                                         deny_url=deny_url)
 
     flash("Request sent! If approved, you'll receive an invite code by email shortly.", 'success')
     return redirect(url_for('auth.signup'))
@@ -499,9 +532,14 @@ def approve_invite(token):
     name  = data['name']
     email = data['email']
 
-    from flask_app.models import SiteConfig
+    from flask_app.models import SiteConfig, InviteCode as _IC
     import os as _os
-    invite_code = SiteConfig.get('invite_code') or _os.getenv('INVITE_CODE', '')
+    # Use the code baked into the token (if admin clicked a specific-code button);
+    # otherwise fall back to most recent active code or legacy SiteConfig/env
+    invite_code = (data.get('code') or
+                   getattr(_IC.query.order_by(_IC.created_at.desc()).first(), 'code', None) or
+                   SiteConfig.get('invite_code') or
+                   _os.getenv('INVITE_CODE', ''))
     if not invite_code:
         return render_template_string(
             _INVITE_RESULT_HTML,

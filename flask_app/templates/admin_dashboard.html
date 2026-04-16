@@ -293,10 +293,10 @@
 }
 .confirm-modal-overlay.active { display: flex; }
 .confirm-modal {
-    background: #fff;
+    background: var(--color-surface, #fff);
     border-radius: 14px;
     padding: 28px 30px;
-    max-width: 420px;
+    max-width: 440px;
     width: 90%;
     box-shadow: 0 20px 60px rgba(0,0,0,0.2);
 }
@@ -315,6 +315,130 @@
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+}
+
+/* ── User table toolbar ──────────────────────────────────────────────── */
+.user-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+    background: var(--color-bg-alt, #f9fafb);
+}
+.user-toolbar input[type="search"] {
+    padding: 6px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.84em;
+    font-family: inherit;
+    background: var(--color-surface, #fff);
+    color: var(--color-text);
+    min-width: 200px;
+}
+.user-toolbar input[type="search"]:focus { outline: none; border-color: var(--color-primary); }
+.user-toolbar select {
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.84em;
+    font-family: inherit;
+    background: var(--color-surface, #fff);
+    color: var(--color-text);
+}
+.bulk-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 18px;
+    background: #FEF3C7;
+    border-bottom: 1px solid #FDE68A;
+    font-size: 0.86em;
+    color: #92400E;
+    font-weight: 600;
+}
+.bulk-bar.visible { display: flex; }
+
+/* ── Users table extras ──────────────────────────────────────────────── */
+.users-table thead th:first-child { width: 36px; text-align: center; }
+.users-table td:first-child { text-align: center; }
+.users-table input[type="checkbox"] { cursor: pointer; accent-color: var(--color-primary); width: 15px; height: 15px; }
+
+.invite-code-chip {
+    display: inline-block;
+    font-family: monospace;
+    font-size: 0.82em;
+    background: var(--color-bg-alt, #f3f4f6);
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    padding: 2px 7px;
+    color: var(--color-text-secondary);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.user-email { font-size: 0.82em; color: var(--color-text-secondary); }
+.user-joined { font-size: 0.8em; color: var(--color-text-secondary); white-space: nowrap; }
+
+/* ── Invite codes panel ──────────────────────────────────────────────── */
+.invite-codes-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88em;
+}
+.invite-codes-table th {
+    padding: 9px 16px;
+    text-align: left;
+    font-size: 0.78em;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-bg-alt, #f9fafb);
+    border-bottom: 1px solid var(--color-border);
+}
+.invite-codes-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+    color: var(--color-text);
+}
+.invite-codes-table tbody tr:last-child td { border-bottom: none; }
+.invite-codes-table tbody tr:hover { background: var(--color-bg-alt, #fafafa); }
+.code-value {
+    font-family: monospace;
+    font-size: 0.95em;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.code-label { font-size: 0.82em; color: var(--color-text-secondary); }
+.add-code-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 16px 18px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg-alt, #f9fafb);
+}
+.add-code-form input[type="text"] {
+    padding: 7px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.84em;
+    font-family: inherit;
+    background: var(--color-surface, #fff);
+    color: var(--color-text);
+}
+.add-code-form input[name="code"] { min-width: 170px; font-family: monospace; }
+.add-code-form input[name="label"] { min-width: 200px; }
+.no-codes {
+    padding: 28px;
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 0.88em;
 }
 </style>
 {% endblock %}
@@ -347,7 +471,7 @@
             Admin Panel
             <span class="admin-badge">Admin Only</span>
         </h2>
-        <p>Manage users, access levels, and account data.</p>
+        <p>Manage users, invite codes, and account data.</p>
     </div>
 </div>
 
@@ -362,8 +486,8 @@
         <div class="stat-card-value">{{ total_accounts }}</div>
     </div>
     <div class="stat-card">
-        <div class="stat-card-label"><i class="fa-solid fa-shield-halved" style="margin-right:5px;"></i>Admins</div>
-        <div class="stat-card-value">{{ admin_count }}</div>
+        <div class="stat-card-label"><i class="fa-solid fa-ticket" style="margin-right:5px;"></i>Active Invite Codes</div>
+        <div class="stat-card-value">{{ invite_codes | length }}</div>
     </div>
 </div>
 
@@ -373,8 +497,8 @@
         <h3 class="panel-card-title">
             <span class="card-icon"><i class="fa-solid fa-users"></i></span>
             Users
+            <span style="font-weight:400; font-size:0.88em; color:var(--color-text-secondary); margin-left:4px;">{{ users | length }}</span>
         </h3>
-        {# Add user inline form #}
         <form action="{{ url_for('admin.admin_add_user') }}" method="POST" class="add-user-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="text" name="new_username" placeholder="New username" required minlength="3">
@@ -384,164 +508,252 @@
         </form>
     </div>
 
-    {% if users %}
-    <table class="users-table">
+    {# Toolbar: search + filter #}
+    <div class="user-toolbar">
+        <input type="search" id="user-search" placeholder="Search by username or email…" oninput="filterUsers()">
+        {% if used_codes %}
+        <select id="code-filter" onchange="filterByCode()">
+            <option value="">All invite codes</option>
+            {% for code in used_codes %}
+            <option value="{{ code }}">{{ code }}</option>
+            {% endfor %}
+        </select>
+        {% endif %}
+        <span id="row-count" style="font-size:0.82em; color:var(--color-text-secondary); margin-left:auto;"></span>
+    </div>
+
+    {# Bulk action bar — shown when checkboxes selected #}
+    <form method="POST" action="{{ url_for('admin.bulk_delete_users') }}" id="bulk-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="bulk-bar" id="bulk-bar">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span id="bulk-count">0 users selected</span>
+            <button type="button" class="btn btn-danger" style="margin-left:8px;"
+                    onclick="confirmBulkDelete()">
+                <i class="fa-solid fa-trash"></i> Delete Selected
+            </button>
+            <button type="button" class="btn btn-secondary"
+                    onclick="clearSelection()">Cancel</button>
+        </div>
+
+        {% if users %}
+        <table class="users-table" id="users-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all" onchange="toggleAll(this)" title="Select all"></th>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Invite Code</th>
+                    <th>Joined</th>
+                    <th>Accts</th>
+                    <th style="text-align:right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-tbody">
+                {% for user in users %}
+                <tr data-username="{{ user.username | lower }}"
+                    data-email="{{ (user.email or '') | lower }}"
+                    data-code="{{ user.invite_code_used or '' }}">
+
+                    {# Checkbox — can't select yourself #}
+                    <td>
+                        {% if user.id != current_user.id %}
+                        <input type="checkbox" name="user_ids" value="{{ user.id }}"
+                               class="user-checkbox" onchange="updateBulkBar()">
+                        {% endif %}
+                    </td>
+
+                    {# User #}
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background: hsl({{ (user.id * 47) % 360 }}, 55%, 55%);">
+                                {{ user.username[0] }}
+                            </div>
+                            <div>
+                                <div class="user-name">{{ user.username }}</div>
+                                <div class="user-id">ID #{{ user.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    {# Email #}
+                    <td>
+                        {% if user.email %}
+                            <span class="user-email">{{ user.email }}</span>
+                            {% if not user.email_verified %}
+                            <span class="badge badge-user" style="font-size:0.72em; margin-left:4px;">unverified</span>
+                            {% endif %}
+                        {% else %}
+                            <span style="color:var(--color-text-secondary); font-size:0.82em;">—</span>
+                        {% endif %}
+                    </td>
+
+                    {# Role #}
+                    <td>
+                        {% if user.id == current_user.id %}
+                            <span class="badge badge-you"><i class="fa-solid fa-circle-check"></i> You</span>
+                        {% endif %}
+                        {% if user.is_admin or user.username == 'cgiglio' %}
+                            <span class="badge badge-admin"><i class="fa-solid fa-shield-halved"></i> Admin</span>
+                        {% else %}
+                            <span class="badge badge-user"><i class="fa-solid fa-user"></i> User</span>
+                        {% endif %}
+                    </td>
+
+                    {# Invite code used #}
+                    <td>
+                        {% if user.invite_code_used %}
+                            <span class="invite-code-chip" title="{{ user.invite_code_used }}">{{ user.invite_code_used }}</span>
+                        {% else %}
+                            <span style="color:var(--color-text-secondary); font-size:0.82em;">—</span>
+                        {% endif %}
+                    </td>
+
+                    {# Joined #}
+                    <td class="user-joined">
+                        {% if user.created_at %}
+                            {{ user.created_at.strftime('%b %d, %Y') }}
+                        {% else %}—{% endif %}
+                    </td>
+
+                    {# Account count #}
+                    <td style="text-align:center;">{{ user.accounts | length }}</td>
+
+                    {# Actions #}
+                    <td>
+                        <div class="action-group">
+                            <form method="POST" action="{{ url_for('admin.admin_reset_password', user_id=user.id) }}"
+                                  onsubmit="return confirm('Reset password for {{ user.username }}?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-secondary" title="Reset password">
+                                    <i class="fa-solid fa-key"></i>
+                                </button>
+                            </form>
+
+                            {% if user.id != current_user.id and user.username != 'cgiglio' %}
+                            <form method="POST" action="{{ url_for('admin.admin_toggle_admin', user_id=user.id) }}"
+                                  onsubmit="return confirm('{% if user.is_admin %}Revoke{% else %}Grant{% endif %} admin for {{ user.username }}?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit"
+                                        class="btn {% if user.is_admin %}btn-warning{% else %}btn-ghost{% endif %}"
+                                        title="{% if user.is_admin %}Revoke admin{% else %}Grant admin{% endif %}">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {% if user.id != current_user.id %}
+                            <button type="button" class="btn btn-danger"
+                                    onclick="openDeleteModal({{ user.id }}, '{{ user.username }}', {{ user.accounts | length }})"
+                                    title="Delete user">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-users" style="font-size:2em; margin-bottom:10px; display:block; opacity:0.3;"></i>
+            No users found.
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+{# ── Invite codes ─────────────────────────────────────────────────────────── #}
+<div class="panel-card">
+    <div class="panel-card-header">
+        <h3 class="panel-card-title">
+            <span class="card-icon"><i class="fa-solid fa-ticket"></i></span>
+            Invite Codes
+            <span style="font-weight:400; font-size:0.88em; color:var(--color-text-secondary); margin-left:4px;">{{ invite_codes | length }} active</span>
+        </h3>
+    </div>
+
+    {% if not invite_codes %}
+    <div class="no-codes">
+        <i class="fa-solid fa-ticket" style="font-size:1.8em; display:block; margin-bottom:8px; opacity:0.3;"></i>
+        No invite codes yet — sign-ups are currently disabled. Add one below.
+    </div>
+    {% else %}
+    <table class="invite-codes-table">
         <thead>
             <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Accounts</th>
-                <th>Actions</th>
+                <th>Code</th>
+                <th>Label</th>
+                <th>Uses</th>
+                <th>Created</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            {% for user in users %}
+            {% for ic in invite_codes %}
             <tr>
-                {# User column #}
+                <td><span class="code-value">{{ ic.code }}</span></td>
+                <td><span class="code-label">{{ ic.label or '—' }}</span></td>
                 <td>
-                    <div class="user-cell">
-                        <div class="user-avatar" style="background: hsl({{ (user.id * 47) % 360 }}, 55%, 55%);">
-                            {{ user.username[0] }}
-                        </div>
-                        <div>
-                            <div class="user-name">{{ user.username }}</div>
-                            <div class="user-id">ID #{{ user.id }}</div>
-                        </div>
-                    </div>
+                    <span style="font-weight:600;">{{ ic.use_count }}</span>
+                    <span style="color:var(--color-text-secondary); font-size:0.82em;"> sign-up{{ 's' if ic.use_count != 1 }}</span>
                 </td>
-
-                {# Role badge #}
-                <td>
-                    {% if user.id == current_user.id %}
-                        <span class="badge badge-you"><i class="fa-solid fa-circle-check"></i> You</span>
-                    {% endif %}
-                    {% if user.is_admin or user.username == 'cgiglio' %}
-                        <span class="badge badge-admin"><i class="fa-solid fa-shield-halved"></i> Admin</span>
-                    {% else %}
-                        <span class="badge badge-user"><i class="fa-solid fa-user"></i> User</span>
-                    {% endif %}
+                <td style="font-size:0.82em; color:var(--color-text-secondary); white-space:nowrap;">
+                    {{ ic.created_at.strftime('%b %d, %Y') }}
                 </td>
-
-                {# Account count #}
-                <td>{{ user.accounts | length }}</td>
-
-                {# Actions #}
-                <td>
-                    <div class="action-group">
-
-                        {# Reset password #}
-                        <form method="POST" action="{{ url_for('admin.admin_reset_password', user_id=user.id) }}"
-                              onsubmit="return confirm('Reset password for {{ user.username }}? A new temporary password will be shown once.')">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit" class="btn btn-secondary" title="Reset password">
-                                <i class="fa-solid fa-key"></i> Reset PW
-                            </button>
-                        </form>
-
-                        {# Toggle admin — disabled for self and for the root admin #}
-                        {% if user.id != current_user.id and user.username != 'cgiglio' %}
-                        <form method="POST" action="{{ url_for('admin.admin_toggle_admin', user_id=user.id) }}"
-                              onsubmit="return confirm('{% if user.is_admin %}Revoke{% else %}Grant{% endif %} admin access for {{ user.username }}?')">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                            <button type="submit"
-                                    class="btn {% if user.is_admin %}btn-warning{% else %}btn-ghost{% endif %}"
-                                    title="{% if user.is_admin %}Revoke admin{% else %}Grant admin{% endif %}">
-                                <i class="fa-solid fa-shield-halved"></i>
-                                {% if user.is_admin %}Revoke Admin{% else %}Grant Admin{% endif %}
-                            </button>
-                        </form>
-                        {% endif %}
-
-                        {# Delete — disabled for self #}
-                        {% if user.id != current_user.id %}
-                        <button type="button" class="btn btn-danger"
-                                onclick="openDeleteModal({{ user.id }}, '{{ user.username }}', {{ user.accounts | length }})"
-                                title="Delete user">
-                            <i class="fa-solid fa-trash"></i>
+                <td style="text-align:right;">
+                    <form method="POST" action="{{ url_for('admin.delete_invite_code', code_id=ic.id) }}"
+                          onsubmit="return confirm('Remove invite code &quot;{{ ic.code }}&quot;? Anyone with this code will no longer be able to sign up.')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-ghost" title="Remove code"
+                                style="color:var(--color-danger); border-color:var(--color-danger);">
+                            <i class="fa-solid fa-xmark"></i> Remove
                         </button>
-                        {% else %}
-                        <button class="btn btn-danger disabled" disabled title="Can't delete yourself">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                        {% endif %}
-
-                    </div>
+                    </form>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    {% else %}
-    <div class="empty-state">
-        <i class="fa-solid fa-users" style="font-size:2em; margin-bottom:10px; display:block; opacity:0.3;"></i>
-        No users found.
-    </div>
     {% endif %}
+
+    <form method="POST" action="{{ url_for('admin.add_invite_code') }}" class="add-code-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="code" placeholder="New invite code" required minlength="4"
+               style="font-family:monospace;">
+        <input type="text" name="label" placeholder="Label (optional) e.g. Beta v2">
+        <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Add Code
+        </button>
+    </form>
 </div>
 
-{# ── Invite code ──────────────────────────────────────────────────────────── #}
-<div class="panel-card">
-    <div class="panel-card-header">
-        <h3 class="panel-card-title">
-            <span class="card-icon"><i class="fa-solid fa-ticket"></i></span>
-            Invite Code
-        </h3>
-    </div>
-    <div style="padding:18px 22px;">
-        <p style="font-size:0.86em; color:var(--color-text-secondary); margin:0 0 16px;">
-            New users must enter this code on the sign-up page. Change it any time to invalidate the current code.
-        </p>
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
-            <input type="password" id="invite-code-display"
-                   value="{{ invite_code or '' }}"
-                   readonly
-                   style="font-family:monospace; padding:9px 12px; border:1px solid var(--color-border);
-                          border-radius:8px; background:var(--color-bg-alt); font-size:0.9em;
-                          min-width:200px; color:var(--color-text);">
-            <button type="button" onclick="toggleInviteCodeVisibility()"
-                    id="toggle-invite-btn"
-                    class="btn btn-ghost" style="white-space:nowrap;">
-                <i class="fa-solid fa-eye" id="toggle-invite-icon"></i> Show
-            </button>
-        </div>
-        {% if not invite_code %}
-        <p style="font-size:0.82em; color:#92400E; background:#FEF3C7; border:1px solid #FDE68A;
-                  border-radius:7px; padding:8px 12px; margin-bottom:14px;">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            No invite code set — sign-ups are currently disabled. Set a code below to enable them.
-        </p>
-        {% endif %}
-        <form method="POST" action="{{ url_for('admin.update_invite_code') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                <input type="text" name="invite_code" placeholder="New invite code"
-                       required minlength="6"
-                       style="padding:7px 12px; border:1px solid var(--color-border); border-radius:7px;
-                              font-size:0.84em; font-family:inherit; min-width:200px;
-                              background:var(--color-bg-alt); color:var(--color-text);">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-rotate"></i> Update Code
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-{# ── Delete confirmation modal ────────────────────────────────────────────── #}
+{# ── Modals ───────────────────────────────────────────────────────────────── #}
 <div class="confirm-modal-overlay" id="deleteModal">
     <div class="confirm-modal">
         <h3><i class="fa-solid fa-triangle-exclamation" style="color:#DC2626; margin-right:6px;"></i>Delete User</h3>
-        <p id="deleteModalBody">
-            This will permanently delete this user and all their portfolio data. This cannot be undone.
-        </p>
+        <p id="deleteModalBody">This will permanently delete this user and all their portfolio data. This cannot be undone.</p>
         <div class="confirm-modal-actions">
             <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
             <form method="POST" id="deleteModalForm">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-danger">
-                    <i class="fa-solid fa-trash"></i> Delete Permanently
-                </button>
+                <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete Permanently</button>
             </form>
+        </div>
+    </div>
+</div>
+
+<div class="confirm-modal-overlay" id="bulkModal">
+    <div class="confirm-modal">
+        <h3><i class="fa-solid fa-triangle-exclamation" style="color:#DC2626; margin-right:6px;"></i>Bulk Delete Users</h3>
+        <p id="bulkModalBody"></p>
+        <div class="confirm-modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeBulkModal()">Cancel</button>
+            <button type="button" class="btn btn-danger" onclick="submitBulkDelete()">
+                <i class="fa-solid fa-trash"></i> Delete All Selected
+            </button>
         </div>
     </div>
 </div>
@@ -550,29 +762,89 @@
 
 {% block scripts %}
 <script>
-function toggleInviteCodeVisibility() {
-    var input = document.getElementById('invite-code-display');
-    var icon  = document.getElementById('toggle-invite-icon');
-    var btn   = document.getElementById('toggle-invite-btn');
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.className = 'fa-solid fa-eye-slash';
-        btn.innerHTML = '<i class="fa-solid fa-eye-slash" id="toggle-invite-icon"></i> Hide';
+// ── Search & filter ───────────────────────────────────────────────────────────
+function filterUsers() {
+    var q    = document.getElementById('user-search').value.toLowerCase();
+    var code = (document.getElementById('code-filter') || {}).value || '';
+    var rows = document.querySelectorAll('#users-tbody tr');
+    var vis  = 0;
+    rows.forEach(function(row) {
+        var matchQ    = !q    || row.dataset.username.includes(q) || row.dataset.email.includes(q);
+        var matchCode = !code || row.dataset.code === code;
+        var show = matchQ && matchCode;
+        row.style.display = show ? '' : 'none';
+        if (show) vis++;
+    });
+    var el = document.getElementById('row-count');
+    if (el) el.textContent = vis + ' of {{ users | length }} users';
+}
+
+function filterByCode() {
+    document.getElementById('user-search').value = '';
+    filterUsers();
+}
+
+// Init count
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('row-count');
+    if (el) el.textContent = '{{ users | length }} users';
+});
+
+// ── Checkbox bulk selection ───────────────────────────────────────────────────
+function toggleAll(master) {
+    document.querySelectorAll('.user-checkbox').forEach(function(cb) {
+        var row = cb.closest('tr');
+        if (row && row.style.display !== 'none') {
+            cb.checked = master.checked;
+        }
+    });
+    updateBulkBar();
+}
+
+function updateBulkBar() {
+    var checked = document.querySelectorAll('.user-checkbox:checked').length;
+    var bar   = document.getElementById('bulk-bar');
+    var count = document.getElementById('bulk-count');
+    if (checked > 0) {
+        bar.classList.add('visible');
+        count.textContent = checked + ' user' + (checked !== 1 ? 's' : '') + ' selected';
     } else {
-        input.type = 'password';
-        icon.className = 'fa-solid fa-eye';
-        btn.innerHTML = '<i class="fa-solid fa-eye" id="toggle-invite-icon"></i> Show';
+        bar.classList.remove('visible');
+        document.getElementById('select-all').checked = false;
     }
 }
 
-function openDeleteModal(userId, username, accountCount) {
-    const modal = document.getElementById('deleteModal');
-    const body  = document.getElementById('deleteModalBody');
-    const form  = document.getElementById('deleteModalForm');
+function clearSelection() {
+    document.querySelectorAll('.user-checkbox').forEach(function(cb) { cb.checked = false; });
+    document.getElementById('select-all').checked = false;
+    updateBulkBar();
+}
 
-    const acctText = accountCount === 1 ? '1 account' : accountCount + ' accounts';
-    body.textContent = `Permanently delete "${username}"? This will remove their profile and ${acctText} — this cannot be undone.`;
-    form.action = `/admin/user/${userId}/delete`;
+function confirmBulkDelete() {
+    var checked = document.querySelectorAll('.user-checkbox:checked').length;
+    var body    = document.getElementById('bulkModalBody');
+    body.textContent = 'Permanently delete ' + checked + ' user' + (checked !== 1 ? 's' : '') +
+        ' and all their portfolio data? This cannot be undone.';
+    document.getElementById('bulkModal').classList.add('active');
+}
+
+function closeBulkModal() {
+    document.getElementById('bulkModal').classList.remove('active');
+}
+
+function submitBulkDelete() {
+    closeBulkModal();
+    document.getElementById('bulk-form').submit();
+}
+
+// ── Single delete modal ───────────────────────────────────────────────────────
+function openDeleteModal(userId, username, accountCount) {
+    var modal = document.getElementById('deleteModal');
+    var body  = document.getElementById('deleteModalBody');
+    var form  = document.getElementById('deleteModalForm');
+    var acctText = accountCount === 1 ? '1 account' : accountCount + ' accounts';
+    body.textContent = 'Permanently delete "' + username + '"? This will remove their profile and ' + acctText + ' — this cannot be undone.';
+    form.action = '/admin/user/' + userId + '/delete';
     modal.classList.add('active');
 }
 
@@ -580,14 +852,17 @@ function closeDeleteModal() {
     document.getElementById('deleteModal').classList.remove('active');
 }
 
-// Close on overlay click
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-    if (e.target === this) closeDeleteModal();
+['deleteModal','bulkModal'].forEach(function(id) {
+    document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
 });
 
-// Close on Escape
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeDeleteModal();
+    if (e.key === 'Escape') {
+        closeDeleteModal();
+        closeBulkModal();
+    }
 });
 </script>
 {% endblock %}

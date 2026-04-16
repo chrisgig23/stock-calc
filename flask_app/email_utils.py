@@ -467,8 +467,9 @@ def send_invite_request_notification(
     requester_name: str,
     requester_email: str,
     requester_note: str = '',
-    approve_url: str = '',
+    approve_url: str = '',       # legacy single-code path (kept for compat)
     deny_url: str = '',
+    approve_options: list = None, # list of (code_label, approve_url) tuples
 ) -> bool:
     """
     Notify the site admin that someone has requested an invite code.
@@ -491,37 +492,60 @@ def send_invite_request_notification(
         if requester_note else ''
     )
 
+    # Build approve buttons — one per code if approve_options provided,
+    # fall back to single approve_url for backward compat
     action_buttons = ''
-    if approve_url and deny_url:
-        action_buttons = f"""
-          <!-- Approve / Deny actions -->
-          <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
-            <tr>
-              <td style="padding-right:8px;">
+    has_actions = deny_url and (approve_options or approve_url)
+    if has_actions:
+        approve_rows = ''
+        if approve_options:
+            for code_label, a_url in approve_options:
+                safe_label = html.escape(str(code_label))
+                approve_rows += f"""
+              <tr><td style="padding-bottom:8px;">
+                <a href="{a_url}"
+                   style="display:block;background:#16a34a;color:#fff;text-decoration:none;
+                          padding:11px 16px;border-radius:8px;font-weight:700;font-size:0.88rem;">
+                  ✅ Approve — Send code: <code style="background:rgba(0,0,0,0.2);padding:1px 6px;border-radius:4px;font-size:0.9em;">{safe_label}</code>
+                </a>
+              </td></tr>"""
+        elif approve_url:
+            approve_rows = f"""
+              <tr><td style="padding-bottom:8px;">
                 <a href="{approve_url}"
-                   style="display:block;background:#16a34a;color:#fff;text-decoration:none;padding:12px 0;border-radius:8px;font-weight:700;font-size:0.9rem;text-align:center;">
+                   style="display:block;background:#16a34a;color:#fff;text-decoration:none;
+                          padding:11px 16px;border-radius:8px;font-weight:700;font-size:0.88rem;">
                   ✅ Approve — Send Invite Code
                 </a>
-              </td>
-              <td style="padding-left:8px;">
-                <a href="{deny_url}"
-                   style="display:block;background:#dc2626;color:#fff;text-decoration:none;padding:12px 0;border-radius:8px;font-weight:700;font-size:0.9rem;text-align:center;">
-                  ✗ Deny Request
-                </a>
-              </td>
-            </tr>
+              </td></tr>"""
+
+        action_buttons = f"""
+          <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
+            {approve_rows}
+            <tr><td>
+              <a href="{deny_url}"
+                 style="display:block;background:#dc2626;color:#fff;text-decoration:none;
+                        padding:11px 16px;border-radius:8px;font-weight:700;font-size:0.88rem;">
+                ✗ Deny Request
+              </a>
+            </td></tr>
           </table>
           <p style="color:#9ca3af;font-size:0.75rem;text-align:center;margin:0 0 24px;">
-            These links are valid for 7 days and can only be used once per request.
+            These links are valid for 7 days.
           </p>
         """
 
-    action_text = (
-        f"\nApprove (sends invite code automatically):\n{approve_url}\n\n"
-        f"Deny (sends cordial decline):\n{deny_url}\n"
-        if approve_url and deny_url else
-        "If you'd like to grant access, reply to their email with your current invite code."
-    )
+    action_text_lines = []
+    if approve_options:
+        for code_label, a_url in approve_options:
+            action_text_lines.append(f"Approve with code '{code_label}':\n{a_url}")
+    elif approve_url:
+        action_text_lines.append(f"Approve (sends invite code automatically):\n{approve_url}")
+    if deny_url:
+        action_text_lines.append(f"Deny (sends cordial decline):\n{deny_url}")
+    action_text = ('\n\n'.join(action_text_lines)
+                   if action_text_lines else
+                   "If you'd like to grant access, reply to their email with your current invite code.")
 
     try:
         params = {
