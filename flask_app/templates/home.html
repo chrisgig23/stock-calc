@@ -8,108 +8,357 @@
 
 {% block styles %}
 <style>
-/* Remove default form card styling inside the login panel */
 .home-login-panel form {
-    background: none;
-    padding: 0;
-    box-shadow: none;
-    border: none;
-    margin: 0;
+    background: none; padding: 0; box-shadow: none; border: none; margin: 0;
 }
 .login-security-note {
+    display: flex; align-items: center; gap: 7px; margin-top: 18px;
+    padding: 10px 14px; background: rgba(16,185,129,0.07);
+    border: 1px solid rgba(16,185,129,0.2); border-radius: 8px;
+    font-size: 0.78rem; color: #064e3b; line-height: 1.4;
+}
+.login-security-note i { color: #059669; font-size: 0.85rem; flex-shrink: 0; }
+.login-help-row { margin-top: 14px; text-align: center; display: flex; flex-direction: column; gap: 8px; }
+.login-help-row a { color: var(--color-primary); font-size: 0.84rem; font-weight: 600; text-decoration: none; }
+.login-help-row a:hover { text-decoration: underline; }
+
+/* ── Features section below the fold ── */
+.home-features {
+    background: #080F1C;
+    padding: 80px 48px;
+    border-top: 1px solid #1E293B;
+}
+.home-features-heading {
+    text-align: center;
+    margin-bottom: 60px;
+}
+.home-features-heading h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #F8FAFC;
+    letter-spacing: -0.04em;
+    margin: 0 0 10px;
+}
+.home-features-heading p {
+    font-size: 1rem;
+    color: #64748B;
+    max-width: 480px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+.home-feature-row {
     display: flex;
     align-items: center;
+    gap: 64px;
+    max-width: 1000px;
+    margin: 0 auto 80px;
+}
+.home-feature-row.reverse { flex-direction: row-reverse; }
+.home-feature-copy { flex: 1; min-width: 0; }
+.home-feature-copy .feat-label {
+    display: inline-flex;
+    align-items: center;
     gap: 7px;
-    margin-top: 18px;
-    padding: 10px 14px;
-    background: rgba(16, 185, 129, 0.07);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: 8px;
-    font-size: 0.78rem;
-    color: #064e3b;
-    line-height: 1.4;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #818CF8;
+    margin-bottom: 14px;
 }
-.login-security-note i {
-    color: #059669;
-    font-size: 0.85rem;
+.home-feature-copy h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #F1F5F9;
+    letter-spacing: -0.03em;
+    margin: 0 0 12px;
+    line-height: 1.2;
+}
+.home-feature-copy p {
+    font-size: 0.93rem;
+    color: #64748B;
+    line-height: 1.7;
+    margin: 0 0 20px;
+}
+.home-feature-bullets {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.home-feature-bullets li {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-size: 0.85rem; color: #94A3B8; line-height: 1.4;
+}
+.home-feature-bullets li::before {
+    content: '✓';
+    color: #6366F1;
+    font-weight: 700;
     flex-shrink: 0;
+    margin-top: 1px;
 }
-.login-help-row {
-    margin-top: 14px;
+.home-feature-visual {
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Mock UI components ── */
+.mock-card {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-family: inherit;
+}
+.mock-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748B;
+    margin-bottom: 4px;
+}
+.mock-value { font-size: 1.3rem; font-weight: 700; color: #F1F5F9; }
+.mock-value.green { color: #34D399; }
+.mock-value.red { color: #F87171; }
+.mock-sub { font-size: 0.72rem; color: #64748B; margin-top: 2px; }
+
+.mock-dashboard {
+    background: #0F172A;
+    border: 1px solid #1E293B;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.mock-topbar {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #1E293B;
+}
+.mock-dot { width: 8px; height: 8px; border-radius: 50%; }
+.mock-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.mock-chart-area {
+    background: #1E293B;
+    border-radius: 10px;
+    padding: 12px 14px;
+    height: 90px;
+    position: relative;
+    overflow: hidden;
+}
+.mock-chart-line {
+    position: absolute;
+    bottom: 14px; left: 14px; right: 14px;
+}
+.mock-chart-fill {
+    fill: rgba(99,102,241,0.15);
+}
+.mock-chart-stroke {
+    fill: none;
+    stroke: #6366F1;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.mock-account-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px;
+    background: #1E293B;
+    border-radius: 8px;
+    margin-bottom: 6px;
+}
+.mock-account-name { font-size: 0.8rem; font-weight: 600; color: #E2E8F0; }
+.mock-account-val { font-size: 0.8rem; color: #34D399; font-weight: 600; }
+
+.mock-harvest {
+    background: #1C1400;
+    border: 1px solid #92400E;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+.mock-harvest-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 10px;
+}
+.mock-harvest-title { font-size: 0.8rem; font-weight: 700; color: #FCD34D; }
+.mock-harvest-total { font-size: 0.95rem; font-weight: 700; color: #FDE68A; }
+.mock-harvest-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0;
+    border-top: 1px solid rgba(146,64,14,0.3);
+}
+.mock-ticker { font-size: 0.78rem; font-weight: 700; color: #E2E8F0; }
+.mock-loss { font-size: 0.78rem; color: #F87171; }
+.mock-savings { font-size: 0.78rem; color: #34D399; }
+
+.mock-report {
+    background: #0F172A;
+    border: 1px solid #1E293B;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.mock-report-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 14px;
+}
+.mock-report-title { font-size: 0.85rem; font-weight: 700; color: #F1F5F9; }
+.mock-report-sub { font-size: 0.7rem; color: #64748B; margin-top: 2px; }
+.mock-badge {
+    background: rgba(52,211,153,0.15);
+    color: #34D399;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+.mock-report-chart {
+    height: 80px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 14px;
+}
+.mock-holding-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #1E293B;
+}
+.mock-holding-row:last-child { border-bottom: none; }
+.mock-h-ticker { font-size: 0.78rem; font-weight: 700; color: #E2E8F0; width: 44px; }
+.mock-h-bar-wrap { flex: 1; margin: 0 10px; height: 5px; background: #1E293B; border-radius: 3px; overflow: hidden; }
+.mock-h-bar { height: 100%; border-radius: 3px; }
+.mock-h-pct { font-size: 0.72rem; font-weight: 600; width: 40px; text-align: right; }
+
+.mock-phone {
+    width: 200px;
+    margin: 0 auto;
+    background: #1E293B;
+    border: 2px solid #334155;
+    border-radius: 32px;
+    padding: 16px 12px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    position: relative;
+}
+.mock-phone::before {
+    content: '';
+    display: block;
+    width: 48px; height: 5px;
+    background: #334155;
+    border-radius: 3px;
+    margin: 0 auto 14px;
+}
+.mock-phone-screen {
+    background: #0F172A;
+    border-radius: 18px;
+    padding: 12px 10px;
+    overflow: hidden;
+}
+.mock-phone-header {
+    font-size: 0.7rem; font-weight: 700; color: #818CF8;
+    margin-bottom: 10px; text-align: center;
+    letter-spacing: 0.05em; text-transform: uppercase;
+}
+.mock-phone-stat {
+    background: #1E293B;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+}
+.mock-phone-stat-label { font-size: 0.6rem; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em; }
+.mock-phone-stat-val { font-size: 0.9rem; font-weight: 700; color: #F1F5F9; }
+
+/* ── CTA section ── */
+.home-cta {
+    background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%);
+    border-top: 1px solid #1E293B;
+    padding: 72px 48px;
     text-align: center;
 }
-.login-help-row a {
-    color: var(--color-primary);
-    font-size: 0.84rem;
-    font-weight: 600;
+.home-cta h2 {
+    font-size: 1.8rem; font-weight: 800; color: #F8FAFC;
+    letter-spacing: -0.03em; margin: 0 0 12px;
+}
+.home-cta p {
+    font-size: 0.95rem; color: #64748B; margin: 0 0 28px;
+    max-width: 400px; margin-left: auto; margin-right: auto;
+    line-height: 1.6;
+}
+.home-cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.cta-btn-primary {
+    background: #6366F1; color: #fff; border: none; border-radius: 10px;
+    padding: 13px 28px; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; text-decoration: none; font-family: inherit;
+}
+.cta-btn-secondary {
+    background: transparent; color: #94A3B8;
+    border: 1px solid #334155; border-radius: 10px;
+    padding: 13px 28px; font-size: 0.9rem; font-weight: 600;
     text-decoration: none;
 }
-.login-help-row a:hover {
-    text-decoration: underline;
+
+@media (max-width: 860px) {
+    .home-features { padding: 56px 24px; }
+    .home-feature-row, .home-feature-row.reverse { flex-direction: column; gap: 32px; }
+    .home-features-heading h2 { font-size: 1.5rem; }
+    .home-cta { padding: 56px 24px; }
+    .mock-phone { width: 170px; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- ── Hero: split panel ────────────────────────────────── -->
 <div class="home-split">
 
-    <!-- ── Left: Marketing panel ──────────────────────────── -->
+    <!-- Left: marketing -->
     <div class="home-marketing">
         <div class="home-brand">
             <img src="{{ asset_url('images/wealthtrack_icon.png') }}" alt="WealthTrack" class="home-brand-icon">
             <span>WealthTrack™</span>
         </div>
 
-        <h1 class="home-headline">Track your wealth,<br>smarter.</h1>
+        <h1 class="home-headline">Your portfolio,<br>finally organized.</h1>
         <p class="home-subheadline">
-            A clean, powerful portfolio tracker built for investors who
-            want clarity — not clutter.
+            Track every account, monitor real-time performance, and get tax insights — without the noise of a full brokerage platform.
         </p>
 
         <div class="home-value-props">
             <div class="home-value-prop">
-                <div class="home-value-icon">
-                    <i class="fa-solid fa-layer-group"></i>
-                </div>
+                <div class="home-value-icon"><i class="fa-solid fa-layer-group"></i></div>
                 <div class="home-value-text">
-                    <strong>Multiple accounts, one view</strong>
-                    <span>Manage your brokerage, retirement, and paper trading portfolios all in one place.</span>
+                    <strong>All your accounts, one dashboard</strong>
+                    <span>Brokerage, retirement, paper trading — see everything in one cross-account view.</span>
                 </div>
             </div>
-
             <div class="home-value-prop">
-                <div class="home-value-icon">
-                    <i class="fa-solid fa-chart-line"></i>
-                </div>
+                <div class="home-value-icon"><i class="fa-solid fa-scissors"></i></div>
                 <div class="home-value-text">
-                    <strong>Real-time performance</strong>
-                    <span>Live market prices, unrealized P&amp;L, and cost basis updated automatically.</span>
+                    <strong>Tax-loss harvesting opportunities</strong>
+                    <span>WealthTrack automatically surfaces positions at a loss and estimates your potential tax savings.</span>
                 </div>
             </div>
-
             <div class="home-value-prop">
-                <div class="home-value-icon">
-                    <i class="fa-solid fa-sliders"></i>
-                </div>
+                <div class="home-value-icon"><i class="fa-solid fa-chart-line"></i></div>
                 <div class="home-value-text">
-                    <strong>Optional allocation planning</strong>
-                    <span>For ETF and model-portfolio investors, set targets and use WealthTrack for rebalancing guidance when you want it.</span>
+                    <strong>Performance reports that make sense</strong>
+                    <span>Growth over time, cost basis, realized gains, and per-holding breakdowns — all in one place.</span>
                 </div>
             </div>
-
             <div class="home-value-prop">
-                <div class="home-value-icon">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
+                <div class="home-value-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
                 <div class="home-value-text">
-                    <strong>Private and secure</strong>
-                    <span>Your data stays yours. No ads, no sharing, no noise.</span>
+                    <strong>Installable on iPhone &amp; Android</strong>
+                    <span>Add WealthTrack to your home screen for a native app experience — no App Store required.</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ── Right: Login panel ─────────────────────────────── -->
+    <!-- Right: login -->
     <div class="home-login-panel">
         <div class="login-container">
             <img src="{{ asset_url('images/WealthTrack_Logo.png') }}" alt="WealthTrack" class="login-brand-logo">
@@ -136,16 +385,241 @@
 
             <div class="login-help-row">
                 <a href="{{ url_for('auth.forgot_password') }}">Forgot your password?</a>
-                <a href="{{ url_for('auth.signup') }}">Create an account</a>
+                <a href="{{ url_for('auth.signup') }}">Don't have an account? <strong>Create one</strong></a>
             </div>
 
             <div class="login-security-note">
                 <i class="fa-solid fa-lock"></i>
-                Your data is encrypted at rest and transmitted over HTTPS.
-                We never sell or share your financial information.
+                Your data is encrypted at rest and transmitted over HTTPS. We never sell or share your financial information.
             </div>
         </div>
     </div>
 
 </div>
+
+<!-- ── Features showcase ───────────────────────────────── -->
+<div class="home-features">
+
+    <div class="home-features-heading">
+        <h2>Everything you need. Nothing you don't.</h2>
+        <p>Built for self-directed investors who want real insight without the complexity of a full trading platform.</p>
+    </div>
+
+    <!-- Feature 1: Dashboard -->
+    <div class="home-feature-row">
+        <div class="home-feature-copy">
+            <div class="feat-label"><i class="fa-solid fa-gauge-high"></i> Portfolio Dashboard</div>
+            <h3>One view across all your accounts</h3>
+            <p>The dashboard pulls together every account you track into a single cross-portfolio summary — total value, unrealized gains, and growth over time, all without switching tabs or logging into multiple brokerages.</p>
+            <ul class="home-feature-bullets">
+                <li>Live prices refreshed from market data</li>
+                <li>Cost basis and unrealized P&amp;L per holding</li>
+                <li>Portfolio growth chart over time</li>
+                <li>Top performing assets at a glance</li>
+            </ul>
+        </div>
+        <div class="home-feature-visual">
+            <div class="mock-dashboard">
+                <div class="mock-topbar">
+                    <div class="mock-dot" style="background:#6366F1;"></div>
+                    <span style="font-size:0.7rem;color:#64748B;font-weight:600;">Portfolio Overview</span>
+                </div>
+                <div class="mock-stat-row">
+                    <div class="mock-card">
+                        <div class="mock-label">Total Value</div>
+                        <div class="mock-value">$84,210</div>
+                    </div>
+                    <div class="mock-card">
+                        <div class="mock-label">Unrealized G/L</div>
+                        <div class="mock-value green">+$9,340</div>
+                    </div>
+                    <div class="mock-card">
+                        <div class="mock-label">Total Return</div>
+                        <div class="mock-value green">+12.5%</div>
+                    </div>
+                </div>
+                <div class="mock-chart-area">
+                    <svg width="100%" height="66" viewBox="0 0 320 66" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#6366F1" stop-opacity="0.3"/>
+                                <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M0 55 C40 52 60 48 90 42 S140 30 170 26 S230 18 260 14 S300 10 320 8 L320 66 L0 66 Z" fill="url(#chartGrad)"/>
+                        <path d="M0 55 C40 52 60 48 90 42 S140 30 170 26 S230 18 260 14 S300 10 320 8" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div style="margin-top:10px;">
+                    <div class="mock-account-row">
+                        <span class="mock-account-name">Schwab Brokerage</span>
+                        <span class="mock-account-val">+8.2%</span>
+                    </div>
+                    <div class="mock-account-row">
+                        <span class="mock-account-name">Roth IRA</span>
+                        <span class="mock-account-val">+14.7%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature 2: Tax-Loss Harvesting -->
+    <div class="home-feature-row reverse">
+        <div class="home-feature-copy">
+            <div class="feat-label"><i class="fa-solid fa-scissors"></i> Tax Tools</div>
+            <h3>Spot tax-loss harvesting opportunities automatically</h3>
+            <p>WealthTrack scans your positions for unrealized losses and surfaces them as potential tax-loss harvesting opportunities — showing exactly how much you could save at the 15% and 20% capital gains rates.</p>
+            <ul class="home-feature-bullets">
+                <li>Positions at a loss highlighted automatically</li>
+                <li>Estimated savings at both capital gains rates</li>
+                <li>One-click to record the sell transaction</li>
+                <li>Wash-sale rule reminder built in</li>
+            </ul>
+        </div>
+        <div class="home-feature-visual">
+            <div class="mock-harvest">
+                <div class="mock-harvest-top">
+                    <span class="mock-harvest-title"><i class="fa-solid fa-scissors" style="margin-right:6px;"></i>Tax-Loss Harvesting</span>
+                    <span class="mock-harvest-total">$1,840 harvestable</span>
+                </div>
+                <div class="mock-harvest-row">
+                    <span class="mock-ticker">INTC</span>
+                    <span class="mock-loss">–$1,140</span>
+                    <span class="mock-savings">Save ~$171</span>
+                </div>
+                <div class="mock-harvest-row">
+                    <span class="mock-ticker">PFE</span>
+                    <span class="mock-loss">–$480</span>
+                    <span class="mock-savings">Save ~$72</span>
+                </div>
+                <div class="mock-harvest-row">
+                    <span class="mock-ticker">T</span>
+                    <span class="mock-loss">–$220</span>
+                    <span class="mock-savings">Save ~$33</span>
+                </div>
+            </div>
+            <div style="font-size:0.7rem;color:#475569;text-align:center;margin-top:6px;">
+                <i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>Wash-sale rule applies. Consult a tax advisor.
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature 3: Reports -->
+    <div class="home-feature-row">
+        <div class="home-feature-copy">
+            <div class="feat-label"><i class="fa-solid fa-chart-bar"></i> Reports</div>
+            <h3>Performance reports that tell the whole story</h3>
+            <p>Dig into each account's performance with a full reports page — growth over time, per-holding return breakdown, transaction history, and CSV export for your own analysis or your accountant.</p>
+            <ul class="home-feature-bullets">
+                <li>Market value vs. cost basis over time</li>
+                <li>Per-holding return with inline visual bars</li>
+                <li>Dividend, interest, and fee summaries</li>
+                <li>Export to CSV for tax prep or spreadsheets</li>
+            </ul>
+        </div>
+        <div class="home-feature-visual">
+            <div class="mock-report">
+                <div class="mock-report-header">
+                    <div>
+                        <div class="mock-report-title">Account Performance</div>
+                        <div class="mock-report-sub">Schwab Brokerage · All time</div>
+                    </div>
+                    <div class="mock-badge">+12.5%</div>
+                </div>
+                <div class="mock-report-chart">
+                    <svg width="100%" height="80" viewBox="0 0 320 80" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="rg1" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#6366F1" stop-opacity="0.25"/>
+                                <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+                            </linearGradient>
+                            <linearGradient id="rg2" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="#94A3B8" stop-opacity="0.15"/>
+                                <stop offset="100%" stop-color="#94A3B8" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M0 65 C50 60 90 55 130 48 S200 35 240 28 S290 18 320 12 L320 80 L0 80Z" fill="url(#rg1)"/>
+                        <path d="M0 65 C50 60 90 55 130 48 S200 35 240 28 S290 18 320 12" fill="none" stroke="#6366F1" stroke-width="2"/>
+                        <path d="M0 68 C60 67 100 65 150 63 S220 60 270 58 S300 57 320 56 L320 80 L0 80Z" fill="url(#rg2)"/>
+                        <path d="M0 68 C60 67 100 65 150 63 S220 60 270 58 S300 57 320 56" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,3"/>
+                    </svg>
+                </div>
+                <div class="mock-holding-row">
+                    <span class="mock-h-ticker">AAPL</span>
+                    <div class="mock-h-bar-wrap"><div class="mock-h-bar" style="width:82%;background:#34D399;"></div></div>
+                    <span class="mock-h-pct" style="color:#34D399;">+28.4%</span>
+                </div>
+                <div class="mock-holding-row">
+                    <span class="mock-h-ticker">VTI</span>
+                    <div class="mock-h-bar-wrap"><div class="mock-h-bar" style="width:55%;background:#6366F1;"></div></div>
+                    <span class="mock-h-pct" style="color:#818CF8;">+14.1%</span>
+                </div>
+                <div class="mock-holding-row">
+                    <span class="mock-h-ticker">MSFT</span>
+                    <div class="mock-h-bar-wrap"><div class="mock-h-bar" style="width:38%;background:#6366F1;"></div></div>
+                    <span class="mock-h-pct" style="color:#818CF8;">+9.7%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature 4: Mobile -->
+    <div class="home-feature-row reverse">
+        <div class="home-feature-copy">
+            <div class="feat-label"><i class="fa-solid fa-mobile-screen-button"></i> Mobile App</div>
+            <h3>Works like a native app on iPhone &amp; Android</h3>
+            <p>WealthTrack is a Progressive Web App — add it to your home screen from Safari or Chrome and it launches full-screen, with no browser chrome, just like a real app. No App Store required.</p>
+            <ul class="home-feature-bullets">
+                <li>Install from Safari → Share → Add to Home Screen</li>
+                <li>Launches full-screen, no browser UI</li>
+                <li>Cached assets load instantly, even on slow connections</li>
+                <li>Works on iPhone, iPad, and Android</li>
+            </ul>
+        </div>
+        <div class="home-feature-visual" style="display:flex;justify-content:center;">
+            <div class="mock-phone">
+                <div class="mock-phone-screen">
+                    <div class="mock-phone-header">WealthTrack</div>
+                    <div class="mock-phone-stat">
+                        <div class="mock-phone-stat-label">Total Value</div>
+                        <div class="mock-phone-stat-val">$84,210</div>
+                    </div>
+                    <div class="mock-phone-stat">
+                        <div class="mock-phone-stat-label">Today's Change</div>
+                        <div class="mock-phone-stat-val" style="color:#34D399;">+$312 (+0.37%)</div>
+                    </div>
+                    <div style="margin-top:8px;">
+                        <svg width="100%" height="40" viewBox="0 0 160 40" preserveAspectRatio="none">
+                            <path d="M0 32 C20 28 40 24 60 18 S100 10 120 8 S145 6 160 4 L160 40 L0 40Z" fill="rgba(99,102,241,0.2)"/>
+                            <path d="M0 32 C20 28 40 24 60 18 S100 10 120 8 S145 6 160 4" fill="none" stroke="#6366F1" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <div style="margin-top:6px;">
+                        <div class="mock-account-row" style="padding:5px 8px;">
+                            <span style="font-size:0.65rem;color:#E2E8F0;font-weight:600;">Schwab</span>
+                            <span style="font-size:0.65rem;color:#34D399;font-weight:600;">+8.2%</span>
+                        </div>
+                        <div class="mock-account-row" style="padding:5px 8px;">
+                            <span style="font-size:0.65rem;color:#E2E8F0;font-weight:600;">Roth IRA</span>
+                            <span style="font-size:0.65rem;color:#34D399;font-weight:600;">+14.7%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── CTA ─────────────────────────────────────────────── -->
+<div class="home-cta">
+    <h2>Ready to see your full picture?</h2>
+    <p>Join investors who track smarter. Free to use, no credit card required.</p>
+    <div class="home-cta-buttons">
+        <a href="{{ url_for('auth.signup') }}" class="cta-btn-primary">Create a free account</a>
+        <a href="{{ url_for('auth.login') }}" class="cta-btn-secondary">Sign in</a>
+    </div>
+</div>
+
 {% endblock %}
