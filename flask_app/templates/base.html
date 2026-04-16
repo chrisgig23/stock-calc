@@ -141,6 +141,23 @@
             <a href="{{ url_for('main.privacy_security_page') }}" class="sidebar-footer-link sidebar-privacy-link">
                 <i class="fa-solid fa-lock"></i><span>Privacy &amp; Security</span>
             </a>
+            <button id="android-install-btn" onclick="triggerAndroidInstall()" style="
+                display: none;
+                width: 100%;
+                background: #6366F1;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                padding: 9px 14px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                font-family: inherit;
+                cursor: pointer;
+                text-align: left;
+                margin-bottom: 8px;
+            ">
+                <i class="fa-solid fa-mobile-screen-button" style="margin-right:7px;"></i>Add to Home Screen
+            </button>
             <div class="sidebar-security-note">
                 <i class="fa-solid fa-shield-halved"></i>
                 Encrypted &amp; secure
@@ -367,6 +384,37 @@
     });
 </script>
 {% block scripts %}{% endblock %}
+
+<!-- Android "Add to Home Screen" — captures beforeinstallprompt and shows sidebar button -->
+<script>
+(function() {
+    var _installPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        _installPrompt = e;
+        var btn = document.getElementById('android-install-btn');
+        if (btn) btn.style.display = 'block';
+    });
+
+    window.triggerAndroidInstall = function() {
+        if (!_installPrompt) return;
+        _installPrompt.prompt();
+        _installPrompt.userChoice.then(function(result) {
+            var btn = document.getElementById('android-install-btn');
+            if (btn) btn.style.display = 'none';
+            _installPrompt = null;
+        });
+    };
+
+    // Hide the button if already installed
+    window.addEventListener('appinstalled', function() {
+        var btn = document.getElementById('android-install-btn');
+        if (btn) btn.style.display = 'none';
+        _installPrompt = null;
+    });
+})();
+</script>
 
 <!-- iOS "Add to Home Screen" prompt -->
 <div id="ios-install-prompt" style="
