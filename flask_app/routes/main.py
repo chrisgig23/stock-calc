@@ -1,5 +1,6 @@
-from flask import Blueprint, redirect, url_for, render_template, request, send_from_directory, current_app
+from flask import Blueprint, redirect, url_for, render_template, request, send_from_directory, current_app, jsonify
 from flask_login import current_user, login_required
+from flask_app import db
 from flask_app.models import Account, PortfolioSnapshot
 from flask_app.utils.price_cache import get_prices
 from collections import defaultdict
@@ -160,3 +161,12 @@ def help_page():
 def privacy_security_page():
     """Privacy & Security page — plain-language explanation of data handling."""
     return render_template("privacy_security.html")
+
+
+@main_bp.route('/settings/dark-mode', methods=['POST'])
+@login_required
+def toggle_dark_mode():
+    """Toggle the authenticated user's dark mode preference and persist it."""
+    current_user.dark_mode = not current_user.dark_mode
+    db.session.commit()
+    return jsonify(dark_mode=current_user.dark_mode)

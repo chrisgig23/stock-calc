@@ -36,7 +36,7 @@
       }
     </script>
 </head>
-<body class="{% if current_user.is_authenticated %}app-layout{% else %}auth-layout{% endif %} {% block extra_body_class %}{% endblock %}">
+<body class="{% if current_user.is_authenticated %}app-layout{% else %}auth-layout{% endif %} {% block extra_body_class %}{% endblock %}{% if current_user.is_authenticated and current_user.dark_mode %} dark-mode{% endif %}">
 
 {% if current_user.is_authenticated %}
 
@@ -138,6 +138,12 @@
                     </a>
                 </div>
             </div>
+            <button class="dark-mode-toggle" id="dark-mode-btn" onclick="toggleDarkMode()" aria-label="Toggle dark mode">
+                <span class="dm-icon">
+                    <i class="fa-solid {% if current_user.dark_mode %}fa-sun{% else %}fa-moon{% endif %}" id="dm-icon"></i>
+                </span>
+                <span class="dm-label" id="dm-label">{% if current_user.dark_mode %}Light Mode{% else %}Dark Mode{% endif %}</span>
+            </button>
             <a href="{{ url_for('main.privacy_security_page') }}" class="sidebar-footer-link sidebar-privacy-link">
                 <i class="fa-solid fa-lock"></i><span>Privacy &amp; Security</span>
             </a>
@@ -534,6 +540,35 @@
         setTimeout(showPrompt, 2500);
     }
 })();
+</script>
+
+<script>
+// ── Dark mode toggle ──────────────────────────────────────────────────────────
+function toggleDarkMode() {
+    fetch("{{ url_for('main.toggle_dark_mode') }}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token() if csrf_token is defined else "" }}' },
+    })
+    .then(r => r.json())
+    .then(data => {
+        var body   = document.body;
+        var icon   = document.getElementById('dm-icon');
+        var label  = document.getElementById('dm-label');
+        if (data.dark_mode) {
+            body.classList.add('dark-mode');
+            icon.className  = 'fa-solid fa-sun';
+            label.textContent = 'Light Mode';
+        } else {
+            body.classList.remove('dark-mode');
+            icon.className  = 'fa-solid fa-moon';
+            label.textContent = 'Dark Mode';
+        }
+    })
+    .catch(() => {
+        // Fallback: just reload so the server-rendered class applies
+        window.location.reload();
+    });
+}
 </script>
 </body>
 </html>

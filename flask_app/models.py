@@ -29,6 +29,9 @@ class User(UserMixin, db.Model):
     dca_reminder_enabled     = db.Column(db.Boolean, nullable=False, default=False)
     dca_reminder_day         = db.Column(db.Integer, nullable=True)  # 1–28, day of month
 
+    # ── Display preferences ───────────────────────────────────────────────
+    dark_mode                = db.Column(db.Boolean, nullable=False, default=False)
+
     accounts = db.relationship('Account', backref='owner', lazy=True)
 
     def set_password(self, password):

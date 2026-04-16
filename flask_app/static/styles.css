@@ -1560,3 +1560,130 @@ h3 { font-size: 15px; font-weight: 600; color: var(--color-text); margin: 0 0 12
     gap: 8px;
     max-width: 300px;
 }
+
+/* ============================================================
+   DARK MODE — token overrides + targeted fixes
+   Applied via <body class="dark-mode"> when user.dark_mode=True
+   ============================================================ */
+
+body.dark-mode {
+    --color-text:           #F1F5F9;
+    --color-text-secondary: #94A3B8;
+    --color-border:         #334155;
+    --color-surface:        #1E293B;
+    --color-bg:             #0F172A;
+    --color-bg-alt:         #1E293B;
+    --color-muted:          #94A3B8;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.25);
+    --shadow-md: 0 4px 6px rgba(0,0,0,.3), 0 2px 4px rgba(0,0,0,.25);
+    --shadow-lg: 0 10px 20px rgba(0,0,0,.4), 0 4px 6px rgba(0,0,0,.3);
+}
+
+/* Cards & surfaces */
+body.dark-mode .card,
+body.dark-mode .card-section {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+/* Inputs & selects */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+    background: #0F172A;
+    color: var(--color-text);
+    border-color: var(--color-border);
+}
+body.dark-mode input::placeholder { color: #64748B; }
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus {
+    background: #0F172A;
+    border-color: var(--color-primary);
+    color: var(--color-text);
+}
+
+/* Form labels */
+body.dark-mode label { color: var(--color-text); }
+
+/* Tables */
+body.dark-mode table { background: var(--color-surface); }
+body.dark-mode thead tr,
+body.dark-mode th { background-color: var(--color-primary) !important; color: #fff !important; }
+body.dark-mode td { border-color: var(--color-border); color: var(--color-text); }
+body.dark-mode tr:hover td { background: #1E293B; }
+body.dark-mode tbody tr:nth-child(even) td { background: rgba(255,255,255,0.03); }
+
+/* Modal overlay & content */
+body.dark-mode .modal-overlay { background: rgba(0,0,0,0.7); }
+body.dark-mode .modal-content {
+    background: #1E293B;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+body.dark-mode .modal-content h2,
+body.dark-mode .modal-content h3,
+body.dark-mode .modal-content p { color: var(--color-text); }
+
+/* Flash / alert banners */
+body.dark-mode .alert-info    { background: #1e3a5f; border-color: #3b82f6; color: #bfdbfe; }
+body.dark-mode .alert-success { background: #14532d; border-color: #16a34a; color: #bbf7d0; }
+body.dark-mode .alert-warning { background: #451a03; border-color: #d97706; color: #fde68a; }
+body.dark-mode .alert-danger  { background: #450a0a; border-color: #dc2626; color: #fecaca; }
+
+/* Harvest panel — keep warm amber in dark mode but darken the base */
+body.dark-mode .harvest-toggle {
+    background: #292524;
+    border-color: #92400E;
+}
+body.dark-mode .harvest-toggle:hover { background: #1c1917; }
+body.dark-mode .harvest-panel {
+    background: #1c1917;
+    border-color: #92400E;
+}
+body.dark-mode .harvest-totals { border-color: #78350F; }
+body.dark-mode .harvest-table td { border-color: #292524; color: #e7e5e4; }
+body.dark-mode .harvest-table th { background: #78350F !important; color: #fef3c7 !important; border-color: #92400E; }
+
+/* Page headings & text */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4 { color: var(--color-text); }
+body.dark-mode p { color: var(--color-text-secondary); }
+
+/* Stat cards on dashboard */
+body.dark-mode .stat-card { background: var(--color-surface); border-color: var(--color-border); }
+body.dark-mode .stat-card .stat-label { color: var(--color-text-secondary); }
+body.dark-mode .stat-card .stat-value { color: var(--color-text); }
+
+/* Dark mode toggle button in sidebar */
+.dark-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--sidebar-border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    color: var(--sidebar-text);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    text-align: left;
+}
+.dark-mode-toggle:hover {
+    background: var(--sidebar-hover);
+    color: var(--sidebar-text-active);
+}
+.dark-mode-toggle .dm-icon { font-size: 0.85em; width: 14px; text-align: center; }
+.dark-mode-toggle .dm-label { flex: 1; }
+.dark-mode-toggle .dm-badge {
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.08);
+    padding: 1px 6px;
+    border-radius: 10px;
+    color: var(--sidebar-text);
+}
