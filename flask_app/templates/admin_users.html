@@ -1,0 +1,633 @@
+{% extends "base.html" %}
+{% block title %}WealthTrack — User Management{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Page header ─────────────────────────────────────────────────────────── */
+.page-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+.page-header-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84em;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 7px;
+    border: 1px solid var(--color-border);
+    transition: background 0.15s;
+}
+.page-header-back:hover { background: var(--color-bg-alt); color: var(--color-text); }
+.page-header-title {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.admin-badge {
+    font-size: 0.55em;
+    font-weight: 700;
+    background: #EDE9FE;
+    color: #5B21B6;
+    border-radius: 6px;
+    padding: 2px 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* ── Panel ───────────────────────────────────────────────────────────────── */
+.panel-card {
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+.panel-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--color-surface, #fff);
+}
+.panel-card-title {
+    font-size: 0.95em;
+    font-weight: 700;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+.card-icon {
+    width: 26px; height: 26px;
+    border-radius: 7px;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.78em;
+    flex-shrink: 0;
+}
+
+/* ── Toolbar ─────────────────────────────────────────────────────────────── */
+.user-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-alt, #f9fafb);
+    flex-wrap: wrap;
+}
+.user-toolbar input[type="search"],
+.user-toolbar select {
+    padding: 7px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.84em;
+    font-family: inherit;
+    background: var(--color-surface, #fff);
+    color: var(--color-text);
+}
+.user-toolbar input[type="search"] { min-width: 220px; }
+.user-toolbar input[type="search"]:focus,
+.user-toolbar select:focus { outline: none; border-color: var(--color-primary); }
+#row-count { font-size: 0.82em; color: var(--color-text-secondary); margin-left: auto; }
+
+/* ── Bulk bar ────────────────────────────────────────────────────────────── */
+.bulk-bar {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    background: #FEF3C7;
+    border-bottom: 1px solid #FDE68A;
+    font-size: 0.86em;
+    color: #92400E;
+    font-weight: 600;
+}
+.bulk-bar.visible { display: flex; }
+
+/* ── Add user form ───────────────────────────────────────────────────────── */
+.add-user-form {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.add-user-form input[type="text"] {
+    padding: 7px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 7px;
+    font-size: 0.84em;
+    font-family: inherit;
+    background: var(--color-bg-alt, #f9fafb);
+    color: var(--color-text);
+    min-width: 170px;
+}
+.add-user-form input[type="text"]:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    background: var(--color-surface, #fff);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 0.82em;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+    line-height: 1;
+}
+.btn-primary   { background: var(--color-primary); color: #fff; }
+.btn-primary:hover { background: var(--color-primary-dark); }
+.btn-secondary { background: var(--color-bg-alt, #f3f4f6); border: 1px solid var(--color-border); color: var(--color-text); }
+.btn-secondary:hover { background: var(--color-border); }
+.btn-warning   { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+.btn-warning:hover { background: #FDE68A; }
+.btn-danger    { background: var(--color-danger); color: #fff; }
+.btn-danger:hover { background: var(--color-danger-dark, #b91c1c); }
+.btn-ghost     { background: transparent; color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+.btn-ghost:hover { background: var(--color-bg-alt, #f3f4f6); color: var(--color-text); }
+.btn[disabled], .btn.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* ── Users table ─────────────────────────────────────────────────────────── */
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875em;
+}
+.users-table thead th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 0.76em;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-bg-alt, #f9fafb);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+.users-table thead th:first-child { width: 40px; text-align: center; }
+.users-table thead th:last-child  { text-align: right; }
+.users-table tbody tr {
+    border-bottom: 1px solid var(--color-border);
+    transition: background 0.1s;
+}
+.users-table tbody tr:last-child { border-bottom: none; }
+.users-table tbody tr:hover { background: var(--color-bg-alt, #fafafa); }
+.users-table td {
+    padding: 12px 14px;
+    vertical-align: middle;
+    color: var(--color-text);
+}
+.users-table td:first-child { text-align: center; }
+.users-table td:last-child  { text-align: right; }
+.users-table input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: var(--color-primary);
+    width: 15px; height: 15px;
+}
+
+/* ── Cell components ─────────────────────────────────────────────────────── */
+.user-cell { display: flex; align-items: center; gap: 10px; }
+.user-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82em; font-weight: 700;
+    flex-shrink: 0;
+    text-transform: uppercase;
+}
+.user-name   { font-weight: 600; }
+.user-id     { font-size: 0.78em; color: var(--color-text-secondary); }
+.user-email  { font-size: 0.82em; color: var(--color-text-secondary); }
+.user-joined { font-size: 0.8em; color: var(--color-text-secondary); white-space: nowrap; }
+
+.badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 0.76em; font-weight: 600; white-space: nowrap;
+}
+.badge-admin { background: #EDE9FE; color: #5B21B6; }
+.badge-user  { background: #F3F4F6; color: #6B7280; }
+.badge-you   { background: #D1FAE5; color: #065F46; }
+
+.invite-code-chip {
+    display: inline-block;
+    font-family: monospace;
+    font-size: 0.82em;
+    background: var(--color-bg-alt, #f3f4f6);
+    border: 1px solid var(--color-border);
+    border-radius: 5px;
+    padding: 2px 7px;
+    color: var(--color-text-secondary);
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Action group — key fix: forms must be inline ────────────────────────── */
+.action-group {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+.action-group form {
+    display: contents;   /* form element takes up no space; children participate directly in flex */
+}
+
+/* ── Flash messages ──────────────────────────────────────────────────────── */
+.flash-list { list-style: none; padding: 0; margin: 0 0 20px; }
+.flash-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 0.88em; margin-bottom: 8px;
+    border: 1px solid transparent;
+}
+.flash-item.success { background: #D1FAE5; color: #065F46; border-color: #A7F3D0; }
+.flash-item.info    { background: #DBEAFE; color: #1E40AF; border-color: #BFDBFE; }
+.flash-item.warning { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.flash-item.danger,
+.flash-item.error   { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+.flash-item code {
+    background: rgba(0,0,0,0.08); padding: 1px 6px;
+    border-radius: 4px; font-family: monospace;
+}
+
+/* ── Modals ──────────────────────────────────────────────────────────────── */
+.modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 1000;
+    align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-box {
+    background: var(--color-surface, #fff);
+    border-radius: 14px; padding: 28px 30px;
+    max-width: 440px; width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-box h3 { margin: 0 0 10px; font-size: 1.05em; color: var(--color-text); }
+.modal-box p  { margin: 0 0 22px; font-size: 0.88em; color: var(--color-text-secondary); line-height: 1.5; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.empty-state {
+    text-align: center; padding: 40px 20px;
+    color: var(--color-text-secondary); font-size: 0.9em;
+}
+</style>
+{% endblock %}
+
+{% block flashes %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<ul class="flash-list">
+    {% for category, message in messages %}
+    <li class="flash-item {{ category }}">
+        {% if category == 'success' %}<i class="fa-solid fa-circle-check"></i>
+        {% elif category == 'info' %}<i class="fa-solid fa-circle-info"></i>
+        {% elif category == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>
+        {% else %}<i class="fa-solid fa-circle-xmark"></i>{% endif %}
+        <span>{{ message | safe }}</span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endblock %}
+
+{% block content %}
+
+{# ── Page header ──────────────────────────────────────────────────────────────  #}
+<div class="page-header">
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="page-header-back">
+        <i class="fa-solid fa-arrow-left"></i> Admin Panel
+    </a>
+    <h2 class="page-header-title">
+        <i class="fa-solid fa-users" style="color:var(--color-primary);"></i>
+        User Management
+        <span class="admin-badge">Admin Only</span>
+    </h2>
+</div>
+
+{# ── Users panel ───────────────────────────────────────────────────────────── #}
+<div class="panel-card">
+    <div class="panel-card-header">
+        <h3 class="panel-card-title">
+            <span class="card-icon"><i class="fa-solid fa-users"></i></span>
+            Users
+            <span style="font-weight:400; font-size:0.88em; color:var(--color-text-secondary);">{{ users | length }}</span>
+        </h3>
+        <form action="{{ url_for('admin.admin_add_user') }}" method="POST" class="add-user-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="new_username" placeholder="New username" required minlength="3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-user-plus"></i> Add User
+            </button>
+        </form>
+    </div>
+
+    {# Toolbar #}
+    <div class="user-toolbar">
+        <input type="search" id="user-search" placeholder="Search username or email…" oninput="filterUsers()">
+        {% if used_codes %}
+        <select id="code-filter" onchange="filterByCode()">
+            <option value="">All invite codes</option>
+            {% for code in used_codes %}
+            <option value="{{ code }}">{{ code }}</option>
+            {% endfor %}
+        </select>
+        {% endif %}
+        <span id="row-count"></span>
+    </div>
+
+    {# Bulk action bar #}
+    <form method="POST" action="{{ url_for('admin.bulk_delete_users') }}" id="bulk-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="bulk-bar" id="bulk-bar">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span id="bulk-count">0 users selected</span>
+            <button type="button" class="btn btn-danger" style="margin-left:8px;"
+                    onclick="confirmBulkDelete()">
+                <i class="fa-solid fa-trash"></i> Delete Selected
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="clearSelection()">Cancel</button>
+        </div>
+
+        {% if users %}
+        <table class="users-table" id="users-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all" onchange="toggleAll(this)" title="Select all visible"></th>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Invite Code</th>
+                    <th>Joined</th>
+                    <th style="text-align:center;">Accts</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-tbody">
+                {% for user in users %}
+                <tr data-username="{{ user.username | lower }}"
+                    data-email="{{ (user.email or '') | lower }}"
+                    data-code="{{ user.invite_code_used or '' }}">
+
+                    {# Checkbox #}
+                    <td>
+                        {% if user.id != current_user.id %}
+                        <input type="checkbox" name="user_ids" value="{{ user.id }}"
+                               class="user-checkbox" onchange="updateBulkBar()">
+                        {% endif %}
+                    </td>
+
+                    {# User #}
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" style="background:hsl({{ (user.id * 47) % 360 }},55%,55%);">
+                                {{ user.username[0] }}
+                            </div>
+                            <div>
+                                <div class="user-name">{{ user.username }}</div>
+                                <div class="user-id">ID #{{ user.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    {# Email #}
+                    <td>
+                        {% if user.email %}
+                            <span class="user-email">{{ user.email }}</span>
+                            {% if not user.email_verified %}
+                            <span class="badge badge-user" style="font-size:0.7em;margin-left:4px;">unverified</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="user-email">—</span>
+                        {% endif %}
+                    </td>
+
+                    {# Role #}
+                    <td>
+                        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                            {% if user.id == current_user.id %}
+                                <span class="badge badge-you"><i class="fa-solid fa-circle-check"></i> You</span>
+                            {% endif %}
+                            {% if user.is_admin or user.username == 'cgiglio' %}
+                                <span class="badge badge-admin"><i class="fa-solid fa-shield-halved"></i> Admin</span>
+                            {% else %}
+                                <span class="badge badge-user"><i class="fa-solid fa-user"></i> User</span>
+                            {% endif %}
+                        </div>
+                    </td>
+
+                    {# Invite code #}
+                    <td>
+                        {% if user.invite_code_used %}
+                            <span class="invite-code-chip" title="{{ user.invite_code_used }}">{{ user.invite_code_used }}</span>
+                        {% else %}
+                            <span class="user-email">—</span>
+                        {% endif %}
+                    </td>
+
+                    {# Joined #}
+                    <td class="user-joined">
+                        {% if user.created_at %}{{ user.created_at.strftime('%b %d, %Y') }}{% else %}—{% endif %}
+                    </td>
+
+                    {# Accounts #}
+                    <td style="text-align:center;">{{ user.accounts | length }}</td>
+
+                    {# Actions — all inline thanks to form { display: contents } #}
+                    <td>
+                        <div class="action-group">
+
+                            <form method="POST" action="{{ url_for('admin.admin_reset_password', user_id=user.id) }}"
+                                  onsubmit="return confirm('Reset password for {{ user.username }}?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-secondary" title="Reset password">
+                                    <i class="fa-solid fa-key"></i> Reset PW
+                                </button>
+                            </form>
+
+                            {% if user.id != current_user.id and user.username != 'cgiglio' %}
+                            <form method="POST" action="{{ url_for('admin.admin_toggle_admin', user_id=user.id) }}"
+                                  onsubmit="return confirm('{% if user.is_admin %}Revoke{% else %}Grant{% endif %} admin for {{ user.username }}?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit"
+                                        class="btn {% if user.is_admin %}btn-warning{% else %}btn-ghost{% endif %}"
+                                        title="{% if user.is_admin %}Revoke admin{% else %}Grant admin{% endif %}">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {% if user.id != current_user.id %}
+                            <button type="button" class="btn btn-danger"
+                                    onclick="openDeleteModal({{ user.id }}, '{{ user.username }}', {{ user.accounts | length }})"
+                                    title="Delete user">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            {% endif %}
+
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-users" style="font-size:2em;margin-bottom:10px;display:block;opacity:0.3;"></i>
+            No users found.
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+{# ── Modals ───────────────────────────────────────────────────────────────── #}
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <h3><i class="fa-solid fa-triangle-exclamation" style="color:#DC2626;margin-right:6px;"></i>Delete User</h3>
+        <p id="deleteModalBody"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button>
+            <form method="POST" id="deleteModalForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete Permanently</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="bulkModal">
+    <div class="modal-box">
+        <h3><i class="fa-solid fa-triangle-exclamation" style="color:#DC2626;margin-right:6px;"></i>Bulk Delete</h3>
+        <p id="bulkModalBody"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('bulkModal')">Cancel</button>
+            <button type="button" class="btn btn-danger" onclick="submitBulkDelete()">
+                <i class="fa-solid fa-trash"></i> Delete All Selected
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Search & filter ───────────────────────────────────────────────────────────
+function filterUsers() {
+    var q    = document.getElementById('user-search').value.toLowerCase();
+    var sel  = document.getElementById('code-filter');
+    var code = sel ? sel.value : '';
+    var rows = document.querySelectorAll('#users-tbody tr');
+    var vis  = 0;
+    rows.forEach(function(row) {
+        var show = (!q    || row.dataset.username.includes(q) || row.dataset.email.includes(q))
+                && (!code || row.dataset.code === code);
+        row.style.display = show ? '' : 'none';
+        if (show) vis++;
+    });
+    document.getElementById('row-count').textContent = vis + ' of {{ users | length }} users';
+}
+
+function filterByCode() {
+    document.getElementById('user-search').value = '';
+    filterUsers();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('row-count').textContent = '{{ users | length }} users';
+});
+
+// ── Checkboxes ────────────────────────────────────────────────────────────────
+function toggleAll(master) {
+    document.querySelectorAll('.user-checkbox').forEach(function(cb) {
+        if (cb.closest('tr').style.display !== 'none') cb.checked = master.checked;
+    });
+    updateBulkBar();
+}
+
+function updateBulkBar() {
+    var n   = document.querySelectorAll('.user-checkbox:checked').length;
+    var bar = document.getElementById('bulk-bar');
+    document.getElementById('bulk-count').textContent = n + ' user' + (n !== 1 ? 's' : '') + ' selected';
+    bar.classList.toggle('visible', n > 0);
+    if (!n) document.getElementById('select-all').checked = false;
+}
+
+function clearSelection() {
+    document.querySelectorAll('.user-checkbox').forEach(function(cb) { cb.checked = false; });
+    document.getElementById('select-all').checked = false;
+    updateBulkBar();
+}
+
+function confirmBulkDelete() {
+    var n = document.querySelectorAll('.user-checkbox:checked').length;
+    document.getElementById('bulkModalBody').textContent =
+        'Permanently delete ' + n + ' user' + (n !== 1 ? 's' : '') +
+        ' and all their portfolio data? This cannot be undone.';
+    document.getElementById('bulkModal').classList.add('active');
+}
+
+function submitBulkDelete() {
+    closeModal('bulkModal');
+    document.getElementById('bulk-form').submit();
+}
+
+// ── Single delete ─────────────────────────────────────────────────────────────
+function openDeleteModal(userId, username, accountCount) {
+    var acctText = accountCount === 1 ? '1 account' : accountCount + ' accounts';
+    document.getElementById('deleteModalBody').textContent =
+        'Permanently delete "' + username + '"? This will remove their profile and ' + acctText + '. This cannot be undone.';
+    document.getElementById('deleteModalForm').action = '/admin/user/' + userId + '/delete';
+    document.getElementById('deleteModal').classList.add('active');
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+}
+
+['deleteModal', 'bulkModal'].forEach(function(id) {
+    document.getElementById(id).addEventListener('click', function(e) {
+        if (e.target === this) closeModal(id);
+    });
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeModal('deleteModal'); closeModal('bulkModal'); }
+});
+</script>
+{% endblock %}

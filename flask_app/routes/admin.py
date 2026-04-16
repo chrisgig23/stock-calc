@@ -49,10 +49,27 @@ def admin_dashboard():
 
     return render_template(
         'admin_dashboard.html',
-        users=users,
+        total_users=len(users),
         total_accounts=total_accounts,
         admin_count=admin_count,
         invite_codes=invite_codes,
+    )
+
+
+@admin_bp.route('/admin/users')
+@login_required
+def admin_users():
+    """Dedicated user management page."""
+    err = _require_admin()
+    if err:
+        return err
+
+    users = User.query.order_by(User.id).all()
+    used_codes = sorted({u.invite_code_used for u in users if u.invite_code_used})
+
+    return render_template(
+        'admin_users.html',
+        users=users,
         used_codes=used_codes,
     )
 
@@ -68,11 +85,11 @@ def admin_add_user():
     new_username = request.form.get('new_username', '').strip()
     if len(new_username) < 3:
         flash('Username must be at least 3 characters.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.admin_users'))
 
     if User.query.filter_by(username=new_username).first():
         flash(f'Username "{new_username}" already exists.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.admin_users'))
 
     temp_pw = _generate_temp_password()
     new_user = User(
@@ -89,7 +106,7 @@ def admin_add_user():
         f'Temporary password: <code>{temp_pw}</code> — share this securely, it won\'t be shown again.',
         'success'
     )
-    return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('admin.admin_users'))
 
 
 @admin_bp.route('/admin/user/<int:user_id>/reset-password', methods=['POST'])
@@ -111,7 +128,7 @@ def admin_reset_password(user_id):
         f'Temporary password: <code>{temp_pw}</code> — share this securely, it won\'t be shown again.',
         'info'
     )
-    return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('admin.admin_users'))
 
 
 @admin_bp.route('/admin/user/<int:user_id>/toggle-admin', methods=['POST'])
@@ -124,7 +141,7 @@ def admin_toggle_admin(user_id):
 
     if user_id == current_user.id:
         flash("You can't change your own admin status.", 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.admin_users'))
 
     user = User.query.get_or_404(user_id)
     user.is_admin = not user.is_admin
@@ -132,7 +149,7 @@ def admin_toggle_admin(user_id):
 
     status = 'granted' if user.is_admin else 'revoked'
     flash(f'Admin access {status} for <strong>{user.username}</strong>.', 'success')
-    return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('admin.admin_users'))
 
 
 @admin_bp.route('/admin/user/<int:user_id>/delete', methods=['POST'])
@@ -145,7 +162,7 @@ def admin_delete_user(user_id):
 
     if user_id == current_user.id:
         flash("You can't delete your own account from the admin panel.", 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.admin_users'))
 
     user = User.query.get_or_404(user_id)
     username = user.username
@@ -156,7 +173,7 @@ def admin_delete_user(user_id):
         f'User <strong>{username}</strong> and all associated data have been permanently deleted.',
         'success'
     )
-    return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('admin.admin_users'))
 
 
 # ── Self-service routes ────────────────────────────────────────────────────────
@@ -348,7 +365,7 @@ def bulk_delete_users():
     user_ids = request.form.getlist('user_ids')  # list of string IDs
     if not user_ids:
         flash('No users selected.', 'warning')
-        return redirect(url_for('admin.admin_dashboard'))
+        return redirect(url_for('admin.admin_users'))
 
     deleted = 0
     for uid in user_ids:
@@ -365,4 +382,4 @@ def bulk_delete_users():
 
     db.session.commit()
     flash(f'{deleted} user{"s" if deleted != 1 else ""} deleted.', 'success' if deleted else 'warning')
-    return redirect(url_for('admin.admin_dashboard'))
+    return redirect(url_for('admin.admin_users'))

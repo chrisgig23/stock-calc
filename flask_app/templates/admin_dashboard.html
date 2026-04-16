@@ -106,112 +106,57 @@
     flex-shrink: 0;
 }
 
-/* ── Add user inline form ────────────────────────────────────────────── */
-.add-user-form {
+/* ── Manage Users card ───────────────────────────────────────────────── */
+.manage-users-card {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
     display: flex;
-    gap: 8px;
     align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px 26px;
     flex-wrap: wrap;
 }
-.add-user-form input[type="text"] {
-    padding: 7px 12px;
-    border: 1px solid var(--color-border);
-    border-radius: 7px;
-    font-size: 0.84em;
-    font-family: inherit;
-    min-width: 180px;
-    background: var(--color-bg-alt, #f9fafb);
-    color: var(--color-text);
-}
-.add-user-form input[type="text"]:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    background: #fff;
-}
-
-/* ── Users table ─────────────────────────────────────────────────────── */
-.users-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88em;
-}
-.users-table thead th {
-    padding: 11px 16px;
-    text-align: left;
-    font-size: 0.78em;
-    font-weight: 700;
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    background: var(--color-bg-alt, #f9fafb);
-    border-bottom: 1px solid var(--color-border);
-    white-space: nowrap;
-}
-.users-table thead th:last-child { text-align: right; }
-.users-table tbody tr {
-    border-bottom: 1px solid var(--color-border);
-    transition: background 0.1s;
-}
-.users-table tbody tr:last-child { border-bottom: none; }
-.users-table tbody tr:hover { background: #fafafa; }
-.users-table td {
-    padding: 13px 16px;
-    vertical-align: middle;
-    color: var(--color-text);
-}
-.users-table td:last-child { text-align: right; }
-
-/* ── Username cell ───────────────────────────────────────────────────── */
-.user-cell {
+.manage-users-info {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
 }
-.user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+.manage-users-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
     background: var(--color-primary);
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8em;
-    font-weight: 700;
+    font-size: 1.2em;
     flex-shrink: 0;
-    text-transform: uppercase;
 }
-.user-name {
-    font-weight: 600;
+.manage-users-text h3 {
+    margin: 0 0 3px;
+    font-size: 1em;
+    font-weight: 700;
+    color: var(--color-text);
 }
-.user-id {
-    font-size: 0.8em;
+.manage-users-text p {
+    margin: 0;
+    font-size: 0.84em;
     color: var(--color-text-secondary);
 }
 
-/* ── Badges ──────────────────────────────────────────────────────────── */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 9px;
-    border-radius: 999px;
-    font-size: 0.77em;
-    font-weight: 600;
-    white-space: nowrap;
-}
-.badge-admin   { background: #EDE9FE; color: #5B21B6; }
-.badge-user    { background: #F3F4F6; color: #6B7280; }
-.badge-you     { background: #D1FAE5; color: #065F46; }
-
-/* ── Action buttons ──────────────────────────────────────────────────── */
+/* ── Buttons ─────────────────────────────────────────────────────────── */
 .btn {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 6px 12px;
+    padding: 8px 16px;
     border-radius: 7px;
-    font-size: 0.82em;
+    font-size: 0.84em;
     font-weight: 600;
     cursor: pointer;
     border: none;
@@ -224,24 +169,10 @@
 .btn-primary:hover { background: var(--color-primary-dark); }
 .btn-secondary { background: var(--color-bg-alt, #f3f4f6); border: 1px solid var(--color-border); color: var(--color-text); }
 .btn-secondary:hover { background: var(--color-border); }
-.btn-warning   { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
-.btn-warning:hover { background: #FDE68A; }
-.btn-danger    { background: var(--color-danger); color: #fff; }
-.btn-danger:hover { background: var(--color-danger-dark, #b91c1c); }
 .btn-ghost     { background: transparent; color: var(--color-text-secondary); border: 1px solid var(--color-border); }
 .btn-ghost:hover { background: var(--color-bg-alt, #f3f4f6); color: var(--color-text); }
-.btn[disabled], .btn.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    pointer-events: none;
-}
-
-.action-group {
-    display: flex;
-    gap: 6px;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-}
+.btn-danger    { background: var(--color-danger); color: #fff; }
+.btn-danger:hover { background: var(--color-danger-dark, #b91c1c); }
 
 /* ── Flash messages ──────────────────────────────────────────────────── */
 .flash-list {
@@ -272,115 +203,6 @@
     font-size: 1em;
 }
 .flash-item strong { font-weight: 700; }
-
-/* ── Empty state ─────────────────────────────────────────────────────── */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--color-text-secondary);
-    font-size: 0.9em;
-}
-
-/* ── Delete modal ────────────────────────────────────────────────────── */
-.confirm-modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-}
-.confirm-modal-overlay.active { display: flex; }
-.confirm-modal {
-    background: var(--color-surface, #fff);
-    border-radius: 14px;
-    padding: 28px 30px;
-    max-width: 440px;
-    width: 90%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-}
-.confirm-modal h3 {
-    margin: 0 0 10px;
-    font-size: 1.05em;
-    color: var(--color-text);
-}
-.confirm-modal p {
-    margin: 0 0 22px;
-    font-size: 0.88em;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-}
-.confirm-modal-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-}
-
-/* ── User table toolbar ──────────────────────────────────────────────── */
-.user-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--color-border);
-    flex-wrap: wrap;
-    background: var(--color-bg-alt, #f9fafb);
-}
-.user-toolbar input[type="search"] {
-    padding: 6px 11px;
-    border: 1px solid var(--color-border);
-    border-radius: 7px;
-    font-size: 0.84em;
-    font-family: inherit;
-    background: var(--color-surface, #fff);
-    color: var(--color-text);
-    min-width: 200px;
-}
-.user-toolbar input[type="search"]:focus { outline: none; border-color: var(--color-primary); }
-.user-toolbar select {
-    padding: 6px 10px;
-    border: 1px solid var(--color-border);
-    border-radius: 7px;
-    font-size: 0.84em;
-    font-family: inherit;
-    background: var(--color-surface, #fff);
-    color: var(--color-text);
-}
-.bulk-bar {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 18px;
-    background: #FEF3C7;
-    border-bottom: 1px solid #FDE68A;
-    font-size: 0.86em;
-    color: #92400E;
-    font-weight: 600;
-}
-.bulk-bar.visible { display: flex; }
-
-/* ── Users table extras ──────────────────────────────────────────────── */
-.users-table thead th:first-child { width: 36px; text-align: center; }
-.users-table td:first-child { text-align: center; }
-.users-table input[type="checkbox"] { cursor: pointer; accent-color: var(--color-primary); width: 15px; height: 15px; }
-
-.invite-code-chip {
-    display: inline-block;
-    font-family: monospace;
-    font-size: 0.82em;
-    background: var(--color-bg-alt, #f3f4f6);
-    border: 1px solid var(--color-border);
-    border-radius: 5px;
-    padding: 2px 7px;
-    color: var(--color-text-secondary);
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.user-email { font-size: 0.82em; color: var(--color-text-secondary); }
-.user-joined { font-size: 0.8em; color: var(--color-text-secondary); white-space: nowrap; }
 
 /* ── Invite codes panel ──────────────────────────────────────────────── */
 .invite-codes-table {
@@ -479,7 +301,7 @@
 <div class="stat-row">
     <div class="stat-card">
         <div class="stat-card-label"><i class="fa-solid fa-users" style="margin-right:5px;"></i>Total Users</div>
-        <div class="stat-card-value">{{ users | length }}</div>
+        <div class="stat-card-value">{{ total_users }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-card-label"><i class="fa-solid fa-briefcase" style="margin-right:5px;"></i>Total Accounts</div>
@@ -491,178 +313,20 @@
     </div>
 </div>
 
-{# ── User management table ────────────────────────────────────────────────── #}
-<div class="panel-card">
-    <div class="panel-card-header">
-        <h3 class="panel-card-title">
-            <span class="card-icon"><i class="fa-solid fa-users"></i></span>
-            Users
-            <span style="font-weight:400; font-size:0.88em; color:var(--color-text-secondary); margin-left:4px;">{{ users | length }}</span>
-        </h3>
-        <form action="{{ url_for('admin.admin_add_user') }}" method="POST" class="add-user-form">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="text" name="new_username" placeholder="New username" required minlength="3">
-            <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-user-plus"></i> Add User
-            </button>
-        </form>
-    </div>
-
-    {# Toolbar: search + filter #}
-    <div class="user-toolbar">
-        <input type="search" id="user-search" placeholder="Search by username or email…" oninput="filterUsers()">
-        {% if used_codes %}
-        <select id="code-filter" onchange="filterByCode()">
-            <option value="">All invite codes</option>
-            {% for code in used_codes %}
-            <option value="{{ code }}">{{ code }}</option>
-            {% endfor %}
-        </select>
-        {% endif %}
-        <span id="row-count" style="font-size:0.82em; color:var(--color-text-secondary); margin-left:auto;"></span>
-    </div>
-
-    {# Bulk action bar — shown when checkboxes selected #}
-    <form method="POST" action="{{ url_for('admin.bulk_delete_users') }}" id="bulk-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <div class="bulk-bar" id="bulk-bar">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span id="bulk-count">0 users selected</span>
-            <button type="button" class="btn btn-danger" style="margin-left:8px;"
-                    onclick="confirmBulkDelete()">
-                <i class="fa-solid fa-trash"></i> Delete Selected
-            </button>
-            <button type="button" class="btn btn-secondary"
-                    onclick="clearSelection()">Cancel</button>
+{# ── Manage Users card ────────────────────────────────────────────────────── #}
+<div class="manage-users-card">
+    <div class="manage-users-info">
+        <div class="manage-users-icon">
+            <i class="fa-solid fa-users"></i>
         </div>
-
-        {% if users %}
-        <table class="users-table" id="users-table">
-            <thead>
-                <tr>
-                    <th><input type="checkbox" id="select-all" onchange="toggleAll(this)" title="Select all"></th>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Invite Code</th>
-                    <th>Joined</th>
-                    <th>Accts</th>
-                    <th style="text-align:right;">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="users-tbody">
-                {% for user in users %}
-                <tr data-username="{{ user.username | lower }}"
-                    data-email="{{ (user.email or '') | lower }}"
-                    data-code="{{ user.invite_code_used or '' }}">
-
-                    {# Checkbox — can't select yourself #}
-                    <td>
-                        {% if user.id != current_user.id %}
-                        <input type="checkbox" name="user_ids" value="{{ user.id }}"
-                               class="user-checkbox" onchange="updateBulkBar()">
-                        {% endif %}
-                    </td>
-
-                    {# User #}
-                    <td>
-                        <div class="user-cell">
-                            <div class="user-avatar" style="background: hsl({{ (user.id * 47) % 360 }}, 55%, 55%);">
-                                {{ user.username[0] }}
-                            </div>
-                            <div>
-                                <div class="user-name">{{ user.username }}</div>
-                                <div class="user-id">ID #{{ user.id }}</div>
-                            </div>
-                        </div>
-                    </td>
-
-                    {# Email #}
-                    <td>
-                        {% if user.email %}
-                            <span class="user-email">{{ user.email }}</span>
-                            {% if not user.email_verified %}
-                            <span class="badge badge-user" style="font-size:0.72em; margin-left:4px;">unverified</span>
-                            {% endif %}
-                        {% else %}
-                            <span style="color:var(--color-text-secondary); font-size:0.82em;">—</span>
-                        {% endif %}
-                    </td>
-
-                    {# Role #}
-                    <td>
-                        {% if user.id == current_user.id %}
-                            <span class="badge badge-you"><i class="fa-solid fa-circle-check"></i> You</span>
-                        {% endif %}
-                        {% if user.is_admin or user.username == 'cgiglio' %}
-                            <span class="badge badge-admin"><i class="fa-solid fa-shield-halved"></i> Admin</span>
-                        {% else %}
-                            <span class="badge badge-user"><i class="fa-solid fa-user"></i> User</span>
-                        {% endif %}
-                    </td>
-
-                    {# Invite code used #}
-                    <td>
-                        {% if user.invite_code_used %}
-                            <span class="invite-code-chip" title="{{ user.invite_code_used }}">{{ user.invite_code_used }}</span>
-                        {% else %}
-                            <span style="color:var(--color-text-secondary); font-size:0.82em;">—</span>
-                        {% endif %}
-                    </td>
-
-                    {# Joined #}
-                    <td class="user-joined">
-                        {% if user.created_at %}
-                            {{ user.created_at.strftime('%b %d, %Y') }}
-                        {% else %}—{% endif %}
-                    </td>
-
-                    {# Account count #}
-                    <td style="text-align:center;">{{ user.accounts | length }}</td>
-
-                    {# Actions #}
-                    <td>
-                        <div class="action-group">
-                            <form method="POST" action="{{ url_for('admin.admin_reset_password', user_id=user.id) }}"
-                                  onsubmit="return confirm('Reset password for {{ user.username }}?')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit" class="btn btn-secondary" title="Reset password">
-                                    <i class="fa-solid fa-key"></i>
-                                </button>
-                            </form>
-
-                            {% if user.id != current_user.id and user.username != 'cgiglio' %}
-                            <form method="POST" action="{{ url_for('admin.admin_toggle_admin', user_id=user.id) }}"
-                                  onsubmit="return confirm('{% if user.is_admin %}Revoke{% else %}Grant{% endif %} admin for {{ user.username }}?')">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                <button type="submit"
-                                        class="btn {% if user.is_admin %}btn-warning{% else %}btn-ghost{% endif %}"
-                                        title="{% if user.is_admin %}Revoke admin{% else %}Grant admin{% endif %}">
-                                    <i class="fa-solid fa-shield-halved"></i>
-                                </button>
-                            </form>
-                            {% endif %}
-
-                            {% if user.id != current_user.id %}
-                            <button type="button" class="btn btn-danger"
-                                    onclick="openDeleteModal({{ user.id }}, '{{ user.username }}', {{ user.accounts | length }})"
-                                    title="Delete user">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty-state">
-            <i class="fa-solid fa-users" style="font-size:2em; margin-bottom:10px; display:block; opacity:0.3;"></i>
-            No users found.
+        <div class="manage-users-text">
+            <h3>User Management</h3>
+            <p>View, add, reset passwords, toggle admin access, and delete users.</p>
         </div>
-        {% endif %}
-    </form>
+    </div>
+    <a href="{{ url_for('admin.admin_users') }}" class="btn btn-primary">
+        <i class="fa-solid fa-arrow-right"></i> Manage Users
+    </a>
 </div>
 
 {# ── Invite codes ─────────────────────────────────────────────────────────── #}
@@ -730,139 +394,4 @@
     </form>
 </div>
 
-{# ── Modals ───────────────────────────────────────────────────────────────── #}
-<div class="confirm-modal-overlay" id="deleteModal">
-    <div class="confirm-modal">
-        <h3><i class="fa-solid fa-triangle-exclamation" style="color:#DC2626; margin-right:6px;"></i>Delete User</h3>
-        <p id="deleteModalBody">This will permanently delete this user and all their portfolio data. This cannot be undone.</p>
-        <div class="confirm-modal-actions">
-            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
-            <form method="POST" id="deleteModalForm">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete Permanently</button>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="confirm-modal-overlay" id="bulkModal">
-    <div class="confirm-modal">
-        <h3><i class="fa-solid fa-triangle-exclamation" style="color:#DC2626; margin-right:6px;"></i>Bulk Delete Users</h3>
-        <p id="bulkModalBody"></p>
-        <div class="confirm-modal-actions">
-            <button type="button" class="btn btn-secondary" onclick="closeBulkModal()">Cancel</button>
-            <button type="button" class="btn btn-danger" onclick="submitBulkDelete()">
-                <i class="fa-solid fa-trash"></i> Delete All Selected
-            </button>
-        </div>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block scripts %}
-<script>
-// ── Search & filter ───────────────────────────────────────────────────────────
-function filterUsers() {
-    var q    = document.getElementById('user-search').value.toLowerCase();
-    var code = (document.getElementById('code-filter') || {}).value || '';
-    var rows = document.querySelectorAll('#users-tbody tr');
-    var vis  = 0;
-    rows.forEach(function(row) {
-        var matchQ    = !q    || row.dataset.username.includes(q) || row.dataset.email.includes(q);
-        var matchCode = !code || row.dataset.code === code;
-        var show = matchQ && matchCode;
-        row.style.display = show ? '' : 'none';
-        if (show) vis++;
-    });
-    var el = document.getElementById('row-count');
-    if (el) el.textContent = vis + ' of {{ users | length }} users';
-}
-
-function filterByCode() {
-    document.getElementById('user-search').value = '';
-    filterUsers();
-}
-
-// Init count
-document.addEventListener('DOMContentLoaded', function() {
-    var el = document.getElementById('row-count');
-    if (el) el.textContent = '{{ users | length }} users';
-});
-
-// ── Checkbox bulk selection ───────────────────────────────────────────────────
-function toggleAll(master) {
-    document.querySelectorAll('.user-checkbox').forEach(function(cb) {
-        var row = cb.closest('tr');
-        if (row && row.style.display !== 'none') {
-            cb.checked = master.checked;
-        }
-    });
-    updateBulkBar();
-}
-
-function updateBulkBar() {
-    var checked = document.querySelectorAll('.user-checkbox:checked').length;
-    var bar   = document.getElementById('bulk-bar');
-    var count = document.getElementById('bulk-count');
-    if (checked > 0) {
-        bar.classList.add('visible');
-        count.textContent = checked + ' user' + (checked !== 1 ? 's' : '') + ' selected';
-    } else {
-        bar.classList.remove('visible');
-        document.getElementById('select-all').checked = false;
-    }
-}
-
-function clearSelection() {
-    document.querySelectorAll('.user-checkbox').forEach(function(cb) { cb.checked = false; });
-    document.getElementById('select-all').checked = false;
-    updateBulkBar();
-}
-
-function confirmBulkDelete() {
-    var checked = document.querySelectorAll('.user-checkbox:checked').length;
-    var body    = document.getElementById('bulkModalBody');
-    body.textContent = 'Permanently delete ' + checked + ' user' + (checked !== 1 ? 's' : '') +
-        ' and all their portfolio data? This cannot be undone.';
-    document.getElementById('bulkModal').classList.add('active');
-}
-
-function closeBulkModal() {
-    document.getElementById('bulkModal').classList.remove('active');
-}
-
-function submitBulkDelete() {
-    closeBulkModal();
-    document.getElementById('bulk-form').submit();
-}
-
-// ── Single delete modal ───────────────────────────────────────────────────────
-function openDeleteModal(userId, username, accountCount) {
-    var modal = document.getElementById('deleteModal');
-    var body  = document.getElementById('deleteModalBody');
-    var form  = document.getElementById('deleteModalForm');
-    var acctText = accountCount === 1 ? '1 account' : accountCount + ' accounts';
-    body.textContent = 'Permanently delete "' + username + '"? This will remove their profile and ' + acctText + ' — this cannot be undone.';
-    form.action = '/admin/user/' + userId + '/delete';
-    modal.classList.add('active');
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.remove('active');
-}
-
-['deleteModal','bulkModal'].forEach(function(id) {
-    document.getElementById(id).addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('active');
-    });
-});
-
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeDeleteModal();
-        closeBulkModal();
-    }
-});
-</script>
 {% endblock %}
