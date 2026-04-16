@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, session, jsonify, current_app
+from flask import Blueprint, render_template, render_template_string, redirect, url_for, request, flash, session, jsonify, current_app
 from flask_login import login_user, login_required, logout_user, current_user
 from flask_app import db, limiter
 from flask_app.models import User
@@ -43,6 +43,58 @@ def _load_password_reset_user(token, max_age=3600):
         return None
 
     return user
+
+# ---------------------------------------------------------------------------
+# Invite-action token helpers (approve / deny from email)
+# ---------------------------------------------------------------------------
+
+def _make_invite_action_token(name: str, email: str) -> str:
+    """Create a signed, time-limited token encoding the requester's name and email."""
+    serializer = _get_reset_serializer()
+    return serializer.dumps({'name': name, 'email': email}, salt='invite-action')
+
+
+def _load_invite_action_data(token: str, max_age: int = 604800):
+    """Return {'name': ..., 'email': ...} for a valid token, else None. Default: 7 days."""
+    serializer = _get_reset_serializer()
+    try:
+        return serializer.loads(token, salt='invite-action', max_age=max_age)
+    except (BadSignature, SignatureExpired):
+        return None
+
+
+# Simple inline HTML template for invite action result pages (no login required)
+_INVITE_RESULT_HTML = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ title }} — WealthTrack</title>
+  <style>
+    body { margin:0; padding:0; background:#0f172a; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+           display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .card { background:#1e293b; border-radius:14px; padding:40px 48px; max-width:420px; text-align:center;
+            box-shadow:0 4px 24px rgba(0,0,0,0.4); }
+    .icon { font-size:3rem; margin-bottom:16px; }
+    h1 { color:#f8fafc; font-size:1.4rem; margin:0 0 12px; }
+    p { color:#94a3b8; line-height:1.6; margin:0 0 28px; }
+    a.btn { display:inline-block; background:#6d28d9; color:#fff; text-decoration:none;
+            padding:11px 24px; border-radius:8px; font-weight:600; font-size:0.9rem; }
+    a.btn:hover { background:#5b21b6; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">{{ "✅" if success else "⚠️" }}</div>
+    <h1>{{ title }}</h1>
+    <p>{{ message }}</p>
+    <a href="{{ dashboard_url }}" class="btn">Go to WealthTrack</a>
+  </div>
+</body>
+</html>
+"""
+
 
 # ---------------------------------------------------------------------------
 # Session management
@@ -419,11 +471,102 @@ def request_invite_code():
         flash('Please provide your name and a valid email address.', 'danger')
         return redirect(url_for('auth.signup'))
 
+    # Build signed approve / deny URLs (valid 7 days)
+    action_token = _make_invite_action_token(name, email)
+    approve_url  = url_for('auth.approve_invite', token=action_token, _external=True)
+    deny_url     = url_for('auth.deny_invite',    token=action_token, _external=True)
+
     from flask_app.email_utils import send_invite_request_notification
-    send_invite_request_notification(name, email, note)
+    send_invite_request_notification(name, email, note, approve_url=approve_url, deny_url=deny_url)
 
     flash("Request sent! If approved, you'll receive an invite code by email shortly.", 'success')
     return redirect(url_for('auth.signup'))
+
+
+@auth_bp.route('/invite/approve/<token>')
+def approve_invite(token):
+    """One-click invite approval link sent to the admin in the notification email."""
+    data = _load_invite_action_data(token)
+    if not data:
+        return render_template_string(
+            _INVITE_RESULT_HTML,
+            title="Link Expired",
+            message="This approval link has expired or is invalid. You can still send the invite code manually.",
+            success=False,
+            dashboard_url=url_for('main.dashboard'),
+        ), 400
+
+    name  = data['name']
+    email = data['email']
+
+    from flask_app.models import SiteConfig
+    import os as _os
+    invite_code = SiteConfig.get('invite_code') or _os.getenv('INVITE_CODE', '')
+    if not invite_code:
+        return render_template_string(
+            _INVITE_RESULT_HTML,
+            title="No Invite Code Set",
+            message="There is no invite code configured in the admin panel. Please set one and send it manually.",
+            success=False,
+            dashboard_url=url_for('main.dashboard'),
+        ), 400
+
+    from flask_app.email_utils import send_invite_approval_email
+    sent = send_invite_approval_email(email, name, invite_code)
+
+    if sent:
+        return render_template_string(
+            _INVITE_RESULT_HTML,
+            title="Invite Sent!",
+            message=f"The invite code was sent to {email}. They can now sign up at wealthtrackapp.com.",
+            success=True,
+            dashboard_url=url_for('main.dashboard'),
+        )
+    else:
+        return render_template_string(
+            _INVITE_RESULT_HTML,
+            title="Email Failed",
+            message=f"Couldn't deliver the invite code to {email}. Check your Resend configuration and send it manually.",
+            success=False,
+            dashboard_url=url_for('main.dashboard'),
+        ), 500
+
+
+@auth_bp.route('/invite/deny/<token>')
+def deny_invite(token):
+    """One-click invite denial link sent to the admin in the notification email."""
+    data = _load_invite_action_data(token)
+    if not data:
+        return render_template_string(
+            _INVITE_RESULT_HTML,
+            title="Link Expired",
+            message="This denial link has expired or is invalid.",
+            success=False,
+            dashboard_url=url_for('main.dashboard'),
+        ), 400
+
+    name  = data['name']
+    email = data['email']
+
+    from flask_app.email_utils import send_invite_denial_email
+    sent = send_invite_denial_email(email, name)
+
+    if sent:
+        return render_template_string(
+            _INVITE_RESULT_HTML,
+            title="Denial Sent",
+            message=f"A cordial decline was sent to {email}.",
+            success=True,
+            dashboard_url=url_for('main.dashboard'),
+        )
+    else:
+        return render_template_string(
+            _INVITE_RESULT_HTML,
+            title="Email Failed",
+            message=f"Couldn't send the denial to {email}. Check your Resend configuration.",
+            success=False,
+            dashboard_url=url_for('main.dashboard'),
+        ), 500
 
 
 @auth_bp.route('/resend-code', methods=['POST'])
