@@ -1566,6 +1566,18 @@ h3 { font-size: 15px; font-weight: 600; color: var(--color-text); margin: 0 0 12
    Applied via <body class="dark-mode"> when user.dark_mode=True
    ============================================================ */
 
+/* Smooth transition on toggle — attach to every surface that changes */
+body,
+body .stat-card, body .chart-card, body .account-card,
+body .summary-card, body .action-card, body .card, body .card-section,
+body table, body input, body select, body textarea {
+    transition:
+        background-color 0.6s ease,
+        border-color     0.4s ease,
+        color            0.3s ease,
+        box-shadow       0.4s ease;
+}
+
 body.dark-mode {
     --color-text:           #F1F5F9;
     --color-text-secondary: #94A3B8;
@@ -1579,11 +1591,63 @@ body.dark-mode {
     --shadow-lg: 0 10px 20px rgba(0,0,0,.4), 0 4px 6px rgba(0,0,0,.3);
 }
 
-/* Cards & surfaces */
+/* ── Sidebar: add a right border so it's distinguishable from the dark bg ── */
+body.dark-mode .sidebar {
+    border-right: 1px solid #1E293B;
+    background-color: #0a1020;
+}
+
+/* Cards & surfaces (generic) */
 body.dark-mode .card,
 body.dark-mode .card-section {
     background: var(--color-surface);
     border-color: var(--color-border);
+}
+
+/* ── Dashboard cards ─────────────────────────────────────────────────────── */
+body.dark-mode .stat-card {
+    background: #1E293B !important;
+    border-color: var(--color-border);
+}
+body.dark-mode .stat-card .stat-label { color: var(--color-text-secondary); }
+body.dark-mode .stat-card .stat-value { color: var(--color-text); }
+body.dark-mode .stat-card .stat-value.positive { color: #34d399; }
+body.dark-mode .stat-card .stat-sub { color: var(--color-text-secondary); }
+
+body.dark-mode .chart-card {
+    background: #1E293B !important;
+    border-color: var(--color-border);
+}
+body.dark-mode .chart-card-title { color: var(--color-text-secondary); }
+
+body.dark-mode .account-card {
+    background: #1E293B !important;
+    border-color: var(--color-border);
+    color: var(--color-text);
+}
+body.dark-mode .account-card:hover { border-color: var(--color-primary); }
+body.dark-mode .account-card-name { color: var(--color-text); }
+body.dark-mode .account-card-actions { border-top-color: var(--color-border); }
+body.dark-mode .gain-positive,
+body.dark-mode .stat-value.positive,
+body.dark-mode .gain-positive-text { color: #34d399 !important; }
+
+/* ── Positions page summary cards ────────────────────────────────────────── */
+body.dark-mode .summary-card {
+    background: #1E293B !important;
+    border-color: var(--color-border);
+}
+body.dark-mode .summary-card .label { color: var(--color-text-secondary); }
+body.dark-mode .summary-card .value { color: var(--color-text); }
+
+/* ── Account action cards (account_menu) ─────────────────────────────────── */
+body.dark-mode .action-card.action-primary {
+    background: linear-gradient(135deg, #052e16 0%, #064e3b 100%) !important;
+    border-color: rgba(16,185,129,0.35);
+}
+body.dark-mode .action-card.action-primary .action-icon {
+    background: rgba(16,185,129,0.2);
+    color: #34d399;
 }
 
 /* Inputs & selects */
@@ -1653,9 +1717,7 @@ body.dark-mode h4 { color: var(--color-text); }
 body.dark-mode p { color: var(--color-text-secondary); }
 
 /* Stat cards on dashboard */
-body.dark-mode .stat-card { background: var(--color-surface); border-color: var(--color-border); }
-body.dark-mode .stat-card .stat-label { color: var(--color-text-secondary); }
-body.dark-mode .stat-card .stat-value { color: var(--color-text); }
+/* (stat-card dark mode rules defined above) */
 
 /* Dark mode toggle button in sidebar */
 .dark-mode-toggle {
